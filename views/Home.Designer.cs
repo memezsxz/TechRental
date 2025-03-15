@@ -28,12 +28,45 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form1";
+            pnlMainView = new Panel();
+            pnlNavigation = new Panel();
+            SuspendLayout();
+            // 
+            // pnlMainView
+            // 
+            pnlMainView.Dock = DockStyle.Fill;
+            pnlMainView.Location = new Point(340, 0);
+            pnlMainView.Margin = new Padding(20);
+            pnlMainView.Name = "pnlMainView";
+            pnlMainView.Padding = new Padding(20);
+            pnlMainView.Size = new Size(1136, 938);
+            pnlMainView.TabIndex = 1;
+            // 
+            // pnlNavigation
+            // 
+            pnlNavigation.Dock = DockStyle.Left;
+            pnlNavigation.Location = new Point(0, 0);
+            pnlNavigation.Name = "pnlNavigation";
+            pnlNavigation.Size = new Size(340, 938);
+            pnlNavigation.TabIndex = 0;
+            // 
+            // Home
+            // 
+            AutoScaleDimensions = new SizeF(163F, 163F);
+            AutoScaleMode = AutoScaleMode.Dpi;
+            BackColor = Color.FromArgb(240, 241, 245);
+            ClientSize = new Size(1476, 938);
+            Controls.Add(pnlMainView);
+            Controls.Add(pnlNavigation);
+            Name = "Home";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "TechRental";
+            Load += Home_Load;
+            ResumeLayout(false);
         }
 
         #endregion
+        private Panel pnlMainView;
+        private Panel pnlNavigation;
     }
 }

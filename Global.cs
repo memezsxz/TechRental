@@ -1,38 +1,19 @@
+﻿using System;
+using System.Collections.Generic;
 using System.Drawing.Drawing2D;
-using System.Windows.Forms;
-using TechRental.views;
-using TechRental.views.panels;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
 namespace TechRental
 {
-    public partial class Home : Form
+    static class Global
     {
-        public Home()
-        {
-            InitializeComponent();
-        }
+        public static int userID = 2;
+        public static int userType = 1; // admin
 
-        private void Home_Load(object sender, EventArgs e)
-        {
 
-            //pnlMainView.Paint += Panel_Paint;
-
-            Global.SizeAndCenterForm(this, 0.8f);
-            CenterToScreen();
-            LoadNavigation();
-
-        }
-
-        void LoadNavigation()
-        {
-            // check user type and load the proper navigation user control
-            admin_navigation navigationPanel = new admin_navigation(pnlMainView);
-
-            pnlNavigation.Controls.Clear();
-            pnlNavigation.Controls.Add(navigationPanel);
-        }
-
-        private void Panel_Paint(object sender, PaintEventArgs e)
+        public static void Panel_Paint(object sender, PaintEventArgs e)
         {
             Panel panel = sender as Panel;
             if (panel == null) return;
@@ -57,7 +38,7 @@ namespace TechRental
         }
 
         // Helper function to create a rounded rectangle path
-        private GraphicsPath GetRoundedPath(Rectangle rect, int radius)
+        public static GraphicsPath GetRoundedPath(Rectangle rect, int radius)
         {
             GraphicsPath path = new GraphicsPath();
             int arcWidth = radius * 2;
@@ -69,6 +50,14 @@ namespace TechRental
 
             path.CloseFigure();
             return path;
+        }
+
+
+        public static void SizeAndCenterForm(Form frm, float screenPercent)
+        {
+            System.Drawing.Rectangle workingRectangle = Screen.PrimaryScreen.WorkingArea;
+
+            frm.Size = new System.Drawing.Size(Convert.ToInt32(screenPercent * workingRectangle.Width), Convert.ToInt32(screenPercent * workingRectangle.Height));
         }
     }
 }
