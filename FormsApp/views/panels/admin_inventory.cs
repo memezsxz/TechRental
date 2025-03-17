@@ -198,13 +198,14 @@ namespace FormsApp.views.panels
 
             string selectedType = cbColumn.SelectedValue?.ToString();
             string col = GetSelectedColumnName();
-            if (selectedType is null or "None") return;
 
             Control control = CreateControlForType(selectedType, col);
+
             if (control == null) return;
 
-            control.Size = new Size(305, 34);
+            //control.MinimumSize = new Size(300, 34);
             control.Dock = DockStyle.Fill;
+
             flpSearch.Controls.RemoveAt(flpSearch.Controls.Count - 1);
             flpSearch.Controls.Add(control);
         }
@@ -234,15 +235,12 @@ namespace FormsApp.views.panels
                     ValueMember = "Value"
                 };
             else if (type == "Decimal")
-                return new NumericUpDown
-                {
-                    Name = $"{col}_decimal",
-                    Dock = DockStyle.Fill,
-                    Minimum = 0.01M,
-                    Maximum = 1000000M,
-                    Increment = 0.01M,
-                    DecimalPlaces = 2
-                };
+            {
+                NumericFilterControl con = new NumericFilterControl(typeof(Equipment), col);
+                con.OnSearchCompleted += HandleSearchResults;
+
+                return con;
+            }
             else if (type == "Int32")
                 return new NumericUpDown
                 {

@@ -29,9 +29,6 @@
         private void InitializeComponent()
         {
             tableLayoutPanel1 = new TableLayoutPanel();
-            flowLayoutPanel1 = new FlowLayoutPanel();
-            btnAdd = new Button();
-            btnEdit = new Button();
             flpSearch = new FlowLayoutPanel();
             label4 = new Label();
             cbColumn = new ComboBox();
@@ -53,7 +50,6 @@
             dgvEquipment = new DataGridView();
             panel2 = new Panel();
             tableLayoutPanel1.SuspendLayout();
-            flowLayoutPanel1.SuspendLayout();
             flpSearch.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             panel1.SuspendLayout();
@@ -70,60 +66,29 @@
             tableLayoutPanel1.ColumnCount = 2;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
-            tableLayoutPanel1.Controls.Add(flowLayoutPanel1, 0, 1);
             tableLayoutPanel1.Controls.Add(flpSearch, 0, 0);
             tableLayoutPanel1.Controls.Add(tableLayoutPanel2, 1, 0);
             tableLayoutPanel1.Dock = DockStyle.Top;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 2;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.RowCount = 1;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanel1.Size = new Size(1096, 136);
             tableLayoutPanel1.TabIndex = 0;
             // 
-            // flowLayoutPanel1
-            // 
-            flowLayoutPanel1.Controls.Add(btnAdd);
-            flowLayoutPanel1.Controls.Add(btnEdit);
-            flowLayoutPanel1.Dock = DockStyle.Fill;
-            flowLayoutPanel1.Location = new Point(3, 71);
-            flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Padding = new Padding(10);
-            flowLayoutPanel1.Size = new Size(870, 62);
-            flowLayoutPanel1.TabIndex = 5;
-            // 
-            // btnAdd
-            // 
-            btnAdd.Location = new Point(13, 13);
-            btnAdd.Margin = new Padding(3, 3, 20, 3);
-            btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(127, 39);
-            btnAdd.TabIndex = 0;
-            btnAdd.Text = "button1";
-            btnAdd.UseVisualStyleBackColor = true;
-            // 
-            // btnEdit
-            // 
-            btnEdit.Location = new Point(163, 13);
-            btnEdit.Margin = new Padding(3, 3, 20, 3);
-            btnEdit.Name = "btnEdit";
-            btnEdit.Size = new Size(127, 39);
-            btnEdit.TabIndex = 1;
-            btnEdit.Text = "button2";
-            btnEdit.UseVisualStyleBackColor = true;
-            // 
             // flpSearch
             // 
-            flpSearch.Anchor = AnchorStyles.None;
+            flpSearch.AutoSize = true;
+            flpSearch.BackColor = Color.IndianRed;
             flpSearch.Controls.Add(label4);
             flpSearch.Controls.Add(cbColumn);
             flpSearch.Controls.Add(label2);
             flpSearch.Controls.Add(pnlInput);
-            flpSearch.Location = new Point(21, 3);
+            flpSearch.Dock = DockStyle.Fill;
+            flpSearch.Location = new Point(3, 3);
             flpSearch.Name = "flpSearch";
             flpSearch.Padding = new Padding(10);
-            flpSearch.Size = new Size(834, 61);
+            flpSearch.Size = new Size(870, 130);
             flpSearch.TabIndex = 0;
             // 
             // label4
@@ -178,7 +143,6 @@
             tableLayoutPanel2.Margin = new Padding(20);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
             tableLayoutPanel2.RowCount = 2;
-            tableLayoutPanel1.SetRowSpan(tableLayoutPanel2, 2);
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanel2.Size = new Size(180, 96);
@@ -274,7 +238,6 @@
             // pnlNext
             // 
             pnlNext.Anchor = AnchorStyles.Left;
-            //pnlNext.BackgroundImage = Properties.Resources.righ;
             pnlNext.BackgroundImageLayout = ImageLayout.Zoom;
             pnlNext.Location = new Point(799, 3);
             pnlNext.Name = "pnlNext";
@@ -362,7 +325,7 @@
             Size = new Size(1136, 938);
             Load += admin_inventory_Load;
             tableLayoutPanel1.ResumeLayout(false);
-            flowLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
             flpSearch.ResumeLayout(false);
             flpSearch.PerformLayout();
             tableLayoutPanel2.ResumeLayout(false);
@@ -398,9 +361,6 @@
         private Panel pnlNext;
         private Label lblTotal;
         private Label lblPagPage;
-        private FlowLayoutPanel flowLayoutPanel1;
-        private Button btnAdd;
-        private Button btnEdit;
         private Label label2;
     }
 }

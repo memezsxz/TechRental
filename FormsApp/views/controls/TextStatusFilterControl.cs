@@ -13,8 +13,6 @@ using System.Reflection;
 
 namespace FormsApp.views.controls
 {
-
-
     public partial class TextStatusFilterControl : UserControl, ISearch
     {
         public enum FilterType
