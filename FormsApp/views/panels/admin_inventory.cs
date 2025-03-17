@@ -130,27 +130,6 @@ namespace FormsApp.views.panels
             return newColumns;
         }
 
-        private PaginatedResult<Equipment> FilterEquipments()
-        {
-            if (flpSearch.Controls.Count == 0) return _context.Equipment.GetAll(pageNumber, pageSize);
-
-
-            Control control = flpSearch.Controls[^1];
-            string[] parts = control.Name.Split('_');
-
-            if (parts.Length < 2) return _context.Equipment.GetAll(pageNumber, pageSize);
-
-
-            string colName = parts[0];
-            string valueType = parts[1];
-
-            string value = ExtractControlValue(control, valueType);
-
-            if (control is ComboBox && valueType != "boolean")
-                colName += "Id";
-
-            return _context.Equipment.SearchByColumn(colName, value, pageNumber, pageSize);
-        }
 
 
         private string ExtractControlValue(Control control, string valueType)
@@ -217,12 +196,12 @@ namespace FormsApp.views.panels
         {
             if (cbColumn.SelectedIndex == 0) return new Panel();
             if (type == "DateTime")
-                return new DateTimePicker
-                {
-                    Name = $"{col}_date",
-                    Format = DateTimePickerFormat.Short,
-                    Dock = DockStyle.Fill
-                };
+            {
+                NumericFilterControl con = new NumericFilterControl(typeof(Equipment), col, typeof(DateTime));
+                con.OnSearchCompleted += HandleSearchResults;
+
+                return con;
+            }
             else if (type == "Boolean")
                 return new ComboBox
                 {
@@ -236,21 +215,18 @@ namespace FormsApp.views.panels
                 };
             else if (type == "Decimal")
             {
-                NumericFilterControl con = new NumericFilterControl(typeof(Equipment), col);
+                NumericFilterControl con = new NumericFilterControl(typeof(Equipment), col, typeof(decimal));
                 con.OnSearchCompleted += HandleSearchResults;
 
                 return con;
             }
             else if (type == "Int32")
-                return new NumericUpDown
-                {
-                    Name = $"{col}_int",
-                    Dock = DockStyle.Fill,
-                    Minimum = 1,
-                    Maximum = 1000000,
-                    Increment = 1,
-                    DecimalPlaces = 0
-                };
+            {
+                NumericFilterControl con = new NumericFilterControl(typeof(Equipment), col, typeof(int));
+                con.OnSearchCompleted += HandleSearchResults;
+
+                return con;
+            }
             else if (type == "String")
             {
                 TextStatusFilterControl con = new TextStatusFilterControl(typeof(Equipment), TextStatusFilterControl.FilterType.String, col);

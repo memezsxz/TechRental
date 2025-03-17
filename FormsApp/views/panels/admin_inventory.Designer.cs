@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(admin_inventory));
             tableLayoutPanel1 = new TableLayoutPanel();
             flpSearch = new FlowLayoutPanel();
             label4 = new Label();
@@ -228,6 +229,7 @@
             // pnlPrevios
             // 
             pnlPrevios.Anchor = AnchorStyles.Right;
+            pnlPrevios.BackgroundImage = (Image)resources.GetObject("pnlPrevios.BackgroundImage");
             pnlPrevios.BackgroundImageLayout = ImageLayout.Zoom;
             pnlPrevios.Location = new Point(699, 3);
             pnlPrevios.Name = "pnlPrevios";
@@ -238,6 +240,7 @@
             // pnlNext
             // 
             pnlNext.Anchor = AnchorStyles.Left;
+            pnlNext.BackgroundImage = (Image)resources.GetObject("pnlNext.BackgroundImage");
             pnlNext.BackgroundImageLayout = ImageLayout.Zoom;
             pnlNext.Location = new Point(799, 3);
             pnlNext.Name = "pnlNext";
