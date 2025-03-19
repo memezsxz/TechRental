@@ -18,7 +18,8 @@ namespace FormsApp.views.controls
         public enum FilterType
         {
             String,
-            Status
+            Status,
+            Boolean
         }
 
         private readonly UnitOfWork _unitOfWork = new UnitOfWork(new RentalDBContext());
@@ -27,6 +28,7 @@ namespace FormsApp.views.controls
         private readonly string _propertyName;
 
         private ComboBox _statusDropdown;
+        private ComboBox _booleanDropdown;
         private TextBox _textBox;
 
         public event Action<object> OnSearchCompleted;
@@ -50,7 +52,6 @@ namespace FormsApp.views.controls
             {
                 _textBox = new TextBox
                 {
-                    Name = "txtFilter",
                     Dock = DockStyle.Fill
                 };
                 this.Controls.Add(_textBox);
@@ -59,7 +60,6 @@ namespace FormsApp.views.controls
             {
                 _statusDropdown = new ComboBox
                 {
-                    Name = $"cmb_{_propertyName}",
                     Dock = DockStyle.Fill,
                     DropDownStyle = ComboBoxStyle.DropDownList
                 };
@@ -67,7 +67,22 @@ namespace FormsApp.views.controls
                 LoadStatusData();
                 this.Controls.Add(_statusDropdown);
             }
+            else if (_selectedType == FilterType.Boolean)
+            {
+                _booleanDropdown = new ComboBox
+                {
+                    Dock = DockStyle.Fill,
+                    DataSource =
+                        new BindingSource(new Dictionary<string, bool> { { "True", true }, { "False", false } },
+                            null),
+                    DisplayMember = "Key",
+                    ValueMember = "Value",
 
+                    DropDownStyle = ComboBoxStyle.DropDownList
+                };
+
+                this.Controls.Add(_booleanDropdown);
+            }
             var btnApply = new Button
             {
                 Text = "Apply",
@@ -83,6 +98,7 @@ namespace FormsApp.views.controls
             {
                 FilterType.String => _textBox?.Text,
                 FilterType.Status => _statusDropdown?.SelectedValue,
+                FilterType.Boolean => _statusDropdown?.SelectedValue,
                 _ => null
             };
 
@@ -106,6 +122,7 @@ namespace FormsApp.views.controls
             string columnToSearch = _selectedType switch
             {
                 FilterType.String => _propertyName,
+                FilterType.Boolean => _propertyName,
                 FilterType.Status => _propertyName + "Id",
                 _ => throw new InvalidOperationException("Unknown filter type.")
             };
@@ -120,6 +137,9 @@ namespace FormsApp.views.controls
 
             // Convert searchValue to string (SearchByColumn expects a string)
             string searchString = searchValue.ToString();
+
+            Console.WriteLine(columnToSearch);
+            Console.WriteLine(searchString);
 
             // Invoke the search method dynamically with pagination parameters
             var result = searchMethod.Invoke(repository, new object[] { columnToSearch, searchString, 1, 10 });

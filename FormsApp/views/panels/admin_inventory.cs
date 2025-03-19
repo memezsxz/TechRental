@@ -203,16 +203,12 @@ namespace FormsApp.views.panels
                 return con;
             }
             else if (type == "Boolean")
-                return new ComboBox
-                {
-                    Name = $"{col}_boolean",
-                    Dock = DockStyle.Fill,
-                    DataSource =
-                        new BindingSource(new Dictionary<string, bool> { { "True", true }, { "False", false } },
-                            null),
-                    DisplayMember = "Key",
-                    ValueMember = "Value"
-                };
+            {
+                TextStatusFilterControl con = new TextStatusFilterControl(typeof(Equipment), TextStatusFilterControl.FilterType.Boolean, col);
+                con.OnSearchCompleted += HandleSearchResults;
+
+                return con;
+            }
             else if (type == "Decimal")
             {
                 NumericFilterControl con = new NumericFilterControl(typeof(Equipment), col, typeof(decimal));

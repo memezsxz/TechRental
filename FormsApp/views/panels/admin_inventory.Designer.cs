@@ -96,10 +96,10 @@
             // 
             label4.Anchor = AnchorStyles.None;
             label4.AutoSize = true;
-            label4.Location = new Point(15, 18);
+            label4.Location = new Point(15, 19);
             label4.Margin = new Padding(5, 5, 20, 0);
             label4.Name = "label4";
-            label4.Size = new Size(31, 30);
+            label4.Size = new Size(34, 32);
             label4.TabIndex = 7;
             label4.Text = "In";
             label4.TextAlign = ContentAlignment.MiddleRight;
@@ -108,10 +108,10 @@
             // 
             cbColumn.Anchor = AnchorStyles.Left;
             cbColumn.FormattingEnabled = true;
-            cbColumn.Location = new Point(66, 15);
+            cbColumn.Location = new Point(69, 15);
             cbColumn.Margin = new Padding(0, 5, 20, 0);
             cbColumn.Name = "cbColumn";
-            cbColumn.Size = new Size(292, 36);
+            cbColumn.Size = new Size(292, 40);
             cbColumn.TabIndex = 6;
             cbColumn.SelectedIndexChanged += dropdownColumns_SelectedIndexChanged;
             // 
@@ -119,17 +119,17 @@
             // 
             label2.Anchor = AnchorStyles.None;
             label2.AutoSize = true;
-            label2.Location = new Point(383, 18);
+            label2.Location = new Point(386, 19);
             label2.Margin = new Padding(5, 5, 20, 0);
             label2.Name = "label2";
-            label2.Size = new Size(110, 30);
+            label2.Size = new Size(126, 32);
             label2.TabIndex = 9;
             label2.Text = "Search For";
             label2.TextAlign = ContentAlignment.MiddleRight;
             // 
             // pnlInput
             // 
-            pnlInput.Location = new Point(516, 13);
+            pnlInput.Location = new Point(535, 13);
             pnlInput.Name = "pnlInput";
             pnlInput.Size = new Size(305, 34);
             pnlInput.TabIndex = 8;
@@ -252,9 +252,9 @@
             // 
             lblTotal.Anchor = AnchorStyles.Left;
             lblTotal.AutoSize = true;
-            lblTotal.Location = new Point(899, 9);
+            lblTotal.Location = new Point(899, 8);
             lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(158, 30);
+            lblTotal.Size = new Size(180, 32);
             lblTotal.TabIndex = 10;
             lblTotal.Text = "Total Records: 0";
             lblTotal.TextAlign = ContentAlignment.MiddleRight;
@@ -267,7 +267,7 @@
             cbRecordsNum.Location = new Point(446, 5);
             cbRecordsNum.Margin = new Padding(0, 5, 20, 0);
             cbRecordsNum.Name = "cbRecordsNum";
-            cbRecordsNum.Size = new Size(80, 36);
+            cbRecordsNum.Size = new Size(80, 40);
             cbRecordsNum.TabIndex = 7;
             cbRecordsNum.SelectedIndexChanged += cbRecordsNum_SelectedIndexChanged;
             // 

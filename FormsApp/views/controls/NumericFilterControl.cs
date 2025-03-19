@@ -21,7 +21,7 @@ namespace FormsApp.views.controls
         private Control _inputValue1;
         private Control _inputValue2;
         private Button _applyButton;
-        private Label _andLabel; 
+        private Label _andLabel;
 
         public event Action<object> OnSearchCompleted;
 
@@ -37,6 +37,7 @@ namespace FormsApp.views.controls
         private void InitializeControls()
         {
             this.Dock = DockStyle.Fill;
+            if (_propertyName == "Id") cbOperands.Visible = false;
 
             // Set column styles to distribute space properly
             tlpFill.ColumnStyles.Clear();
@@ -57,8 +58,8 @@ namespace FormsApp.views.controls
             }
             else if (_colType == typeof(int) || _colType == typeof(double) || _colType == typeof(decimal))
             {
-                _inputValue1 = new NumericUpDown { Width = 120, Margin = new Padding(5), DecimalPlaces = _colType == typeof(int) ? 0 : 2 , Minimum = 0, Maximum = (_colType == typeof(int) ? 10000 : 10000.0m) };
-                _inputValue2 = new NumericUpDown { Width = 120, Margin = new Padding(5), DecimalPlaces = _colType == typeof(int) ? 0 : 2, Minimum = 0, Maximum =(_colType == typeof(int) ? 10000 : 10000.0m), Visible = false };
+                _inputValue1 = new NumericUpDown { Width = 120, Margin = new Padding(5), DecimalPlaces = _colType == typeof(int) ? 0 : 2, Minimum = 0, Maximum = (_colType == typeof(int) ? 10000 : 10000.0m) };
+                _inputValue2 = new NumericUpDown { Width = 120, Margin = new Padding(5), DecimalPlaces = _colType == typeof(int) ? 0 : 2, Minimum = 0, Maximum = (_colType == typeof(int) ? 10000 : 10000.0m), Visible = false };
                 _inputValue1.KeyPress += NumericInput_KeyPress;
                 _inputValue2.KeyPress += NumericInput_KeyPress;
             }
@@ -96,6 +97,7 @@ namespace FormsApp.views.controls
             tlpFill.Controls.Add(_andLabel, 2, 0);        // "AND" Label
             tlpFill.Controls.Add(_inputValue2, 3, 0);      // Second Input
             tlpFill.Controls.Add(_applyButton, 4, 0);      // Apply Button
+            cbOperands.SelectedIndex = 0;
         }
 
 
