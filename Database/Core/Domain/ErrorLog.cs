@@ -29,7 +29,7 @@ namespace Database.Core.Domain
         public string? SourceProcedure { get; set; }
 
         [ForeignKey("UserId")]
-        [InverseProperty("ErrorLogs")]
+        [InverseProperty("ErrorLog")]
         public virtual User? User { get; set; }
     }
 }

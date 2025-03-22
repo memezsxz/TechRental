@@ -39,13 +39,13 @@ namespace Database.Core.Domain
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("CustomerId")]
-        [InverseProperty("RentalRequests")]
+        [InverseProperty("RentalRequest")]
         public virtual User? Customer { get; set; }
         [ForeignKey("EquipmentId")]
-        [InverseProperty("RentalRequests")]
+        [InverseProperty("RentalRequest")]
         public virtual Equipment? Equipment { get; set; }
         [ForeignKey("StatusId")]
-        [InverseProperty("RentalRequests")]
+        [InverseProperty("RentalRequest")]
         public virtual RentalRequestStatus? Status { get; set; }
         [InverseProperty("Rental")]
         public virtual ICollection<Document> Documents { get; set; }

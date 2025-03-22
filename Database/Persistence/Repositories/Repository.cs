@@ -107,7 +107,7 @@ namespace Database.Persistence.Repositories
                         // Get the referenced entity type
                         var referencedEntityType = foreignKey.PrincipalEntityType.ClrType;
 
-                        // Get the DbSet<> property name from the context (e.g., "Categories" instead of "Category")
+                        // Get the DbSet<> property name from the context (e.g., "Category" instead of "Category")
                         var dbSetName = context.GetType().GetProperties()
                             .FirstOrDefault(prop => prop.PropertyType == typeof(DbSet<>).MakeGenericType(referencedEntityType))
                             ?.Name;

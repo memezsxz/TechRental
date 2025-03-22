@@ -30,10 +30,10 @@ namespace Database.Core.Domain
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("NotificationTypeId")]
-        [InverseProperty("Notifications")]
+        [InverseProperty("Notification")]
         public virtual NotificationType? NotificationType { get; set; }
         [ForeignKey("UserId")]
-        [InverseProperty("Notifications")]
+        [InverseProperty("Notification")]
         public virtual User? User { get; set; }
     }
 }

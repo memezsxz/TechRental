@@ -10,11 +10,25 @@ namespace Database.Core
 {
     internal interface IUnitOfWork  : IDisposable
     {
-        public IEquipmentAvailabilityStatusRepository EquipmentAvailabilityStatuses { get;  }
-        public IEquipmentConditionStatusRepository EquipmentConditionStatuses { get; }
-        public IEquipmentRateRepository EquipmentRates { get; }
+        public ICategoryRepository Category { get; }
+        public IDocumentRepository Document { get; }
         public IEquipmentRepository Equipment { get; }
-        public ICategoryRepository Categories { get; }
+        public IEquipmentAvailabilityStatusRepository EquipmentAvailabilityStatus { get; }
+        public IEquipmentConditionStatusRepository EquipmentConditionStatus { get; }
+        public IEquipmentRateRepository EquipmentRate { get; }
+        public IErrorLogRepository ErrorLog { get; }
+        public ILogRepository Log { get; }
+        public INotificationRepository Notification { get; }
+        public INotificationTypeRepository NotificationType { get; }
+        public IPaymentRepository Payment { get; }
+        public IPaymentMethodRepository PaymentMethod { get; }
+        public IPaymentStatusRepository PaymentStatus { get; }
+        public IRentalRecordRepository RentalRecord { get; }
+        public IRentalRequestRepository RentalRequest { get; }
+        public IRentalRequestStatusRepository RentalRequestStatus { get; }
+        public IReturnConditionStatusRepository ReturnConditionStatus { get; }
+        public IUserRepository User { get; }
+        public IUserRoleRepository UserRole { get; }
         int Complete();
     }
 }

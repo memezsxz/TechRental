@@ -22,6 +22,20 @@ namespace FormsApp.views.controls
             Boolean
         }
 
+        private int _pageNumber = 1;
+        public int PageNumber
+        {
+            get => _pageNumber;
+            set => _pageNumber = value < 1 ? 1 : value;
+        }
+        private int _pageSize = 10;
+        public int PageSize
+        {
+            get => _pageSize;
+            set => _pageSize = value < 1 ? 10 : value; 
+        }
+
+
         private readonly UnitOfWork _unitOfWork = new UnitOfWork(new RentalDBContext());
         private readonly FilterType _selectedType; // Now an Enum!
         private readonly Type _entityType;
@@ -83,11 +97,13 @@ namespace FormsApp.views.controls
 
                 this.Controls.Add(_booleanDropdown);
             }
+
             var btnApply = new Button
             {
                 Text = "Apply",
                 Dock = DockStyle.Right
             };
+
             btnApply.Click += BtnApply_Click;
             this.Controls.Add(btnApply);
         }
@@ -98,7 +114,7 @@ namespace FormsApp.views.controls
             {
                 FilterType.String => _textBox?.Text,
                 FilterType.Status => _statusDropdown?.SelectedValue,
-                FilterType.Boolean => _statusDropdown?.SelectedValue,
+                FilterType.Boolean => _booleanDropdown?.SelectedValue,
                 _ => null
             };
 
@@ -110,7 +126,8 @@ namespace FormsApp.views.controls
 
         private void PerformSearch(object searchValue)
         {
-            var repository = _unitOfWork.Equipment; // Always search in Equipment
+            Console.WriteLine("testing in preform search");
+            var repository = GetRepositoryByEntityType(); 
 
             if (repository == null)
             {
@@ -142,10 +159,44 @@ namespace FormsApp.views.controls
             Console.WriteLine(searchString);
 
             // Invoke the search method dynamically with pagination parameters
-            var result = searchMethod.Invoke(repository, new object[] { columnToSearch, searchString, 1, 10 });
+            var result = searchMethod.Invoke(repository, new object[] { columnToSearch, searchString, _pageNumber, _pageSize });
 
             // Notify the main form with the filtered results
             OnSearchCompleted?.Invoke(result);
+        }
+
+        private object GetRepositoryByEntityType()
+        {
+            var unitOfWorkType = typeof(UnitOfWork);
+            var properties = unitOfWorkType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
+
+            foreach (var prop in properties)
+            {
+                var repoInstance = prop.GetValue(_unitOfWork);
+                if (repoInstance == null) continue;
+
+                var interfaces = repoInstance.GetType().GetInterfaces();
+
+                foreach (var iface in interfaces)
+                {
+                    if (!iface.IsGenericType) continue;
+
+                    var genericDef = iface.GetGenericTypeDefinition();
+                    var genericArgs = iface.GetGenericArguments();
+
+                    // Match generic interface IRepository<T> or any known IRepository-like interface
+                    if ((genericDef == typeof(IRepository<>)
+                         || genericDef.Name.Contains("Repository")) // Catch custom interfaces like IEquipmentRepository
+                        && genericArgs.Length == 1
+                        && genericArgs[0] == _entityType)
+                    {
+                        return repoInstance;
+                    }
+                }
+            }
+
+            Console.WriteLine($"No repository found in UnitOfWork for entity type {_entityType.Name}.");
+            return null;
         }
 
         private void LoadStatusData()
@@ -201,6 +252,12 @@ namespace FormsApp.views.controls
             }
 
             return repositoryProperty.GetValue(_unitOfWork);
+        }
+
+
+        public void Apply()
+        {
+            BtnApply_Click(null, null);
         }
 
         public string GetTextValue() => _textBox?.Text;

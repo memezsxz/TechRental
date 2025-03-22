@@ -56,10 +56,10 @@ namespace Database.Core.Domain
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("RentalRequestId")]
-        [InverseProperty("RentalRecords")]
+        [InverseProperty("RentalRecord")]
         public virtual RentalRequest? RentalRequest { get; set; }
         [ForeignKey("ReturnConditionId")]
-        [InverseProperty("RentalRecords")]
+        [InverseProperty("RentalRecord")]
         public virtual ReturnConditionStatus? ReturnCondition { get; set; }
         [InverseProperty("RentalRecord")]
         public virtual ICollection<Payment> Payments { get; set; }

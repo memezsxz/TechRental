@@ -30,6 +30,8 @@ namespace FormsApp.views.panels
         private int totalPages = 0;
         private int pageSize = 0;
         private int pageNumber = 1;
+        private ISearch currentControl;
+        private Type currentType = typeof(Equipment);
 
         public admin_inventory()
         {
@@ -52,14 +54,35 @@ namespace FormsApp.views.panels
 
         private void LoadColumnDropdown()
         {
-            Dictionary<string, string> columnInfo = new Dictionary<string, string> { { "None", "" } };
-            columnInfo = columnInfo.Concat(FormatColumnNames(_context.Equipment.GetEntityColumnsWithTypes()))
-                .Where(kv => kv.Key != "Description")
-                .ToDictionary(kv => kv.Key, kv => kv.Value);
-            //foreach (var col in columnInfo)
-            //{
-            //    Console.WriteLine($"{col.Key}: '{col.Value}'");
-            //}
+            Dictionary<string, string> columnInfo = new() { { "None", "" } };
+
+            // Dynamically get repository for currentType
+            object repo = Global.GetRepositoryForType(currentType);
+
+            if (repo == null)
+            {
+                Console.WriteLine($"No repository found for type {currentType.Name}.");
+                return;
+            }
+
+            // Look for GetEntityColumnsWithTypes method
+            MethodInfo getColumnsMethod = repo.GetType().GetMethod("GetEntityColumnsWithTypes");
+            if (getColumnsMethod != null)
+            {
+                var result = getColumnsMethod.Invoke(repo, null);
+                if (result is Dictionary<string, string> columns)
+                {
+                    columnInfo = columnInfo
+                        .Concat(columns)
+                        .Where(kv => kv.Key != "Description")
+                        .ToDictionary(kv => kv.Key, kv => kv.Value);
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Repository for {currentType.Name} does not implement GetEntityColumnsWithTypes.");
+            }
+
             cbColumn.DataSource = new BindingSource(columnInfo, null);
             cbColumn.DisplayMember = "Key";
             cbColumn.ValueMember = "Value";
@@ -67,6 +90,7 @@ namespace FormsApp.views.panels
 
             dropdownColumns_SelectedIndexChanged(cbColumn, EventArgs.Empty);
         }
+
         private void btnApply_Click(object sender, EventArgs e)
         {
 
@@ -78,8 +102,7 @@ namespace FormsApp.views.panels
             }
             else
             {
-                // The search logic is now handled dynamically by `TextStatusFilterControl`
-                // UpdatePaginatedData(FilterEquipments()); <-- Remove this, it's now event-driven.
+                currentControl.Apply();
             }
 
         }
@@ -173,18 +196,14 @@ namespace FormsApp.views.panels
 
         private void dropdownColumns_SelectedIndexChanged(object sender, EventArgs e)
         {
-            if (cbColumn.SelectedIndex == 0) return;
-
-            string selectedType = cbColumn.SelectedValue?.ToString();
-            string col = GetSelectedColumnName();
-
-            Control control = CreateControlForType(selectedType, col);
+            Control control = (cbColumn.SelectedIndex == 0) ? new Panel() : CreateControlForType(cbColumn.SelectedValue?.ToString(), GetSelectedColumnName());
 
             if (control == null) return;
 
             //control.MinimumSize = new Size(300, 34);
             control.Dock = DockStyle.Fill;
 
+            currentControl = control as ISearch;
             flpSearch.Controls.RemoveAt(flpSearch.Controls.Count - 1);
             flpSearch.Controls.Add(control);
         }
@@ -194,51 +213,27 @@ namespace FormsApp.views.panels
 
         private Control CreateControlForType(string type, string col)
         {
-            if (cbColumn.SelectedIndex == 0) return new Panel();
-            if (type == "DateTime")
-            {
-                NumericFilterControl con = new NumericFilterControl(typeof(Equipment), col, typeof(DateTime));
-                con.OnSearchCompleted += HandleSearchResults;
-
-                return con;
-            }
-            else if (type == "Boolean")
-            {
-                TextStatusFilterControl con = new TextStatusFilterControl(typeof(Equipment), TextStatusFilterControl.FilterType.Boolean, col);
-                con.OnSearchCompleted += HandleSearchResults;
-
-                return con;
-            }
-            else if (type == "Decimal")
-            {
-                NumericFilterControl con = new NumericFilterControl(typeof(Equipment), col, typeof(decimal));
-                con.OnSearchCompleted += HandleSearchResults;
-
-                return con;
-            }
-            else if (type == "Int32")
-            {
-                NumericFilterControl con = new NumericFilterControl(typeof(Equipment), col, typeof(int));
-                con.OnSearchCompleted += HandleSearchResults;
-
-                return con;
-            }
-            else if (type == "String")
-            {
-                TextStatusFilterControl con = new TextStatusFilterControl(typeof(Equipment), TextStatusFilterControl.FilterType.String, col);
-                con.OnSearchCompleted += HandleSearchResults;
-
-                return con;
-            }
-            else if (type == "")
+            if (cbColumn.SelectedIndex == 0 || string.IsNullOrEmpty(type))
                 return new Panel();
-            else
-            {
-                TextStatusFilterControl con = new TextStatusFilterControl(typeof(Equipment), TextStatusFilterControl.FilterType.Status, col);
-                con.OnSearchCompleted += HandleSearchResults;
 
-                return con;
-            }
+            ISearch control = type switch
+            {
+                "DateTime" => new NumericFilterControl(currentType, col, typeof(DateTime)),
+                "Decimal" => new NumericFilterControl(currentType, col, typeof(decimal)),
+                "Int32" => new NumericFilterControl(currentType, col, typeof(int)),
+                "Boolean" => new TextStatusFilterControl(currentType, TextStatusFilterControl.FilterType.Boolean,
+                    col),
+                "String" => new TextStatusFilterControl(currentType, TextStatusFilterControl.FilterType.String,
+                    col),
+                _ => new TextStatusFilterControl(currentType, TextStatusFilterControl.FilterType.Status, col)
+            };
+
+            // Set page size if the control supports it
+
+            control.PageSize = (int)cbRecordsNum.SelectedIndex;
+            control.OnSearchCompleted += HandleSearchResults;
+
+            return control as UserControl;
         }
 
         private void HandleSearchResults(object result)
@@ -264,6 +259,7 @@ namespace FormsApp.views.panels
         private void cbRecordsNum_SelectedIndexChanged(object sender, EventArgs e)
         {
             pageSize = (int)cbRecordsNum.SelectedItem!;
+            if (currentControl != null) currentControl.PageSize = pageSize;
             btnApply_Click(cbColumn, EventArgs.Empty);
         }
 
@@ -274,11 +270,13 @@ namespace FormsApp.views.panels
             if (panel == pnlNext && pageNumber < totalPages)
             {
                 pageNumber++;
+                if (currentControl != null) currentControl.PageNumber = pageNumber;
                 btnApply_Click(cbColumn, EventArgs.Empty);
             }
             else if (panel == pnlPrevios && pageNumber > 1)
             {
                 pageNumber--;
+                if (currentControl != null) currentControl.PageNumber = pageNumber;
                 btnApply_Click(cbColumn, EventArgs.Empty);
             }
         }

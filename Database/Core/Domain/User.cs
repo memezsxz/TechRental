@@ -44,7 +44,7 @@ namespace Database.Core.Domain
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("RoleId")]
-        [InverseProperty("Users")]
+        [InverseProperty("User")]
         public virtual UserRole? Role { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<Document> Documents { get; set; }

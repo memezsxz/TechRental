@@ -28,13 +28,13 @@ namespace Database.Core.Domain
         public DateTime? PaymentDate { get; set; }
 
         [ForeignKey("PaymentMethodId")]
-        [InverseProperty("Payments")]
+        [InverseProperty("Payment")]
         public virtual PaymentMethod? PaymentMethod { get; set; }
         [ForeignKey("PaymentStatusId")]
-        [InverseProperty("Payments")]
+        [InverseProperty("Payment")]
         public virtual PaymentStatus? PaymentStatus { get; set; }
         [ForeignKey("RentalRecordId")]
-        [InverseProperty("Payments")]
+        [InverseProperty("Payment")]
         public virtual RentalRecord? RentalRecord { get; set; }
     }
 }

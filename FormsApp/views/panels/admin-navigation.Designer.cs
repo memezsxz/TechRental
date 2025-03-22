@@ -111,7 +111,7 @@
             label6.Name = "label6";
             label6.Size = new Size(237, 78);
             label6.TabIndex = 0;
-            label6.Text = "Logs";
+            label6.Text = "Log";
             label6.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // panel7

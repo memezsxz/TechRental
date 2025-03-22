@@ -20,8 +20,27 @@ namespace FormsApp.views.controls
         private readonly string _propertyName;
         private Control _inputValue1;
         private Control _inputValue2;
-        private Button _applyButton;
+        //private Button _applyButton;
         private Label _andLabel;
+
+        private int _pageNumber = 1;
+        public int PageNumber
+        {
+            get => _pageNumber;
+            set => _pageNumber = value < 1 ? 1 : value;
+        }
+
+        public void Apply()
+        {
+            BtnApply_Click(null, null);
+        }
+
+        private int _pageSize = 10;
+        public int PageSize
+        {
+            get => _pageSize;
+            set => _pageSize = value < 1 ? 10 : value;
+        }
 
         public event Action<object> OnSearchCompleted;
 
@@ -45,7 +64,7 @@ namespace FormsApp.views.controls
             tlpFill.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));    // First input
             tlpFill.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 80));   // "AND" Label
             tlpFill.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 35));    // Second input (if "between" selected)
-            tlpFill.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));       // Apply button
+            //tlpFill.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));       // Apply button
 
             cbOperands.Items.AddRange(new object[] { "==", ">=", "<=", ">", "<", "between" });
             cbOperands.SelectedIndexChanged += OperatorChanged;
@@ -83,20 +102,20 @@ namespace FormsApp.views.controls
             };
 
             // Apply Button
-            _applyButton = new Button
-            {
-                Text = "Apply",
-                AutoSize = true,
-                Padding = new Padding(5),
-                Margin = new Padding(5)
-            };
-            _applyButton.Click += BtnApply_Click;
+            //_applyButton = new Button
+            //{
+            //    Text = "Apply",
+            //    AutoSize = true,
+            //    Padding = new Padding(5),
+            //    Margin = new Padding(5)
+            //};
+            //_applyButton.Click += BtnApply_Click;
 
             // Add controls to TableLayoutPanel
             tlpFill.Controls.Add(_inputValue1, 1, 0);      // First Input
             tlpFill.Controls.Add(_andLabel, 2, 0);        // "AND" Label
             tlpFill.Controls.Add(_inputValue2, 3, 0);      // Second Input
-            tlpFill.Controls.Add(_applyButton, 4, 0);      // Apply Button
+            //tlpFill.Controls.Add(_applyButton, 4, 0);      // Apply Button
             cbOperands.SelectedIndex = 0;
         }
 
@@ -158,7 +177,7 @@ namespace FormsApp.views.controls
                 searchQuery = selectedOperator == "between" ? $"{value1},{value2}" : value1.ToString();
             }
 
-            var result = searchMethod.Invoke(repository, new object[] { _propertyName, searchQuery, 1, 10, selectedOperator });
+            var result = searchMethod.Invoke(repository, new object[] { _propertyName, searchQuery, PageNumber, PageSize, selectedOperator });
 
             OnSearchCompleted?.Invoke(result);
         }
@@ -182,6 +201,7 @@ namespace FormsApp.views.controls
                 e.Handled = true;
             }
         }
+
 
     }
 }
