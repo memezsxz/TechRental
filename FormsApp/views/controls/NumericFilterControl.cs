@@ -32,6 +32,7 @@ namespace FormsApp.views.controls
 
         public void Apply()
         {
+            PageNumber = 1;
             BtnApply_Click(null, null);
         }
 
@@ -158,29 +159,44 @@ namespace FormsApp.views.controls
 
         private void PerformSearch(string selectedOperator, object value1, object value2)
         {
-            var repository = new UnitOfWork(new RentalDBContext()).Equipment;
-            if (repository == null) return;
+            var repository = Global.GetRepositoryForType(_propertyType); // Use the correct type!
+            if (repository == null)
+            {
+                Console.WriteLine($"No repository found for {_propertyType.Name}.");
+                return;
+            }
 
             MethodInfo searchMethod = repository.GetType().GetMethod("SearchByColumnOperation");
-            if (searchMethod == null) return;
+            if (searchMethod == null)
+            {
+                Console.WriteLine($"Repository for {_propertyType.Name} does not implement SearchByColumnOperation.");
+                return;
+            }
 
             string searchQuery;
             if (_colType == typeof(DateTime))
             {
                 string formattedDate1 = ((DateTime)value1).ToString("yyyy-MM-dd");
                 string formattedDate2 = value2 != null ? ((DateTime)value2).ToString("yyyy-MM-dd") : "";
-
                 searchQuery = selectedOperator == "between" ? $"{formattedDate1},{formattedDate2}" : formattedDate1;
             }
             else
             {
-                searchQuery = selectedOperator == "between" ? $"{value1},{value2}" : value1.ToString();
+                searchQuery = selectedOperator == "between" ? $"{value1},{value2}" : value1?.ToString();
             }
 
-            var result = searchMethod.Invoke(repository, new object[] { _propertyName, searchQuery, PageNumber, PageSize, selectedOperator });
+            var result = searchMethod.Invoke(repository, new object[]
+            {
+                _propertyName,
+                searchQuery,
+                PageNumber,
+                PageSize,
+                selectedOperator
+            });
 
             OnSearchCompleted?.Invoke(result);
         }
+
 
         private void NumericInput_KeyPress(object sender, KeyPressEventArgs e)
         {

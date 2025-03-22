@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Database.Core.Domain
 {
     [Table("UserRole")]
-    [Index("RoleName", Name = "UQ__UserRole__783254B1BF95ED4A", IsUnique = true)]
+    [Index("RoleName", Name = "UQ__UserRole__783254B13102A65B", IsUnique = true)]
     public partial class UserRole
     {
         public UserRole()

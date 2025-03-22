@@ -83,6 +83,8 @@ namespace FormsApp.views.panels
                 Console.WriteLine($"Repository for {currentType.Name} does not implement GetEntityColumnsWithTypes.");
             }
 
+          columnInfo =  FormatColumnNames(columnInfo);
+          Console.WriteLine(columnInfo);
             cbColumn.DataSource = new BindingSource(columnInfo, null);
             cbColumn.DisplayMember = "Key";
             cbColumn.ValueMember = "Value";
@@ -96,7 +98,7 @@ namespace FormsApp.views.panels
 
             if (cbColumn.SelectedIndex == 0)
             {
-                UpdatePaginatedData(_context.Equipment.GetAll(pageNumber, pageSize));
+                GetAllAndUpdate();
                 flpSearch.Controls.RemoveAt(flpSearch.Controls.Count - 1);
                 flpSearch.Controls.Add(new Panel());
             }
@@ -107,6 +109,25 @@ namespace FormsApp.views.panels
 
         }
 
+        private void GetAllAndUpdate()
+        {
+            var repository = Global.GetRepositoryForType(currentType);
+            MethodInfo method = repository.GetType().GetMethod("GetAll", new[] { typeof(int), typeof(int) });
+
+            if (method != null)
+            {
+                var result = method.Invoke(repository, new object[] { pageNumber, pageSize });
+                var method2 = typeof(admin_inventory).GetMethod("UpdatePaginatedData", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+                var genericMethod = method2.MakeGenericMethod(currentType);
+                genericMethod.Invoke(this, new object[] { result });
+            }
+            else
+            {
+                Console.WriteLine("Method 'GetAll(int, int)' not found in repository.");
+            }
+
+
+        }
         private void UpdatePaginatedData<T>(PaginatedResult<T> val) where T : class
         {
             totalPages = val.TotalPages;
@@ -116,10 +137,29 @@ namespace FormsApp.views.panels
         }
         private void RefreshInventory()
         {
-            dgvEquipment.DataSource = _context.Equipment.GetAll().ToList();
+            var repository = Global.GetRepositoryForType(currentType);
+            if (repository == null)
+            {
+                Console.WriteLine($"No repository found for type {currentType.Name}.");
+                return;
+            }
+
+            // Get the GetAll() method with no parameters
+            MethodInfo getAllMethod = repository.GetType().GetMethod("GetAll", Type.EmptyTypes);
+            if (getAllMethod == null)
+            {
+                Console.WriteLine($"Repository for {currentType.Name} does not have a GetAll() method.");
+                return;
+            }
+
+            // Invoke and bind result
+            var result = getAllMethod.Invoke(repository, null);
+            dgvEquipment.DataSource = result;
+
             cbColumn.SelectedIndex = 0;
             btnApply_Click(cbColumn, EventArgs.Empty);
         }
+
         private void btnReset_Click(object sender, EventArgs e) => RefreshInventory();
 
         private void dgvEquipment_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
@@ -238,15 +278,26 @@ namespace FormsApp.views.panels
 
         private void HandleSearchResults(object result)
         {
-            if (result is PaginatedResult<Equipment> paginatedResult)
+            if (result == null) return;
+
+            var resultType = result.GetType();
+
+            if (resultType.IsGenericType && resultType.GetGenericTypeDefinition() == typeof(PaginatedResult<>))
             {
-                UpdatePaginatedData(paginatedResult);
+                Type entityType = resultType.GetGenericArguments()[0];
+
+                MethodInfo method = typeof(admin_inventory)
+                    .GetMethod("UpdatePaginatedData", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
+
+                MethodInfo generic = method.MakeGenericMethod(entityType);
+                generic.Invoke(this, new object[] { result });
             }
             else
             {
                 Console.WriteLine("Invalid search result type.");
             }
         }
+
         private Control CreateReferenceDropdown(string col, string entityName)
         {
 
@@ -260,6 +311,8 @@ namespace FormsApp.views.panels
         {
             pageSize = (int)cbRecordsNum.SelectedItem!;
             if (currentControl != null) currentControl.PageSize = pageSize;
+            if (currentControl != null) currentControl.PageNumber = 1;
+            pageNumber = 1;
             btnApply_Click(cbColumn, EventArgs.Empty);
         }
 

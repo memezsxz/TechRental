@@ -18,5 +18,9 @@ namespace Database.Persistence.Repositories
         {
             get { return context as RentalDBContext; }
         }
+        public Dictionary<int, string> GetAllByName()
+        {
+            return context.Equipment.ToDictionary(e => e.Id, e => e.Name);
+        }
     }
 }

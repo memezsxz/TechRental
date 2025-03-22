@@ -13,5 +13,10 @@ namespace Database.Persistence.Repositories
         {
             get { return context as RentalDBContext; }
         }
+
+        public Dictionary<int, string> GetAllByName()
+        {
+            return context.Users.ToDictionary(u => u.Id, u => $"{u.FirstName} {u.LastName}");
+        }
     }
 }

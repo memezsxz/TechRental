@@ -28,10 +28,10 @@ namespace Database.Core.Domain
         public DateTime? CreatedAt { get; set; }
 
         [ForeignKey("RentalId")]
-        [InverseProperty("Document")]
+        [InverseProperty("Documents")]
         public virtual RentalRequest? Rental { get; set; }
         [ForeignKey("UserId")]
-        [InverseProperty("Document")]
+        [InverseProperty("Documents")]
         public virtual User? User { get; set; }
     }
 }

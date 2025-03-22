@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Database.Core.Domain
 {
     [Table("PaymentMethod")]
-    [Index("MethodName", Name = "UQ__PaymentM__2DA2FAEEFEAF910A", IsUnique = true)]
+    [Index("MethodName", Name = "UQ__PaymentM__2DA2FAEEDF29BEA3", IsUnique = true)]
     public partial class PaymentMethod
     {
         public PaymentMethod()

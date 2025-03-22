@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database.Core.Domain
 {
-    [Index("Email", Name = "UQ__Users__AB6E6164C0B89942", IsUnique = true)]
+    [Index("Email", Name = "UQ__Users__AB6E61646F63A786", IsUnique = true)]
     public partial class User
     {
         public User()
@@ -44,7 +44,7 @@ namespace Database.Core.Domain
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("RoleId")]
-        [InverseProperty("User")]
+        [InverseProperty("Users")]
         public virtual UserRole? Role { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<Document> Documents { get; set; }

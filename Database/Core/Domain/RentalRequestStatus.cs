@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Database.Core.Domain
 {
     [Table("RentalRequestStatus")]
-    [Index("StatusName", Name = "UQ__RentalRe__501B37530BA236BB", IsUnique = true)]
+    [Index("StatusName", Name = "UQ__RentalRe__501B3753DCF84AF5", IsUnique = true)]
     public partial class RentalRequestStatus
     {
         public RentalRequestStatus()

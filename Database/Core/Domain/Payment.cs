@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Database.Core.Domain
 {
     [Table("Payment")]
-    [Index("TransactionId", Name = "UQ__Payment__85C600AE2C1C994D", IsUnique = true)]
+    [Index("TransactionId", Name = "UQ__Payment__85C600AE73EB7D35", IsUnique = true)]
     public partial class Payment
     {
         [Key]
@@ -28,13 +28,13 @@ namespace Database.Core.Domain
         public DateTime? PaymentDate { get; set; }
 
         [ForeignKey("PaymentMethodId")]
-        [InverseProperty("Payment")]
+        [InverseProperty("Payments")]
         public virtual PaymentMethod? PaymentMethod { get; set; }
         [ForeignKey("PaymentStatusId")]
-        [InverseProperty("Payment")]
+        [InverseProperty("Payments")]
         public virtual PaymentStatus? PaymentStatus { get; set; }
         [ForeignKey("RentalRecordId")]
-        [InverseProperty("Payment")]
+        [InverseProperty("Payments")]
         public virtual RentalRecord? RentalRecord { get; set; }
     }
 }

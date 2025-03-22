@@ -34,10 +34,10 @@ namespace Database.Core.Domain
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("EquipmentId")]
-        [InverseProperty("EquipmentRate")]
+        [InverseProperty("EquipmentRates")]
         public virtual Equipment? Equipment { get; set; }
         [ForeignKey("UserId")]
-        [InverseProperty("EquipmentRate")]
+        [InverseProperty("EquipmentRates")]
         public virtual User? User { get; set; }
     }
 }

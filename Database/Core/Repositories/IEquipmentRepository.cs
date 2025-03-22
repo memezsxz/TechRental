@@ -8,7 +8,7 @@ using Database.Core.Domain;
 
 namespace Database.Core.Repositories
 {
-    public interface IEquipmentRepository : IRepository<Equipment>
+    public interface IEquipmentRepository : IRepository<Equipment>, IStatus
     {
       
     }

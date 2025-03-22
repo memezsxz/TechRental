@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Database.Core.Domain;
-using DotNetEnv;
 
 namespace Database.Persistence
 {
@@ -42,26 +41,8 @@ namespace Database.Persistence
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Load environment variables from .env file
-                string projectRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\"));
-                string customEnvFilePath = Path.Combine(projectRoot, "Config", ".env");
-                Env.Load(customEnvFilePath);
-
-                // Retrieve credentials from environment variables
-                string server = Env.GetString("DB_SERVER");
-                string database = Env.GetString("DB_NAME");
-                string user = Env.GetString("DB_USER");
-                string password = Env.GetString("DB_PASSWORD");
-                string encrypt = Env.GetString("DB_ENCRYPT", "False");
-                string trustServerCert = Env.GetString("DB_TRUST_SERVER_CERT", "True");
-
-                // Build the connection string
-                string connectionString = $"Server={server};Database={database};User Id={user};Password={password};Encrypt={encrypt};TrustServerCertificate={trustServerCert};";
-
-                // Configure the database connection
-                optionsBuilder.UseSqlServer(connectionString);
-
-                //optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=RentalDB;Trusted_Connection=True;");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=reboot08.com;Database=RentalDB;User Id=sa;Password='caliber,willpower,enjoyably,ending,giggling,P5';Encrypt=True;TrustServerCertificate=True;");
             }
         }
 
@@ -83,12 +64,12 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Rental)
                     .WithMany(p => p.Documents)
                     .HasForeignKey(d => d.RentalId)
-                    .HasConstraintName("FK__Document__rental__6383C8BA");
+                    .HasConstraintName("FK__Document__rental__76969D2E");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Documents)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Document__user_i__628FA481");
+                    .HasConstraintName("FK__Document__user_i__75A278F5");
             });
 
             modelBuilder.Entity<Equipment>(entity =>
@@ -102,17 +83,17 @@ namespace Database.Persistence
                 entity.HasOne(d => d.AvailabilityStatus)
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.AvailabilityStatusId)
-                    .HasConstraintName("FK__Equipment__avail__46E78A0C");
+                    .HasConstraintName("FK__Equipment__avail__59FA5E80");
 
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.CategoryId)
-                    .HasConstraintName("FK__Equipment__categ__48CFD27E");
+                    .HasConstraintName("FK__Equipment__categ__5BE2A6F2");
 
                 entity.HasOne(d => d.ConditionStatus)
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.ConditionStatusId)
-                    .HasConstraintName("FK__Equipment__condi__47DBAE45");
+                    .HasConstraintName("FK__Equipment__condi__5AEE82B9");
             });
 
             modelBuilder.Entity<EquipmentRate>(entity =>
@@ -128,12 +109,12 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Equipment)
                     .WithMany(p => p.EquipmentRates)
                     .HasForeignKey(d => d.EquipmentId)
-                    .HasConstraintName("FK__Equipment__equip__5CD6CB2B");
+                    .HasConstraintName("FK__Equipment__equip__6FE99F9F");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.EquipmentRates)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Equipment__user___5BE2A6F2");
+                    .HasConstraintName("FK__Equipment__user___6EF57B66");
             });
 
             modelBuilder.Entity<ErrorLog>(entity =>
@@ -143,7 +124,7 @@ namespace Database.Persistence
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.ErrorLogs)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__ErrorLog__user_i__71D1E811");
+                    .HasConstraintName("FK__ErrorLog__user_i__04E4BC85");
             });
 
             modelBuilder.Entity<Log>(entity =>
@@ -153,7 +134,7 @@ namespace Database.Persistence
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Logs)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Log__user_id__6E01572D");
+                    .HasConstraintName("FK__Log__user_id__01142BA1");
             });
 
             modelBuilder.Entity<Notification>(entity =>
@@ -167,12 +148,12 @@ namespace Database.Persistence
                 entity.HasOne(d => d.NotificationType)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.NotificationTypeId)
-                    .HasConstraintName("FK__Notificat__notif__68487DD7");
+                    .HasConstraintName("FK__Notificat__notif__7B5B524B");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Notificat__user___6754599E");
+                    .HasConstraintName("FK__Notificat__user___7A672E12");
             });
 
             modelBuilder.Entity<Payment>(entity =>
@@ -182,17 +163,17 @@ namespace Database.Persistence
                 entity.HasOne(d => d.PaymentMethod)
                     .WithMany(p => p.Payments)
                     .HasForeignKey(d => d.PaymentMethodId)
-                    .HasConstraintName("FK__Payment__payment__778AC167");
+                    .HasConstraintName("FK__Payment__payment__0A9D95DB");
 
                 entity.HasOne(d => d.PaymentStatus)
                     .WithMany(p => p.Payments)
                     .HasForeignKey(d => d.PaymentStatusId)
-                    .HasConstraintName("FK__Payment__payment__787EE5A0");
+                    .HasConstraintName("FK__Payment__payment__0B91BA14");
 
                 entity.HasOne(d => d.RentalRecord)
                     .WithMany(p => p.Payments)
                     .HasForeignKey(d => d.RentalRecordId)
-                    .HasConstraintName("FK__Payment__rental___76969D2E");
+                    .HasConstraintName("FK__Payment__rental___09A971A2");
             });
 
             modelBuilder.Entity<RentalRecord>(entity =>
@@ -204,12 +185,12 @@ namespace Database.Persistence
                 entity.HasOne(d => d.RentalRequest)
                     .WithMany(p => p.RentalRecords)
                     .HasForeignKey(d => d.RentalRequestId)
-                    .HasConstraintName("FK__RentalRec__renta__5535A963");
+                    .HasConstraintName("FK__RentalRec__renta__68487DD7");
 
                 entity.HasOne(d => d.ReturnCondition)
                     .WithMany(p => p.RentalRecords)
                     .HasForeignKey(d => d.ReturnConditionId)
-                    .HasConstraintName("FK__RentalRec__retur__5629CD9C");
+                    .HasConstraintName("FK__RentalRec__retur__693CA210");
             });
 
             modelBuilder.Entity<RentalRequest>(entity =>
@@ -221,17 +202,17 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.RentalRequests)
                     .HasForeignKey(d => d.CustomerId)
-                    .HasConstraintName("FK__RentalReq__custo__4F7CD00D");
+                    .HasConstraintName("FK__RentalReq__custo__628FA481");
 
                 entity.HasOne(d => d.Equipment)
                     .WithMany(p => p.RentalRequests)
                     .HasForeignKey(d => d.EquipmentId)
-                    .HasConstraintName("FK__RentalReq__equip__4E88ABD4");
+                    .HasConstraintName("FK__RentalReq__equip__619B8048");
 
                 entity.HasOne(d => d.Status)
                     .WithMany(p => p.RentalRequests)
                     .HasForeignKey(d => d.StatusId)
-                    .HasConstraintName("FK__RentalReq__statu__5070F446");
+                    .HasConstraintName("FK__RentalReq__statu__6383C8BA");
             });
 
             modelBuilder.Entity<User>(entity =>
@@ -245,7 +226,7 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.RoleId)
-                    .HasConstraintName("FK__Users__role_id__3C69FB99");
+                    .HasConstraintName("FK__Users__role_id__4F7CD00D");
             });
 
             OnModelCreatingPartial(modelBuilder);

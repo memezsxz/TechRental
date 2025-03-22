@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Database.Core.Domain
 {
     [Table("ReturnConditionStatus")]
-    [Index("ConditionName", Name = "UQ__ReturnCo__1A81D2F827980B50", IsUnique = true)]
+    [Index("ConditionName", Name = "UQ__ReturnCo__1A81D2F8B5791F07", IsUnique = true)]
     public partial class ReturnConditionStatus
     {
         public ReturnConditionStatus()
