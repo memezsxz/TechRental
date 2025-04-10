@@ -1,1 +1,1 @@
-﻿Scaffold-DbContext "Server=(localdb)\MSSQLLocalDB;Database=RentalDB;Trusted_Connection=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Core\Domain -Context "RentalDBContext" -ContextDir Persistence -DataAnnotations
+﻿Scaffold-DbContext "Server=reboot08.com;Database=RentalDB;User Id=sa;Password='caliber,willpower,enjoyably,ending,giggling,P5';Encrypt=True;TrustServerCertificate=True;" Microsoft.EntityFrameworkCore.SqlServer -OutputDir Core\Domain -Context "RentalDBContext" -ContextDir Persistence -DataAnnotations
