@@ -28,8 +28,7 @@ namespace FormsApp.views.panels
     {
         private UnitOfWork _context = new UnitOfWork(new RentalDBContext());
         private int totalPages = 0;
-        private int pageSize = 0;
-        private int pageNumber = 1;
+
         private ISearch currentControl;
         private Type currentType = typeof(Equipment);
 
@@ -37,19 +36,16 @@ namespace FormsApp.views.panels
         {
             InitializeComponent();
             this.Paint += Global.Panel_Paint;
-            LoadColumnDropdown();
-            RefreshInventory();
-
-            AddUnboundColumn("Delete", "Delete", Color.Red);
-            AddUnboundColumn("Edit", "Edit", Color.Blue);
         }
 
         private void admin_inventory_Load(object sender, EventArgs e)
         {
-            RefreshInventory();
             cbRecordsNum.DataSource = new BindingList<int>() { 10, 20, 30 };
             cbRecordsNum.SelectedIndex = 0;
-            pageSize = (int)cbRecordsNum.SelectedItem!;
+            LoadColumnDropdown();
+
+            AddUnboundColumn("Delete", "Delete", Color.Red);
+            AddUnboundColumn("Edit", "Edit", Color.Blue);
         }
 
         private void LoadColumnDropdown()
@@ -76,98 +72,40 @@ namespace FormsApp.views.panels
                         .Concat(columns)
                         .Where(kv => kv.Key != "Description")
                         .ToDictionary(kv => kv.Key, kv => kv.Value);
+
+                    columnInfo = FormatColumnNames(columnInfo);
+                    //Console.WriteLine(columnInfo);
+                    cbColumn.DisplayMember = "Key";
+                    cbColumn.ValueMember = "Value";
+                    cbColumn.DataSource = new BindingSource(columnInfo, null);
+                    cbColumn.SelectedIndex = 0;
+
+                    dropdownColumns_SelectedIndexChanged(cbColumn, EventArgs.Empty);
                 }
             }
             else
             {
                 Console.WriteLine($"Repository for {currentType.Name} does not implement GetEntityColumnsWithTypes.");
             }
-
-          columnInfo =  FormatColumnNames(columnInfo);
-          Console.WriteLine(columnInfo);
-            cbColumn.DataSource = new BindingSource(columnInfo, null);
-            cbColumn.DisplayMember = "Key";
-            cbColumn.ValueMember = "Value";
-            cbColumn.SelectedIndex = 0;
-
-            dropdownColumns_SelectedIndexChanged(cbColumn, EventArgs.Empty);
         }
 
         private void btnApply_Click(object sender, EventArgs e)
         {
-
-            if (cbColumn.SelectedIndex == 0)
-            {
-                GetAllAndUpdate();
-                flpSearch.Controls.RemoveAt(flpSearch.Controls.Count - 1);
-                flpSearch.Controls.Add(new Panel());
-            }
-            else
-            {
-                currentControl.Apply();
-            }
-
+            currentControl.PageNumber = 1;
+            currentControl.Apply();
         }
 
-        private void GetAllAndUpdate()
+
+
+        private void btnReset_Click(object sender, EventArgs e)
         {
-            var repository = Global.GetRepositoryForType(currentType);
-            MethodInfo method = repository.GetType().GetMethod("GetAll", new[] { typeof(int), typeof(int) });
-
-            if (method != null)
-            {
-                var result = method.Invoke(repository, new object[] { pageNumber, pageSize });
-                var method2 = typeof(admin_inventory).GetMethod("UpdatePaginatedData", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public);
-                var genericMethod = method2.MakeGenericMethod(currentType);
-                genericMethod.Invoke(this, new object[] { result });
-            }
-            else
-            {
-                Console.WriteLine("Method 'GetAll(int, int)' not found in repository.");
-            }
-
-
-        }
-        private void UpdatePaginatedData<T>(PaginatedResult<T> val) where T : class
-        {
-            totalPages = val.TotalPages;
-            lblTotal.Text = $"Total Records: {val.TotalRecords}";
-            lblPagPage.Text = $"Page {pageNumber} of {totalPages}";
-            dgvEquipment.DataSource = val.Data;
-        }
-        private void RefreshInventory()
-        {
-            var repository = Global.GetRepositoryForType(currentType);
-            if (repository == null)
-            {
-                Console.WriteLine($"No repository found for type {currentType.Name}.");
-                return;
-            }
-
-            // Get the GetAll() method with no parameters
-            MethodInfo getAllMethod = repository.GetType().GetMethod("GetAll", Type.EmptyTypes);
-            if (getAllMethod == null)
-            {
-                Console.WriteLine($"Repository for {currentType.Name} does not have a GetAll() method.");
-                return;
-            }
-
-            // Invoke and bind result
-            var result = getAllMethod.Invoke(repository, null);
-            dgvEquipment.DataSource = result;
-
             cbColumn.SelectedIndex = 0;
-            btnApply_Click(cbColumn, EventArgs.Empty);
         }
-
-        private void btnReset_Click(object sender, EventArgs e) => RefreshInventory();
 
         private void dgvEquipment_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
         {
             new view_edit_inventory().ShowDialog();
         }
-
-
 
 
         private Dictionary<string, string> FormatColumnNames(Dictionary<string, string> columns)
@@ -191,21 +129,6 @@ namespace FormsApp.views.panels
             }
 
             return newColumns;
-        }
-
-
-
-        private string ExtractControlValue(Control control, string valueType)
-        {
-            return control switch
-            {
-                DateTimePicker dtp => dtp.Value.Date.ToString("yyyy-MM-dd"),
-                ComboBox cb when valueType == "boolean" => cb.SelectedValue.ToString(),
-                ComboBox cb => cb.SelectedValue?.ToString(),
-                NumericUpDown nud => nud.Value.ToString(),
-                TextBox tb => tb.Text,
-                _ => null
-            };
         }
 
         private void HandelRefDropDown(string entityName, ComboBox dropdown)
@@ -236,7 +159,7 @@ namespace FormsApp.views.panels
 
         private void dropdownColumns_SelectedIndexChanged(object sender, EventArgs e)
         {
-            Control control = (cbColumn.SelectedIndex == 0) ? new Panel() : CreateControlForType(cbColumn.SelectedValue?.ToString(), GetSelectedColumnName());
+            Control control = CreateControlForType(cbColumn.SelectedValue?.ToString(), GetSelectedColumnName());
 
             if (control == null) return;
 
@@ -244,6 +167,7 @@ namespace FormsApp.views.panels
             control.Dock = DockStyle.Fill;
 
             currentControl = control as ISearch;
+            if (cbColumn.SelectedIndex == 0) currentControl.Apply();
             flpSearch.Controls.RemoveAt(flpSearch.Controls.Count - 1);
             flpSearch.Controls.Add(control);
         }
@@ -253,11 +177,12 @@ namespace FormsApp.views.panels
 
         private Control CreateControlForType(string type, string col)
         {
-            if (cbColumn.SelectedIndex == 0 || string.IsNullOrEmpty(type))
-                return new Panel();
+            //if (cbColumn.SelectedIndex == 0 || string.IsNullOrEmpty(type))
+            //    return ;
 
             ISearch control = type switch
             {
+                "" => new GetAllControl(currentType),
                 "DateTime" => new NumericFilterControl(currentType, col, typeof(DateTime)),
                 "Decimal" => new NumericFilterControl(currentType, col, typeof(decimal)),
                 "Int32" => new NumericFilterControl(currentType, col, typeof(int)),
@@ -265,12 +190,13 @@ namespace FormsApp.views.panels
                     col),
                 "String" => new TextStatusFilterControl(currentType, TextStatusFilterControl.FilterType.String,
                     col),
-                _ => new TextStatusFilterControl(currentType, TextStatusFilterControl.FilterType.Status, col)
+                _ => new TextStatusFilterControl(currentType, TextStatusFilterControl.FilterType.Status,
+                    col)
             };
 
             // Set page size if the control supports it
 
-            control.PageSize = (int)cbRecordsNum.SelectedIndex;
+            control.PageSize = (int)cbRecordsNum.SelectedItem;
             control.OnSearchCompleted += HandleSearchResults;
 
             return control as UserControl;
@@ -298,6 +224,18 @@ namespace FormsApp.views.panels
             }
         }
 
+#pragma warning disable IDE0051 // Remove unused private members
+
+        [UsedViaReflection]
+        private void UpdatePaginatedData<T>(PaginatedResult<T> val) where T : class
+        {
+            totalPages = val.TotalPages;
+            lblTotal.Text = $"Total Records: {val.TotalRecords}";
+            lblPagPage.Text = $"Page {currentControl.PageNumber} of {totalPages}";
+            dgvEquipment.DataSource = val.Data;
+        }
+#pragma warning restore IDE0051
+
         private Control CreateReferenceDropdown(string col, string entityName)
         {
 
@@ -309,28 +247,30 @@ namespace FormsApp.views.panels
 
         private void cbRecordsNum_SelectedIndexChanged(object sender, EventArgs e)
         {
-            pageSize = (int)cbRecordsNum.SelectedItem!;
-            if (currentControl != null) currentControl.PageSize = pageSize;
-            if (currentControl != null) currentControl.PageNumber = 1;
-            pageNumber = 1;
-            btnApply_Click(cbColumn, EventArgs.Empty);
+            //Console.WriteLine("value : " + (int)cbRecordsNum.SelectedValue);
+            //Console.WriteLine("item : " + (int)cbRecordsNum.SelectedItem);
+            if (currentControl != null)
+            {
+                currentControl.PageSize = (int)cbRecordsNum.SelectedItem;
+
+                btnApply_Click(cbColumn, EventArgs.Empty);
+            }
+           
         }
 
         private void page_toggle_Click(object sender, EventArgs e)
         {
             if (sender is not Panel panel) return;
 
-            if (panel == pnlNext && pageNumber < totalPages)
+            if (panel == pnlNext && currentControl.PageNumber < totalPages)
             {
-                pageNumber++;
-                if (currentControl != null) currentControl.PageNumber = pageNumber;
-                btnApply_Click(cbColumn, EventArgs.Empty);
+               currentControl.PageNumber++;
+               currentControl.Apply();
             }
-            else if (panel == pnlPrevios && pageNumber > 1)
+            else if (panel == pnlPrevios && currentControl.PageNumber > 1)
             {
-                pageNumber--;
-                if (currentControl != null) currentControl.PageNumber = pageNumber;
-                btnApply_Click(cbColumn, EventArgs.Empty);
+                currentControl.PageNumber--;
+                currentControl.Apply();
             }
         }
 

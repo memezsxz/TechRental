@@ -32,7 +32,6 @@ namespace FormsApp.views.controls
 
         public void Apply()
         {
-            PageNumber = 1;
             BtnApply_Click(null, null);
         }
 
@@ -119,8 +118,6 @@ namespace FormsApp.views.controls
             //tlpFill.Controls.Add(_applyButton, 4, 0);      // Apply Button
             cbOperands.SelectedIndex = 0;
         }
-
-
 
         private void OperatorChanged(object sender, EventArgs e)
         {

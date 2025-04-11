@@ -32,7 +32,7 @@ namespace FormsApp.views.controls
         public int PageSize
         {
             get => _pageSize;
-            set => _pageSize = value < 1 ? 10 : value; 
+            set => _pageSize = value < 1 ? 10 : value;
         }
 
 
@@ -98,14 +98,14 @@ namespace FormsApp.views.controls
                 this.Controls.Add(_booleanDropdown);
             }
 
-            var btnApply = new Button
-            {
-                Text = "Apply",
-                Dock = DockStyle.Right
-            };
+            //var btnApply = new Button
+            //{
+            //    Text = "Apply",
+            //    Dock = DockStyle.Right
+            //};
 
-            btnApply.Click += BtnApply_Click;
-            this.Controls.Add(btnApply);
+            //btnApply.Click += BtnApply_Click;
+            //this.Controls.Add(btnApply);
         }
 
         private void BtnApply_Click(object sender, EventArgs e)
@@ -127,7 +127,7 @@ namespace FormsApp.views.controls
         private void PerformSearch(object searchValue)
         {
             Console.WriteLine("testing in preform search");
-            var repository = GetRepositoryByEntityType(); 
+            var repository = GetRepositoryByEntityType();
 
             if (repository == null)
             {
