@@ -10,15 +10,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="controllers\**" />
+    <Compile Remove="models\**" />
+    <EmbeddedResource Remove="controllers\**" />
+    <EmbeddedResource Remove="models\**" />
+    <None Remove="controllers\**" />
+    <None Remove="models\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="icon.ico" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="controllers\" />
-    <Folder Include="models\" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="AWSSDK.S3" Version="3.7.416.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.36">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

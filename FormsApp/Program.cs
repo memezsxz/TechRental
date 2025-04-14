@@ -18,6 +18,10 @@ namespace FormsApp
             {
                 try
                 {
+                    //var bb = new List<byte> { 1, 2, 3 };
+                    //var x = S3Manager.DownloadBinaryAsync("bush.jpg").Result;
+                    //var y = S3Manager.UploadBinaryAsync(bb.ToArray(), "test").Result;
+
                     context.Database.EnsureCreated();
                     Console.WriteLine("Database connection successful!");
 
