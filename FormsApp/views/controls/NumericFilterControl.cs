@@ -97,7 +97,7 @@ public partial class NumericFilterControl : BaseSearchControl
     }
 
     /// <summary>
-    /// Dynamically creates input controls based on the column type (DateTime, numeric, or text).
+    /// Dynamically creates input controls based on the column viewType (DateTime, numeric, or text).
     /// </summary>
     private void CreateFilterControl()
     {
@@ -173,7 +173,7 @@ public partial class NumericFilterControl : BaseSearchControl
     {
         string searchQuery;
 
-        // Format values based on column type
+        // Format values based on column viewType
         if (_colType == typeof(DateTime))
         {
             string formattedDate1 = ((DateTime)value1).ToString("yyyy-MM-dd");

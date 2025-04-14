@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AdminNavigationPanel));
             pnlPanel = new TableLayoutPanel();
             tlpLogs = new TableLayoutPanel();
             label6 = new Label();
@@ -319,7 +318,7 @@
             // 
             // pnlIcon
             // 
-            pnlIcon.BackgroundImage = (Image)resources.GetObject("pnlIcon.BackgroundImage");
+            //pnlIcon.BackgroundImage = Properties.Resources.icon;
             pnlIcon.BackgroundImageLayout = ImageLayout.Zoom;
             pnlIcon.Dock = DockStyle.Fill;
             pnlIcon.Location = new Point(3, 3);

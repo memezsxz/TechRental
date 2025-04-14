@@ -16,6 +16,7 @@ using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence;
 using FormsApp.views.controls;
+using FormsApp.views.dialogs;
 using Microsoft.EntityFrameworkCore;
 using Sprache;
 
@@ -182,7 +183,7 @@ public partial class BaseDBSetView : UserControl
 
     private void dgvEquipment_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
     {
-        new view_edit_inventory().ShowDialog();
+        //new view_edit_inventory().ShowDialog();
     }
 
     private void btnAdd_Click(object sender, EventArgs e)
@@ -191,6 +192,8 @@ public partial class BaseDBSetView : UserControl
 
     private void btnEdit_Click(object sender, EventArgs e)
     {
+        new ManageEquipment(BaseViewEditDeleteForm.ViewType.EDIT, 2).ShowDialog();
+
     }
 
     private void btnDelete_Click(object sender, EventArgs e)
@@ -226,7 +229,7 @@ public partial class BaseDBSetView : UserControl
     /// <summary>
     /// Binds a formatted dictionary of column display names and internal values to the ComboBox control.
     /// </summary>
-    /// <param name="columnInfo">The dictionary of columns to bind, with keys as display names and values as type names.</param>
+    /// <param name="columnInfo">The dictionary of columns to bind, with keys as display names and values as viewType names.</param>
     private void BindColumnDropdown(Dictionary<string, string> columnInfo)
     {
         cbColumn.DisplayMember = "Key"; // Text shown to the user
@@ -235,7 +238,7 @@ public partial class BaseDBSetView : UserControl
     }
 
     /// <summary>
-    /// Updates the filter input control displayed in the UI based on the selected column's data type.
+    /// Updates the filter input control displayed in the UI based on the selected column's data viewType.
     /// Dynamically creates an appropriate control (e.g., textbox, dropdown, date picker) for filtering,
     /// binds it to the UI, and applies the filter if the "None" option is selected.
     /// </summary>
@@ -308,7 +311,7 @@ public partial class BaseDBSetView : UserControl
     }
 
     /// <summary>
-    /// Dynamically creates a filtering control based on the provided data type and column name.
+    /// Dynamically creates a filtering control based on the provided data viewType and column name.
     /// This method is used to build the appropriate UI control to filter a specific column,
     /// supporting numeric, text, boolean, status, and date types.
     ///
@@ -317,7 +320,7 @@ public partial class BaseDBSetView : UserControl
     ///
     /// </summary>
     /// <param name="type">
-    /// A string representing the CLR type name of the column to filter
+    /// A string representing the CLR viewType name of the column to filter
     /// (e.g., "String", "Int32", "Decimal", "DateTime", "Boolean").
     /// </param>
     /// <param name="col">
@@ -325,13 +328,13 @@ public partial class BaseDBSetView : UserControl
     /// </param>
     /// <returns>
     /// A <see cref="BaseSearchControl"/> instance that allows the user to enter a filter condition
-    /// for the specified column type.
+    /// for the specified column viewType.
     /// </returns>
     private BaseSearchControl CreateControlForType(string type, string col)
     {
         try
         {
-            // get the right control based on the data type
+            // get the right control based on the data viewType
             BaseSearchControl control = type switch
             {
                 "" => new GetAllControl(currentType),
@@ -373,12 +376,12 @@ public partial class BaseDBSetView : UserControl
     /// </returns>
     private Dictionary<string, string>? GetColumnsFromRepository()
     {
-        // Try to get the appropriate repository for the current entity type
+        // Try to get the appropriate repository for the current entity viewType
         object repo = Helpers.GetRepositoryForType(currentType);
         if (repo == null)
         {
             Global.DisplayReportErrorDialog(new InvalidOperationException(
-                $"No repository found for type '{currentType.Name}'."));
+                $"No repository found for viewType '{currentType.Name}'."));
             return null;
         }
 

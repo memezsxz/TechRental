@@ -11,7 +11,7 @@ public partial class AdminManagementView : UserControl
     #region Fields
 
     /// <summary>
-    /// Maps labels to their corresponding entity type and permission flags (Add, Edit, Delete).
+    /// Maps labels to their corresponding entity viewType and permission flags (Add, Edit, Delete).
     /// </summary>
     private Dictionary<Label, (Type entity, bool allowAdd, bool allowEdit, bool allowDelete)> _tabTypeMap;
 
@@ -140,7 +140,7 @@ public partial class AdminManagementView : UserControl
     /// <summary>
     /// Loads the UserControl associated with the selected label and permissions.
     /// </summary>
-    /// <param name="config">Tuple containing the entity type and its permission flags.</param>
+    /// <param name="config">Tuple containing the entity viewType and its permission flags.</param>
     private void LoadEntityPanel((Type entity, bool allowAdd, bool allowEdit, bool allowDelete) config)
     {
         UserControl userControl = new BaseDBSetView(

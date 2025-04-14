@@ -55,7 +55,7 @@ namespace FormsApp.views.panels
                     IsValueShownAsLabel = true,
                     ChartType = SeriesChartType.Pie
                 };
-       
+
 
                 chart1.Series.Add(series);
                 chart1.Series["Sales"]["PieLabelStyle"] = "Outside";
@@ -66,6 +66,11 @@ namespace FormsApp.views.panels
                     series.Points.AddXY(item.Category, item.Count);
                 }
             }
+
+        }
+
+        private void panel4_Paint(object sender, PaintEventArgs e)
+        {
 
         }
     }

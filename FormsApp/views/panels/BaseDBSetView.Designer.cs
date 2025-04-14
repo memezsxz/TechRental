@@ -28,7 +28,6 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BaseDBSetView));
             tableLayoutPanel1 = new TableLayoutPanel();
             gbOptions = new GroupBox();
             tableLayoutPanel4 = new TableLayoutPanel();
@@ -110,14 +109,14 @@
             tableLayoutPanel4.Controls.Add(btnAdd, 0, 0);
             tableLayoutPanel4.Controls.Add(btnDelete, 0, 1);
             tableLayoutPanel4.Dock = DockStyle.Fill;
-            tableLayoutPanel4.Location = new Point(3, 34);
+            tableLayoutPanel4.Location = new Point(3, 51);
             tableLayoutPanel4.Margin = new Padding(5);
             tableLayoutPanel4.Name = "tableLayoutPanel4";
             tableLayoutPanel4.Padding = new Padding(5);
             tableLayoutPanel4.RowCount = 2;
             tableLayoutPanel4.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanel4.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanel4.Size = new Size(406, 118);
+            tableLayoutPanel4.Size = new Size(406, 101);
             tableLayoutPanel4.TabIndex = 6;
             // 
             // btnEdit
@@ -127,7 +126,7 @@
             btnEdit.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             btnEdit.Location = new Point(206, 8);
             btnEdit.Name = "btnEdit";
-            btnEdit.Size = new Size(192, 48);
+            btnEdit.Size = new Size(192, 39);
             btnEdit.TabIndex = 2;
             btnEdit.Text = "Edit";
             btnEdit.UseVisualStyleBackColor = false;
@@ -140,7 +139,7 @@
             btnAdd.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             btnAdd.Location = new Point(8, 8);
             btnAdd.Name = "btnAdd";
-            btnAdd.Size = new Size(192, 48);
+            btnAdd.Size = new Size(192, 39);
             btnAdd.TabIndex = 0;
             btnAdd.Text = "Add";
             btnAdd.UseVisualStyleBackColor = false;
@@ -153,9 +152,9 @@
             btnDelete.Dock = DockStyle.Fill;
             btnDelete.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             btnDelete.ForeColor = Color.Red;
-            btnDelete.Location = new Point(8, 62);
+            btnDelete.Location = new Point(8, 53);
             btnDelete.Name = "btnDelete";
-            btnDelete.Size = new Size(390, 48);
+            btnDelete.Size = new Size(390, 40);
             btnDelete.TabIndex = 1;
             btnDelete.Text = "Delete";
             btnDelete.UseVisualStyleBackColor = false;
@@ -183,14 +182,14 @@
             tableLayoutPanel5.Controls.Add(tableLayoutPanel2, 1, 0);
             tableLayoutPanel5.Controls.Add(pnlSearch, 0, 1);
             tableLayoutPanel5.Dock = DockStyle.Fill;
-            tableLayoutPanel5.Location = new Point(3, 34);
+            tableLayoutPanel5.Location = new Point(3, 51);
             tableLayoutPanel5.Margin = new Padding(5);
             tableLayoutPanel5.Name = "tableLayoutPanel5";
             tableLayoutPanel5.Padding = new Padding(5);
             tableLayoutPanel5.RowCount = 2;
             tableLayoutPanel5.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanel5.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanel5.Size = new Size(877, 118);
+            tableLayoutPanel5.Size = new Size(877, 101);
             tableLayoutPanel5.TabIndex = 7;
             // 
             // flowLayoutPanel1
@@ -203,7 +202,7 @@
             flowLayoutPanel1.Dock = DockStyle.Fill;
             flowLayoutPanel1.Location = new Point(8, 8);
             flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(687, 48);
+            flowLayoutPanel1.Size = new Size(687, 39);
             flowLayoutPanel1.TabIndex = 1;
             // 
             // label3
@@ -213,7 +212,7 @@
             label3.Location = new Point(5, 5);
             label3.Margin = new Padding(5, 5, 20, 0);
             label3.Name = "label3";
-            label3.Size = new Size(33, 31);
+            label3.Size = new Size(50, 48);
             label3.TabIndex = 7;
             label3.Text = "In";
             label3.TextAlign = ContentAlignment.MiddleRight;
@@ -222,10 +221,10 @@
             // 
             cbColumn.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             cbColumn.FormattingEnabled = true;
-            cbColumn.Location = new Point(58, 5);
+            cbColumn.Location = new Point(75, 5);
             cbColumn.Margin = new Padding(0, 5, 20, 0);
             cbColumn.Name = "cbColumn";
-            cbColumn.Size = new Size(263, 39);
+            cbColumn.Size = new Size(263, 56);
             cbColumn.TabIndex = 6;
             cbColumn.SelectedIndexChanged += dropdownColumns_SelectedIndexChanged;
             // 
@@ -233,10 +232,10 @@
             // 
             label7.AutoSize = true;
             label7.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label7.Location = new Point(346, 5);
+            label7.Location = new Point(363, 5);
             label7.Margin = new Padding(5, 5, 20, 0);
             label7.Name = "label7";
-            label7.Size = new Size(120, 31);
+            label7.Size = new Size(188, 48);
             label7.TabIndex = 9;
             label7.Text = "Search For";
             label7.TextAlign = ContentAlignment.MiddleRight;
@@ -255,7 +254,7 @@
             tableLayoutPanel5.SetRowSpan(tableLayoutPanel2, 2);
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanel2.Size = new Size(164, 98);
+            tableLayoutPanel2.Size = new Size(164, 81);
             tableLayoutPanel2.TabIndex = 4;
             // 
             // btnApply
@@ -265,7 +264,7 @@
             btnApply.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             btnApply.Location = new Point(3, 3);
             btnApply.Name = "btnApply";
-            btnApply.Size = new Size(158, 43);
+            btnApply.Size = new Size(158, 34);
             btnApply.TabIndex = 0;
             btnApply.Text = "Apply";
             btnApply.UseVisualStyleBackColor = false;
@@ -275,9 +274,9 @@
             // 
             btnReset.Dock = DockStyle.Fill;
             btnReset.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            btnReset.Location = new Point(3, 52);
+            btnReset.Location = new Point(3, 43);
             btnReset.Name = "btnReset";
-            btnReset.Size = new Size(158, 43);
+            btnReset.Size = new Size(158, 35);
             btnReset.TabIndex = 1;
             btnReset.Text = "Reset";
             btnReset.UseVisualStyleBackColor = true;
@@ -286,9 +285,9 @@
             // pnlSearch
             // 
             pnlSearch.Dock = DockStyle.Fill;
-            pnlSearch.Location = new Point(8, 62);
+            pnlSearch.Location = new Point(8, 53);
             pnlSearch.Name = "pnlSearch";
-            pnlSearch.Size = new Size(687, 48);
+            pnlSearch.Size = new Size(687, 40);
             pnlSearch.TabIndex = 10;
             // 
             // panel1
@@ -383,7 +382,6 @@
             // pnlPrevios
             // 
             pnlPrevios.Anchor = AnchorStyles.Right;
-            pnlPrevios.BackgroundImage = (Image)resources.GetObject("pnlPrevios.BackgroundImage");
             pnlPrevios.BackgroundImageLayout = ImageLayout.Zoom;
             pnlPrevios.Location = new Point(910, 3);
             pnlPrevios.Name = "pnlPrevios";
@@ -394,7 +392,6 @@
             // pnlNext
             // 
             pnlNext.Anchor = AnchorStyles.Left;
-            pnlNext.BackgroundImage = (Image)resources.GetObject("pnlNext.BackgroundImage");
             pnlNext.BackgroundImageLayout = ImageLayout.Zoom;
             pnlNext.Location = new Point(1010, 3);
             pnlNext.Name = "pnlNext";
@@ -407,9 +404,9 @@
             lblTotal.Anchor = AnchorStyles.Left;
             lblTotal.AutoSize = true;
             lblTotal.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            lblTotal.Location = new Point(1110, 9);
+            lblTotal.Location = new Point(1110, 0);
             lblTotal.Name = "lblTotal";
-            lblTotal.Size = new Size(173, 31);
+            lblTotal.Size = new Size(184, 49);
             lblTotal.TabIndex = 10;
             lblTotal.Text = "Total Records: 0";
             lblTotal.TextAlign = ContentAlignment.MiddleRight;
@@ -423,7 +420,7 @@
             cbRecordsNum.Location = new Point(657, 5);
             cbRecordsNum.Margin = new Padding(0, 5, 20, 0);
             cbRecordsNum.Name = "cbRecordsNum";
-            cbRecordsNum.Size = new Size(80, 39);
+            cbRecordsNum.Size = new Size(80, 56);
             cbRecordsNum.TabIndex = 7;
             cbRecordsNum.SelectedIndexChanged += cbRecordsNum_SelectedIndexChanged;
             // 

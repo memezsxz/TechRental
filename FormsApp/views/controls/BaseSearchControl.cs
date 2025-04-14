@@ -19,7 +19,7 @@ public abstract class BaseSearchControl : UserControl
     #region Protected Properties
 
     /// <summary>
-    /// The target entity type for which the repository is being resolved.
+    /// The target entity viewType for which the repository is being resolved.
     /// </summary>
     protected Type EntityType { get; set; }
 
@@ -87,7 +87,7 @@ public abstract class BaseSearchControl : UserControl
     /// Initializes a new instance of the <see cref="BaseSearchControl"/> class.
     /// Resolves the repository and binds the target method.
     /// </summary>
-    /// <param name="entityType">The type of entity being searched.</param>
+    /// <param name="entityType">The viewType of entity being searched.</param>
     /// <param name="propertyName">The property name to filter on.</param>
     /// <param name="searchMethodName">The method name to invoke on the repository.</param>
     /// <param name="searchMethodParams">Parameter types for overload resolution.</param>
@@ -110,7 +110,7 @@ public abstract class BaseSearchControl : UserControl
     /// Resolves the repository instance and binds the search method using reflection.
     /// Throws typed exceptions if resolution fails.
     /// </summary>
-    /// <exception cref="InvalidOperationException">Thrown when no repository is found for the given type.</exception>
+    /// <exception cref="InvalidOperationException">Thrown when no repository is found for the given viewType.</exception>
     /// <exception cref="MissingMethodException">Thrown when the target method cannot be resolved.</exception>
     private void InitializeRepositoryAndMethod()
     {

@@ -26,7 +26,7 @@ namespace FormsApp.views.controls
         #region Enum
 
         /// <summary>
-        /// Filter type determines which kind of control and logic to use.
+        /// Filter viewType determines which kind of control and logic to use.
         /// </summary>
         public enum FilterType
         {
@@ -56,7 +56,7 @@ namespace FormsApp.views.controls
         #region Constructor
 
         /// <summary>
-        /// Initializes the control with entity, property name and filter type.
+        /// Initializes the control with entity, property name and filter viewType.
         /// </summary>
         public TextStatusFilterControl(Type entityType, string propertyName, FilterType selectedType)
             : base(entityType, propertyName, _searchMethodName, _searchMethodParams)
@@ -71,7 +71,7 @@ namespace FormsApp.views.controls
         #region Initialization
 
         /// <summary>
-        /// Initializes the appropriate input control based on the selected filter type.
+        /// Initializes the appropriate input control based on the selected filter viewType.
         /// </summary>
         private void InitializeControls()
         {
@@ -80,7 +80,7 @@ namespace FormsApp.views.controls
 
             Panel wrapper = new Panel { Dock = DockStyle.Fill };
 
-            // Dynamically create the input control based on type
+            // Dynamically create the input control based on viewType
             _inputControl = CreateFilterControl();
 
             if (_inputControl == null)
@@ -106,7 +106,7 @@ namespace FormsApp.views.controls
         }
 
         /// <summary>
-        /// Creates and returns a new input control (TextBox or ComboBox) based on the selected filter type.
+        /// Creates and returns a new input control (TextBox or ComboBox) based on the selected filter viewType.
         /// </summary>
         /// <returns>
         /// A <see cref="Control"/> object that matches the current <see cref="FilterType"/>:
@@ -219,9 +219,9 @@ namespace FormsApp.views.controls
                 .FirstOrDefault(p => p.Name.Equals(PropertyName, StringComparison.OrdinalIgnoreCase));
 
             if (entityProperty == null)
-                throw new MissingMemberException($"Property '{PropertyName}' not found on entity type '{EntityType.Name}'.");
+                throw new MissingMemberException($"Property '{PropertyName}' not found on entity viewType '{EntityType.Name}'.");
 
-            // Match repository by property type
+            // Match repository by property viewType
             PropertyInfo repositoryProperty = typeof(UnitOfWork)
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .FirstOrDefault(p => p.PropertyType.Name.Contains(entityProperty.PropertyType.Name));
@@ -230,7 +230,7 @@ namespace FormsApp.views.controls
 
             if (repositoryProperty == null)
                 throw new MissingMemberException(
-                    $"No matching sub-repository found in '{_unitOfWork.GetType().Name}' for type '{repositoryProperty.Name}' " +
+                    $"No matching sub-repository found in '{_unitOfWork.GetType().Name}' for viewType '{repositoryProperty.Name}' " +
                     $"(from property '{PropertyName}' in entity '{EntityType.Name}').");
 
             object? result = repositoryProperty.GetValue(_unitOfWork);
@@ -250,7 +250,7 @@ namespace FormsApp.views.controls
         /// </summary>
         public override void Apply()
         {
-            // Resolve value from input control based on type
+            // Resolve value from input control based on viewType
             object searchValue = _selectedType switch
             {
                 FilterType.String => (_inputControl as TextBox)?.Text,
