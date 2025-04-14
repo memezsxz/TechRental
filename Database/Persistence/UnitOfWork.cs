@@ -22,7 +22,7 @@ namespace Database.Persistence
             Equipment = new EquipmentRepository(_context);
             EquipmentAvailabilityStatus = new EquipmentAvailabilityStatusRepository(_context);
             EquipmentConditionStatus = new EquipmentConditionStatusRepository(_context);
-            EquipmentRate = new EquipmentRateRepository(_context);
+            Rating = new RatingRepository(_context);
             ErrorLog = new ErrorLogRepository(_context);
             Log = new LogRepository(_context);
             Notification = new NotificationRepository(_context);
@@ -43,7 +43,7 @@ namespace Database.Persistence
         public IEquipmentRepository Equipment { get; private set; }
         public IEquipmentAvailabilityStatusRepository EquipmentAvailabilityStatus { get; private set; }
         public IEquipmentConditionStatusRepository EquipmentConditionStatus { get; private set; }
-        public IEquipmentRateRepository EquipmentRate { get; private set; }
+        public IRatingRepository Rating { get; private set; }
         public IErrorLogRepository ErrorLog { get; private set; }
         public ILogRepository Log { get; private set; }
         public INotificationRepository Notification { get; private set; }

@@ -13,7 +13,7 @@ namespace Database.Core.Repositories
     {
         TEntity Get(int id);
         IEnumerable<TEntity> GetAll();
-        PaginatedResult<TEntity> GetAll(int pageNumber, int pageSize);
+        PaginatedResult GetAll(int pageNumber, int pageSize);
         IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
         TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate);
         void Add(TEntity entity);
@@ -26,8 +26,7 @@ namespace Database.Core.Repositories
 
         public Dictionary<string, string> GetEntityColumnsWithTypes();
 
-        public PaginatedResult<TEntity> SearchByColumn(string columnName, string value, int pageNumber, int pageSize);
-
-
+        public PaginatedResult SearchByColumn(string columnName, string value, int pageNumber, int pageSize, string comparisonOperator = "");
+        public IQueryable<object> SelectViewColumns(IQueryable query);
     }
 }

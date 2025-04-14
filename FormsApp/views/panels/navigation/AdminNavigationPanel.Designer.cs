@@ -1,6 +1,6 @@
 ﻿namespace FormsApp.views.panels
 {
-    partial class admin_navigation
+    partial class AdminNavigationPanel
     {
         /// <summary> 
         /// Required designer variable.
@@ -28,18 +28,18 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(admin_navigation));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AdminNavigationPanel));
             pnlPanel = new TableLayoutPanel();
             tlpLogs = new TableLayoutPanel();
             label6 = new Label();
             panel7 = new Panel();
-            tlpReports = new TableLayoutPanel();
+            tlpProfile = new TableLayoutPanel();
             label5 = new Label();
             panel6 = new Panel();
-            tlpInventory = new TableLayoutPanel();
+            tlpReports = new TableLayoutPanel();
             label4 = new Label();
             panel5 = new Panel();
-            tlpRequests = new TableLayoutPanel();
+            tlpManage = new TableLayoutPanel();
             label3 = new Label();
             panel4 = new Panel();
             tlpDashboard = new TableLayoutPanel();
@@ -51,9 +51,9 @@
             pnlIcon = new Panel();
             pnlPanel.SuspendLayout();
             tlpLogs.SuspendLayout();
+            tlpProfile.SuspendLayout();
             tlpReports.SuspendLayout();
-            tlpInventory.SuspendLayout();
-            tlpRequests.SuspendLayout();
+            tlpManage.SuspendLayout();
             tlpDashboard.SuspendLayout();
             panel1.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
@@ -66,9 +66,9 @@
             pnlPanel.ColumnCount = 1;
             pnlPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             pnlPanel.Controls.Add(tlpLogs, 0, 5);
-            pnlPanel.Controls.Add(tlpReports, 0, 4);
-            pnlPanel.Controls.Add(tlpInventory, 0, 3);
-            pnlPanel.Controls.Add(tlpRequests, 0, 2);
+            pnlPanel.Controls.Add(tlpProfile, 0, 4);
+            pnlPanel.Controls.Add(tlpReports, 0, 3);
+            pnlPanel.Controls.Add(tlpManage, 0, 2);
             pnlPanel.Controls.Add(tlpDashboard, 0, 1);
             pnlPanel.Controls.Add(panel1, 0, 0);
             pnlPanel.Dock = DockStyle.Fill;
@@ -111,7 +111,7 @@
             label6.Name = "label6";
             label6.Size = new Size(237, 78);
             label6.TabIndex = 0;
-            label6.Text = "Log";
+            label6.Text = "for logout";
             label6.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // panel7
@@ -124,21 +124,21 @@
             panel7.Size = new Size(57, 78);
             panel7.TabIndex = 1;
             // 
-            // tlpReports
+            // tlpProfile
             // 
-            tlpReports.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            tlpReports.ColumnCount = 2;
-            tlpReports.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28.57143F));
-            tlpReports.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 71.42857F));
-            tlpReports.Controls.Add(label5, 1, 0);
-            tlpReports.Controls.Add(panel6, 0, 0);
-            tlpReports.Location = new Point(0, 664);
-            tlpReports.Margin = new Padding(0, 40, 0, 40);
-            tlpReports.Name = "tlpReports";
-            tlpReports.RowCount = 1;
-            tlpReports.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpReports.Size = new Size(340, 76);
-            tlpReports.TabIndex = 5;
+            tlpProfile.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tlpProfile.ColumnCount = 2;
+            tlpProfile.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28.57143F));
+            tlpProfile.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 71.42857F));
+            tlpProfile.Controls.Add(label5, 1, 0);
+            tlpProfile.Controls.Add(panel6, 0, 0);
+            tlpProfile.Location = new Point(0, 664);
+            tlpProfile.Margin = new Padding(0, 40, 0, 40);
+            tlpProfile.Name = "tlpProfile";
+            tlpProfile.RowCount = 1;
+            tlpProfile.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpProfile.Size = new Size(340, 76);
+            tlpProfile.TabIndex = 5;
             // 
             // label5
             // 
@@ -150,7 +150,7 @@
             label5.Name = "label5";
             label5.Size = new Size(237, 76);
             label5.TabIndex = 0;
-            label5.Text = "Reports";
+            label5.Text = "Profile";
             label5.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // panel6
@@ -163,21 +163,21 @@
             panel6.Size = new Size(57, 76);
             panel6.TabIndex = 1;
             // 
-            // tlpInventory
+            // tlpReports
             // 
-            tlpInventory.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            tlpInventory.ColumnCount = 2;
-            tlpInventory.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28.57143F));
-            tlpInventory.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 71.42857F));
-            tlpInventory.Controls.Add(label4, 1, 0);
-            tlpInventory.Controls.Add(panel5, 0, 0);
-            tlpInventory.Location = new Point(0, 508);
-            tlpInventory.Margin = new Padding(0, 40, 0, 40);
-            tlpInventory.Name = "tlpInventory";
-            tlpInventory.RowCount = 1;
-            tlpInventory.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpInventory.Size = new Size(340, 76);
-            tlpInventory.TabIndex = 4;
+            tlpReports.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tlpReports.ColumnCount = 2;
+            tlpReports.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28.57143F));
+            tlpReports.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 71.42857F));
+            tlpReports.Controls.Add(label4, 1, 0);
+            tlpReports.Controls.Add(panel5, 0, 0);
+            tlpReports.Location = new Point(0, 508);
+            tlpReports.Margin = new Padding(0, 40, 0, 40);
+            tlpReports.Name = "tlpReports";
+            tlpReports.RowCount = 1;
+            tlpReports.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpReports.Size = new Size(340, 76);
+            tlpReports.TabIndex = 4;
             // 
             // label4
             // 
@@ -189,7 +189,7 @@
             label4.Name = "label4";
             label4.Size = new Size(237, 76);
             label4.TabIndex = 0;
-            label4.Text = "Inventory";
+            label4.Text = "Reports";
             label4.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // panel5
@@ -202,21 +202,21 @@
             panel5.Size = new Size(57, 76);
             panel5.TabIndex = 1;
             // 
-            // tlpRequests
+            // tlpManage
             // 
-            tlpRequests.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            tlpRequests.ColumnCount = 2;
-            tlpRequests.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28.57143F));
-            tlpRequests.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 71.42857F));
-            tlpRequests.Controls.Add(label3, 1, 0);
-            tlpRequests.Controls.Add(panel4, 0, 0);
-            tlpRequests.Location = new Point(0, 352);
-            tlpRequests.Margin = new Padding(0, 40, 0, 40);
-            tlpRequests.Name = "tlpRequests";
-            tlpRequests.RowCount = 1;
-            tlpRequests.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tlpRequests.Size = new Size(340, 76);
-            tlpRequests.TabIndex = 3;
+            tlpManage.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            tlpManage.ColumnCount = 2;
+            tlpManage.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28.57143F));
+            tlpManage.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 71.42857F));
+            tlpManage.Controls.Add(label3, 1, 0);
+            tlpManage.Controls.Add(panel4, 0, 0);
+            tlpManage.Location = new Point(0, 352);
+            tlpManage.Margin = new Padding(0, 40, 0, 40);
+            tlpManage.Name = "tlpManage";
+            tlpManage.RowCount = 1;
+            tlpManage.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tlpManage.Size = new Size(340, 76);
+            tlpManage.TabIndex = 3;
             // 
             // label3
             // 
@@ -228,7 +228,7 @@
             label3.Name = "label3";
             label3.Size = new Size(237, 76);
             label3.TabIndex = 0;
-            label3.Text = "Requests";
+            label3.Text = "Manage";
             label3.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // panel4
@@ -327,22 +327,22 @@
             pnlIcon.Size = new Size(89, 144);
             pnlIcon.TabIndex = 1;
             // 
-            // admin_navigation
+            // AdminNavigationPanel
             // 
             AutoScaleMode = AutoScaleMode.Inherit;
             BackColor = Color.FromArgb(159, 109, 224);
             Controls.Add(pnlPanel);
-            Name = "admin_navigation";
+            Name = "AdminNavigationPanel";
             Size = new Size(340, 938);
             pnlPanel.ResumeLayout(false);
             tlpLogs.ResumeLayout(false);
             tlpLogs.PerformLayout();
+            tlpProfile.ResumeLayout(false);
+            tlpProfile.PerformLayout();
             tlpReports.ResumeLayout(false);
             tlpReports.PerformLayout();
-            tlpInventory.ResumeLayout(false);
-            tlpInventory.PerformLayout();
-            tlpRequests.ResumeLayout(false);
-            tlpRequests.PerformLayout();
+            tlpManage.ResumeLayout(false);
+            tlpManage.PerformLayout();
             tlpDashboard.ResumeLayout(false);
             tlpDashboard.PerformLayout();
             panel1.ResumeLayout(false);
@@ -364,13 +364,13 @@
         private TableLayoutPanel tlpLogs;
         private Label label6;
         private Panel panel7;
-        private TableLayoutPanel tlpReports;
+        private TableLayoutPanel tlpProfile;
         private Label label5;
         private Panel panel6;
-        private TableLayoutPanel tlpInventory;
+        private TableLayoutPanel tlpReports;
         private Label label4;
         private Panel panel5;
-        private TableLayoutPanel tlpRequests;
+        private TableLayoutPanel tlpManage;
         private Label label3;
         private Panel panel4;
     }

@@ -22,16 +22,7 @@ namespace Database.Core.Domain
         [Column("equipment_name")]
         [StringLength(100)]
         public string? EquipmentName { get; set; }
-        [Column("customer_name")]
-        [StringLength(100)]
-        public string? CustomerName { get; set; }
-        [Column("customer_phone_number")]
-        [StringLength(20)]
-        public string? CustomerPhoneNumber { get; set; }
-        [Column("customer_email")]
-        [StringLength(100)]
-        public string? CustomerEmail { get; set; }
-        [Column("pickup_date", TypeName = "date")]
+        [Column("pickup_date", TypeName = "datetime")]
         public DateTime PickupDate { get; set; }
         [Column("actual_return_date", TypeName = "date")]
         public DateTime? ActualReturnDate { get; set; }

@@ -27,6 +27,11 @@ namespace Database.Core.Domain
         [Column("source_entity")]
         [StringLength(100)]
         public string? SourceEntity { get; set; }
+        [Column("data_after_action")]
+        public string? DataAfterAction { get; set; }
+        [Column("affected_record_key")]
+        [StringLength(100)]
+        public string? AffectedRecordKey { get; set; }
 
         [ForeignKey("UserId")]
         [InverseProperty("Logs")]

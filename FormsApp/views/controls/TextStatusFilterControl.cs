@@ -1,4 +1,5 @@
-﻿using System;
+﻿#region Using Directives
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -10,11 +11,23 @@ using System.Windows.Forms;
 using Database.Core.Repositories;
 using Database.Persistence;
 using System.Reflection;
+using Database;
+using DotNetEnv;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
+#endregion
 
 namespace FormsApp.views.controls
 {
-    public partial class TextStatusFilterControl : UserControl, ISearch
+    /// <summary>
+    /// A control for performing text/status/boolean filtering using a dynamically bound input.
+    /// </summary>
+    public partial class TextStatusFilterControl : BaseSearchControl
     {
+        #region Enum
+
+        /// <summary>
+        /// Filter type determines which kind of control and logic to use.
+        /// </summary>
         public enum FilterType
         {
             String,
@@ -22,99 +35,226 @@ namespace FormsApp.views.controls
             Boolean
         }
 
-        private int _pageNumber = 1;
-        public int PageNumber
-        {
-            get => _pageNumber;
-            set => _pageNumber = value < 1 ? 1 : value;
-        }
-        private int _pageSize = 10;
-        public int PageSize
-        {
-            get => _pageSize;
-            set => _pageSize = value < 1 ? 10 : value;
-        }
+        #endregion
 
+        #region Static Metadata
 
-        private readonly UnitOfWork _unitOfWork = new UnitOfWork(new RentalDBContext());
-        private readonly FilterType _selectedType; // Now an Enum!
-        private readonly Type _entityType;
-        private readonly string _propertyName;
+        private static readonly string _searchMethodName = "SearchByColumn";
 
-        private ComboBox _statusDropdown;
-        private ComboBox _booleanDropdown;
-        private TextBox _textBox;
+        private static readonly Type[] _searchMethodParams = new[]
+            { typeof(string), typeof(string), typeof(int), typeof(int), typeof(string) };
 
-        public event Action<object> OnSearchCompleted;
+        #endregion
 
-        public TextStatusFilterControl(Type entityType, FilterType selectedType, string propertyName)
+        #region Fields
+
+        private readonly FilterType _selectedType;
+        private Control _inputControl;
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Initializes the control with entity, property name and filter type.
+        /// </summary>
+        public TextStatusFilterControl(Type entityType, string propertyName, FilterType selectedType)
+            : base(entityType, propertyName, _searchMethodName, _searchMethodParams)
         {
             InitializeComponent();
-            _entityType = entityType ?? throw new ArgumentNullException(nameof(entityType));
-            _selectedType = selectedType; // Enum prevents null values
-            _propertyName = propertyName;
-
+            _selectedType = selectedType;
             InitializeControls();
         }
 
+        #endregion
+
+        #region Initialization
+
+        /// <summary>
+        /// Initializes the appropriate input control based on the selected filter type.
+        /// </summary>
         private void InitializeControls()
         {
             this.Controls.Clear();
             this.Dock = DockStyle.Fill;
 
-            if (_selectedType == FilterType.String)
-            {
-                _textBox = new TextBox
-                {
-                    Dock = DockStyle.Fill
-                };
-                this.Controls.Add(_textBox);
-            }
-            else if (_selectedType == FilterType.Status)
-            {
-                _statusDropdown = new ComboBox
-                {
-                    Dock = DockStyle.Fill,
-                    DropDownStyle = ComboBoxStyle.DropDownList
-                };
+            Panel wrapper = new Panel { Dock = DockStyle.Fill };
 
+            // Dynamically create the input control based on type
+            _inputControl = CreateFilterControl();
+
+            if (_inputControl == null)
+                return;
+
+            _inputControl.Anchor = AnchorStyles.None;
+            wrapper.Controls.Add(_inputControl);
+
+            // Center the control within the panel when resized
+            wrapper.Resize += (s, e) =>
+            {
+                _inputControl.Left = (wrapper.Width - _inputControl.Width) / 2;
+                _inputControl.Top = (wrapper.Height - _inputControl.Height) / 2;
+            };
+
+            // Load data if needed
+            if (_selectedType == FilterType.Status && _inputControl is ComboBox combo)
+            {
                 LoadStatusData();
-                this.Controls.Add(_statusDropdown);
-            }
-            else if (_selectedType == FilterType.Boolean)
-            {
-                _booleanDropdown = new ComboBox
-                {
-                    Dock = DockStyle.Fill,
-                    DataSource =
-                        new BindingSource(new Dictionary<string, bool> { { "True", true }, { "False", false } },
-                            null),
-                    DisplayMember = "Key",
-                    ValueMember = "Value",
-
-                    DropDownStyle = ComboBoxStyle.DropDownList
-                };
-
-                this.Controls.Add(_booleanDropdown);
             }
 
-            //var btnApply = new Button
-            //{
-            //    Text = "Apply",
-            //    Dock = DockStyle.Right
-            //};
-
-            //btnApply.Click += BtnApply_Click;
-            //this.Controls.Add(btnApply);
+            this.Controls.Add(wrapper);
         }
 
-        private void BtnApply_Click(object sender, EventArgs e)
+        /// <summary>
+        /// Creates and returns a new input control (TextBox or ComboBox) based on the selected filter type.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Control"/> object that matches the current <see cref="FilterType"/>:
+        /// - <see cref="FilterType.String"/> returns a <see cref="TextBox"/>
+        /// - <see cref="FilterType.Status"/> returns a <see cref="ComboBox"/> in dropdown mode (with no items bound)
+        /// - <see cref="FilterType.Boolean"/> returns a <see cref="ComboBox"/> with true/false options
+        /// - otherwise returns null
+        /// </returns>
+        /// <remarks>
+        /// This method is typically used to generate input controls dynamically based on the filter configuration
+        /// (e.g., in a search/filter panel).
+        /// </remarks>
+        private Control CreateFilterControl()
         {
+          return  _selectedType switch
+            {
+                // For string input: return a plain TextBox
+                FilterType.String => new TextBox
+                {
+                    AutoSize = true,
+                    MinimumSize = new Size(250, 30),
+                    Margin = new Padding(5)
+                },
+
+                // For status selections: return a ComboBox (items to be bound later)
+                FilterType.Status => new ComboBox
+                {
+                    AutoSize = true,
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    MinimumSize = new Size(250, 30),
+                    Margin = new Padding(5)
+                },
+
+                // For true/false input: return a ComboBox with hardcoded boolean options
+                FilterType.Boolean => new ComboBox
+                {
+                    DataSource = new BindingSource(new Dictionary<string, bool>
+                    {
+                        { "True", true },
+                        { "False", false }
+                    }, null),
+                    DisplayMember = "Key",
+                    ValueMember = "Value",
+                    DropDownStyle = ComboBoxStyle.DropDownList,
+                    MinimumSize = new Size(250, 30),
+                    Margin = new Padding(5)
+                },
+
+                _ => null
+            };
+        }
+
+        #endregion
+
+        #region Search Execution
+
+        /// <summary>
+        /// Triggers search with the given value passed as a string.
+        /// </summary>
+        private void PerformSearch(object searchValue)
+        {
+            string searchQuery = searchValue.ToString() ?? string.Empty;
+            InvokeSearch(new object[] { PropertyName, searchQuery, PageNumber, PageSize, "" });
+        }
+
+        /// <summary>
+        /// Loads status values into the ComboBox by calling IStatus repository.
+        /// </summary>
+        private void LoadStatusData()
+        {
+            try
+            {
+                // Validate
+                if (string.IsNullOrWhiteSpace(PropertyName))
+                    throw new ArgumentException("PropertyName is null or empty. Cannot load status data.");
+
+                var repository = GetRepositoryByEntityProperty();
+
+                // Cast check
+                if (repository is not IStatus statusRepository)
+                {
+                    throw new InvalidCastException(
+                        $"Repository for property '{PropertyName}' in entity '{EntityType.Name}' does not implement IStatus.");
+                }
+
+                // Get values and bind
+                var statusData = statusRepository.GetAllByName();
+
+                if (_inputControl is not ComboBox cb)
+                    throw new InvalidCastException("The input control is not a ComboBox. Cannot bind status data.");
+
+                cb.DataSource = new BindingSource(statusData, null);
+                cb.DisplayMember = "Value";
+                cb.ValueMember = "Key";
+            }
+            catch (Exception ex)
+            {
+                Global.DisplayReportErrorDialog(ex);
+            }
+        }
+
+        /// <summary>
+        /// Uses reflection to locate a repository related to a navigation property on the entity.
+        /// </summary>
+        private object GetRepositoryByEntityProperty()
+        {
+            // Locate navigation property
+            PropertyInfo entityProperty = EntityType
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(p => p.Name.Equals(PropertyName, StringComparison.OrdinalIgnoreCase));
+
+            if (entityProperty == null)
+                throw new MissingMemberException($"Property '{PropertyName}' not found on entity type '{EntityType.Name}'.");
+
+            // Match repository by property type
+            PropertyInfo repositoryProperty = typeof(UnitOfWork)
+                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
+                .FirstOrDefault(p => p.PropertyType.Name.Contains(entityProperty.PropertyType.Name));
+
+            UnitOfWork _unitOfWork = new UnitOfWork(new RentalDBContext());
+
+            if (repositoryProperty == null)
+                throw new MissingMemberException(
+                    $"No matching sub-repository found in '{_unitOfWork.GetType().Name}' for type '{repositoryProperty.Name}' " +
+                    $"(from property '{PropertyName}' in entity '{EntityType.Name}').");
+
+            object? result = repositoryProperty.GetValue(_unitOfWork);
+
+            if (result == null)
+                throw new NullReferenceException($"Sub-repository '{repositoryProperty.Name}' is null in '{Repository.GetType().Name}'.");
+
+            return result;
+        }
+
+        #endregion
+
+        #region Public API
+
+        /// <summary>
+        /// Public method to apply the filter. Calls the apply logic via button handler.
+        /// </summary>
+        public override void Apply()
+        {
+            // Resolve value from input control based on type
             object searchValue = _selectedType switch
             {
-                FilterType.String => _textBox?.Text,
-                FilterType.Status => _statusDropdown?.SelectedValue,
-                FilterType.Boolean => _booleanDropdown?.SelectedValue,
+                FilterType.String => (_inputControl as TextBox)?.Text,
+                FilterType.Status or FilterType.Boolean => (_inputControl as ComboBox)?.SelectedValue,
                 _ => null
             };
 
@@ -124,144 +264,6 @@ namespace FormsApp.views.controls
             }
         }
 
-        private void PerformSearch(object searchValue)
-        {
-            Console.WriteLine("testing in preform search");
-            var repository = GetRepositoryByEntityType();
-
-            if (repository == null)
-            {
-                Console.WriteLine($"No repository found for entity 'Equipment'.");
-                return;
-            }
-
-            // Convert navigation property (e.g., "AvailabilityStatus") to foreign key column ("AvailabilityStatusId")
-            string columnToSearch = _selectedType switch
-            {
-                FilterType.String => _propertyName,
-                FilterType.Boolean => _propertyName,
-                FilterType.Status => _propertyName + "Id",
-                _ => throw new InvalidOperationException("Unknown filter type.")
-            };
-
-            // Ensure repository supports filtering
-            MethodInfo searchMethod = repository.GetType().GetMethod("SearchByColumn");
-            if (searchMethod == null)
-            {
-                Console.WriteLine($"Repository does not support searching by '{columnToSearch}'.");
-                return;
-            }
-
-            // Convert searchValue to string (SearchByColumn expects a string)
-            string searchString = searchValue.ToString();
-
-            Console.WriteLine(columnToSearch);
-            Console.WriteLine(searchString);
-
-            // Invoke the search method dynamically with pagination parameters
-            var result = searchMethod.Invoke(repository, new object[] { columnToSearch, searchString, _pageNumber, _pageSize });
-
-            // Notify the main form with the filtered results
-            OnSearchCompleted?.Invoke(result);
-        }
-
-        private object GetRepositoryByEntityType()
-        {
-            var unitOfWorkType = typeof(UnitOfWork);
-            var properties = unitOfWorkType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            foreach (var prop in properties)
-            {
-                var repoInstance = prop.GetValue(_unitOfWork);
-                if (repoInstance == null) continue;
-
-                var interfaces = repoInstance.GetType().GetInterfaces();
-
-                foreach (var iface in interfaces)
-                {
-                    if (!iface.IsGenericType) continue;
-
-                    var genericDef = iface.GetGenericTypeDefinition();
-                    var genericArgs = iface.GetGenericArguments();
-
-                    // Match generic interface IRepository<T> or any known IRepository-like interface
-                    if ((genericDef == typeof(IRepository<>)
-                         || genericDef.Name.Contains("Repository")) // Catch custom interfaces like IEquipmentRepository
-                        && genericArgs.Length == 1
-                        && genericArgs[0] == _entityType)
-                    {
-                        return repoInstance;
-                    }
-                }
-            }
-
-            Console.WriteLine($"No repository found in UnitOfWork for entity type {_entityType.Name}.");
-            return null;
-        }
-
-        private void LoadStatusData()
-        {
-            if (string.IsNullOrEmpty(_propertyName))
-            {
-                Console.WriteLine("Property name is null or empty.");
-                return;
-            }
-
-            var repository = GetRepositoryByEntityProperty();
-
-            if (repository is IStatus statusRepository)
-            {
-                var statusData = statusRepository.GetAllByName();
-                if (statusData != null && statusData.Any())
-                {
-                    _statusDropdown.DataSource = new BindingSource(statusData, null);
-                    _statusDropdown.DisplayMember = "Value";
-                    _statusDropdown.ValueMember = "Key";
-                }
-                else
-                {
-                    Console.WriteLine($"No status data found for '{_propertyName}'.");
-                }
-            }
-            else
-            {
-                Console.WriteLine($"Repository for property '{_propertyName}' not found or does not implement IStatus.");
-            }
-        }
-
-        private object GetRepositoryByEntityProperty()
-        {
-            PropertyInfo entityProperty = _entityType
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(p => p.Name.Equals(_propertyName, StringComparison.OrdinalIgnoreCase));
-
-            if (entityProperty == null)
-            {
-                Console.WriteLine($"Property '{_propertyName}' not found in entity '{_entityType.Name}'.");
-                return null;
-            }
-
-            PropertyInfo repositoryProperty = typeof(UnitOfWork)
-                .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                .FirstOrDefault(p => p.PropertyType.Name.Contains(entityProperty.PropertyType.Name));
-
-            if (repositoryProperty == null)
-            {
-                Console.WriteLine($"Repository for '{entityProperty.PropertyType.Name}' not found in UnitOfWork.");
-                return null;
-            }
-
-            return repositoryProperty.GetValue(_unitOfWork);
-        }
-
-
-        public void Apply()
-        {
-            BtnApply_Click(null, null);
-        }
-
-        public string GetTextValue() => _textBox?.Text;
-        public object GetStatusValue() => _statusDropdown?.SelectedValue;
-
+        #endregion
     }
 }

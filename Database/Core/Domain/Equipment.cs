@@ -10,7 +10,7 @@ namespace Database.Core.Domain
     {
         public Equipment()
         {
-            EquipmentRates = new HashSet<EquipmentRate>();
+            Ratings = new HashSet<Rating>();
             RentalRequests = new HashSet<RentalRequest>();
         }
 
@@ -48,7 +48,7 @@ namespace Database.Core.Domain
         [InverseProperty("Equipment")]
         public virtual EquipmentConditionStatus? ConditionStatus { get; set; }
         [InverseProperty("Equipment")]
-        public virtual ICollection<EquipmentRate> EquipmentRates { get; set; }
+        public virtual ICollection<Rating> Ratings { get; set; }
         [InverseProperty("Equipment")]
         public virtual ICollection<RentalRequest> RentalRequests { get; set; }
     }

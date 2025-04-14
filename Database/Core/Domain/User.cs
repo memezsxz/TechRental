@@ -12,10 +12,10 @@ namespace Database.Core.Domain
         public User()
         {
             Documents = new HashSet<Document>();
-            EquipmentRates = new HashSet<EquipmentRate>();
             ErrorLogs = new HashSet<ErrorLog>();
             Logs = new HashSet<Log>();
             Notifications = new HashSet<Notification>();
+            Ratings = new HashSet<Rating>();
             RentalRequests = new HashSet<RentalRequest>();
         }
 
@@ -49,13 +49,13 @@ namespace Database.Core.Domain
         [InverseProperty("User")]
         public virtual ICollection<Document> Documents { get; set; }
         [InverseProperty("User")]
-        public virtual ICollection<EquipmentRate> EquipmentRates { get; set; }
-        [InverseProperty("User")]
         public virtual ICollection<ErrorLog> ErrorLogs { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<Log> Logs { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<Notification> Notifications { get; set; }
+        [InverseProperty("User")]
+        public virtual ICollection<Rating> Ratings { get; set; }
         [InverseProperty("Customer")]
         public virtual ICollection<RentalRequest> RentalRequests { get; set; }
     }

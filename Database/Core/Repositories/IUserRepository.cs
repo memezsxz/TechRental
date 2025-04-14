@@ -4,5 +4,6 @@ namespace Database.Core.Repositories
 {
     public interface IUserRepository : IRepository<User>, IStatus
     {
+     
     }
 }

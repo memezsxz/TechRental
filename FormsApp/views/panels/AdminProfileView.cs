@@ -10,9 +10,9 @@ using System.Windows.Forms;
 
 namespace FormsApp.views.panels
 {
-    public partial class admin_dashboard: UserControl
+    public partial class AdminProfileView: UserControl
     {
-        public admin_dashboard()
+        public AdminProfileView()
         {
             InitializeComponent();
         }

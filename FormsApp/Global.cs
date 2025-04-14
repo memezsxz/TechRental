@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Reflection;
@@ -14,8 +15,14 @@ namespace FormsApp
     {
         public static int userID = 2;
         public static int userType = 1; // admin
+        // public static BindingList<string> pageSizes = new BindingList<string>() { "10", "20", "30" };
+        public static BindingList<int> pageSizes = new BindingList<int>() { 10, 20, 30 };
 
+        #region Brand Colors
 
+        public static Color Gray = Color.FromArgb(191, 199, 217);
+
+        #endregion
         public static void Panel_Paint(object sender, PaintEventArgs e)
         {
             Panel panel = sender as Panel;
@@ -63,45 +70,9 @@ namespace FormsApp
             frm.Size = new System.Drawing.Size(Convert.ToInt32(screenPercent * workingRectangle.Width), Convert.ToInt32(screenPercent * workingRectangle.Height));
         }
 
-
-        public static object GetRepositoryForType(Type entityType)
+        public static void DisplayReportErrorDialog(Exception e)
         {
-            var _unitOfWork = new UnitOfWork(new RentalDBContext());
-            var unitOfWorkType = typeof(UnitOfWork);
-            var properties = unitOfWorkType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-
-            foreach (var prop in properties)
-            {
-                var repoInstance = prop.GetValue(_unitOfWork);
-                if (repoInstance == null) continue;
-
-                var interfaces = repoInstance.GetType().GetInterfaces();
-
-                foreach (var iface in interfaces)
-                {
-                    if (!iface.IsGenericType) continue;
-
-                    var genericDef = iface.GetGenericTypeDefinition();
-                    var genericArgs = iface.GetGenericArguments();
-
-                    if ((genericDef == typeof(IRepository<>)
-                         || genericDef.Name.Contains("Repository"))
-                        && genericArgs.Length == 1
-                        && genericArgs[0] == entityType)
-                    {
-                        return repoInstance;
-                    }
-                }
-
-                // Also check non-generic interfaces like IEquipmentRepository
-                if (interfaces.Any(i => i.Name.Contains(entityType.Name)))
-                {
-                    return repoInstance;
-                }
-            }
-
-            return null;
+            Console.WriteLine("From Global: Error: " + e.Message);
         }
-
     }
 }

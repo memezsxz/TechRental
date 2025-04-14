@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Database
 {
-    public class PaginatedResult<T>
+    public class PaginatedResult
     {
-        public IEnumerable<T> Data { get; set; }
+        public IEnumerable Data { get; set; }
         public int TotalRecords { get; set; }
         public int TotalPages { get; set; }
     }

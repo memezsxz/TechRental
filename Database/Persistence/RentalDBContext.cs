@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Database.Core.Domain;
+using DotNetEnv;
 
 namespace Database.Persistence
 {
@@ -22,7 +23,6 @@ namespace Database.Persistence
         public virtual DbSet<Equipment> Equipment { get; set; } = null!;
         public virtual DbSet<EquipmentAvailabilityStatus> EquipmentAvailabilityStatuses { get; set; } = null!;
         public virtual DbSet<EquipmentConditionStatus> EquipmentConditionStatuses { get; set; } = null!;
-        public virtual DbSet<EquipmentRate> EquipmentRates { get; set; } = null!;
         public virtual DbSet<ErrorLog> ErrorLogs { get; set; } = null!;
         public virtual DbSet<Log> Logs { get; set; } = null!;
         public virtual DbSet<Notification> Notifications { get; set; } = null!;
@@ -30,6 +30,7 @@ namespace Database.Persistence
         public virtual DbSet<Payment> Payments { get; set; } = null!;
         public virtual DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
         public virtual DbSet<PaymentStatus> PaymentStatuses { get; set; } = null!;
+        public virtual DbSet<Rating> Ratings { get; set; } = null!;
         public virtual DbSet<RentalRecord> RentalRecords { get; set; } = null!;
         public virtual DbSet<RentalRequest> RentalRequests { get; set; } = null!;
         public virtual DbSet<RentalRequestStatus> RentalRequestStatuses { get; set; } = null!;
@@ -41,8 +42,27 @@ namespace Database.Persistence
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
-                optionsBuilder.UseSqlServer("Server=reboot08.com;Database=RentalDB;User Id=sa;Password='caliber,willpower,enjoyably,ending,giggling,P5';Encrypt=True;TrustServerCertificate=True;");
+                // Load environment variables from .env file
+                string projectRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\"));
+                string customEnvFilePath = Path.Combine(projectRoot, "Config.env");
+                //Console.WriteLine(customEnvFilePath);
+                Env.Load(customEnvFilePath);
+
+                // Retrieve credentials from environment variables
+                string server = Env.GetString("DB_SERVER");
+                string database = Env.GetString("DB_NAME");
+                string user = Env.GetString("DB_USER");
+                string password = Env.GetString("DB_PASSWORD");
+                string encrypt = Env.GetString("DB_ENCRYPT", "False");
+                string trustServerCert = Env.GetString("DB_TRUST_SERVER_CERT", "True");
+
+                // Build the connection string
+                string connectionString = $"Server={server};Database={database};User Id={user};Password={password};Encrypt={encrypt};TrustServerCertificate={trustServerCert};";
+
+                // Configure the database connection
+                optionsBuilder.UseSqlServer(connectionString);
+
+                //optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=RentalDB;Trusted_Connection=True;");
             }
         }
 
@@ -94,27 +114,6 @@ namespace Database.Persistence
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.ConditionStatusId)
                     .HasConstraintName("FK__Equipment__condi__5AEE82B9");
-            });
-
-            modelBuilder.Entity<EquipmentRate>(entity =>
-            {
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.IsHedding).HasDefaultValueSql("((1))");
-
-                entity.Property(e => e.TimeDate).HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
-
-                entity.HasOne(d => d.Equipment)
-                    .WithMany(p => p.EquipmentRates)
-                    .HasForeignKey(d => d.EquipmentId)
-                    .HasConstraintName("FK__Equipment__equip__6FE99F9F");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.EquipmentRates)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Equipment__user___6EF57B66");
             });
 
             modelBuilder.Entity<ErrorLog>(entity =>
@@ -174,6 +173,27 @@ namespace Database.Persistence
                     .WithMany(p => p.Payments)
                     .HasForeignKey(d => d.RentalRecordId)
                     .HasConstraintName("FK__Payment__rental___09A971A2");
+            });
+
+            modelBuilder.Entity<Rating>(entity =>
+            {
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.IsHidden).HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.TimeDate).HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.Equipment)
+                    .WithMany(p => p.Ratings)
+                    .HasForeignKey(d => d.EquipmentId)
+                    .HasConstraintName("FK__Equipment__equip__6FE99F9F");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.Ratings)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK__Equipment__user___6EF57B66");
             });
 
             modelBuilder.Entity<RentalRecord>(entity =>

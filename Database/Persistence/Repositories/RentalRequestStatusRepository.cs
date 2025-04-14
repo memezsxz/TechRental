@@ -13,5 +13,10 @@ namespace Database.Persistence.Repositories
         {
             get { return context as RentalDBContext; }
         }
+
+        public Dictionary<int, string> GetAllByName()
+        {
+            return context.RentalRequestStatuses.ToDictionary(rrs => rrs.Id, rrs => rrs.StatusName);
+        }
     }
 }

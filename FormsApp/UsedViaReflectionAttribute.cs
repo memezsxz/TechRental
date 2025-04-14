@@ -1,4 +1,4 @@
-﻿namespace FormsApp.views.panels;
+﻿namespace FormsApp;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class UsedViaReflectionAttribute : Attribute

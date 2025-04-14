@@ -28,10 +28,10 @@ namespace FormsApp
         {
             new UnitOfWork(new RentalDBContext()).Equipment.GetAll();
             // check user type and load the proper navigation user control
-            admin_navigation navigationPanel = new admin_navigation(pnlMainView);
+            AdminNavigationPanel navigationPanelPanel = new AdminNavigationPanel(pnlMainView);
 
             pnlNavigation.Controls.Clear();
-            pnlNavigation.Controls.Add(navigationPanel);
+            pnlNavigation.Controls.Add(navigationPanelPanel);
         }
     }
 }

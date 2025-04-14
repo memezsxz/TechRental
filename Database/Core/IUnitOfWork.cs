@@ -15,7 +15,7 @@ namespace Database.Core
         public IEquipmentRepository Equipment { get; }
         public IEquipmentAvailabilityStatusRepository EquipmentAvailabilityStatus { get; }
         public IEquipmentConditionStatusRepository EquipmentConditionStatus { get; }
-        public IEquipmentRateRepository EquipmentRate { get; }
+        public IRatingRepository Rating { get; }
         public IErrorLogRepository ErrorLog { get; }
         public ILogRepository Log { get; }
         public INotificationRepository Notification { get; }

@@ -7,13 +7,14 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using Database.Core.Domain;
 
 namespace FormsApp.views.panels
 {
-    public partial class admin_navigation : UserControl
+    public partial class AdminNavigationPanel : UserControl
     {
         private Panel view;
-        public admin_navigation(Panel view)
+        public AdminNavigationPanel(Panel view)
         {
             InitializeComponent();
             this.Dock = DockStyle.Fill;
@@ -43,15 +44,12 @@ namespace FormsApp.views.panels
 
         private UserControl? GetUserControlByPanelName(string panelName)
         {
-     
             return panelName switch
             {
-                "tlpDashboard" => new admin_dashboard(),
-                "tlpRequests" => new admin_requests (),
-                "tlpInventory" => new admin_inventory(),
-                "tlpLogs" => new admin_logs(),
-                "tlpReports" => new admin_reports(),
-
+                "tlpDashboard" => new AdminDashboardView(),
+                "tlpManage" => new AdminManagementView(),
+                "tlpReports" => new AdminReportsView(),
+                "tlpProfile" => new AdminProfileView(),
                 _ => null
             };
         }
@@ -77,7 +75,7 @@ namespace FormsApp.views.panels
                 {
                     if (control is not Label lbl) continue;
 
-                    textLabel = lbl; 
+                    textLabel = lbl;
                     break;
                 }
             }

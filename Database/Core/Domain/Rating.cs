@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database.Core.Domain
 {
-    [Table("EquipmentRate")]
-    public partial class EquipmentRate
+    [Table("Rating")]
+    public partial class Rating
     {
         [Key]
         [Column("id")]
@@ -23,21 +23,18 @@ namespace Database.Core.Domain
         public int? UserId { get; set; }
         [Column("equipment_id")]
         public int? EquipmentId { get; set; }
-        [Column("is_hedding")]
-        public bool? IsHedding { get; set; }
-        [Column("image_path")]
-        [StringLength(255)]
-        public string? ImagePath { get; set; }
+        [Column("is_hidden")]
+        public bool? IsHidden { get; set; }
         [Column("created_at", TypeName = "datetime")]
         public DateTime? CreatedAt { get; set; }
         [Column("updated_at", TypeName = "datetime")]
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("EquipmentId")]
-        [InverseProperty("EquipmentRates")]
+        [InverseProperty("Ratings")]
         public virtual Equipment? Equipment { get; set; }
         [ForeignKey("UserId")]
-        [InverseProperty("EquipmentRates")]
+        [InverseProperty("Ratings")]
         public virtual User? User { get; set; }
     }
 }
