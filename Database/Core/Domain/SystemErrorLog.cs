@@ -6,20 +6,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database.Core.Domain
 {
-    [Table("ErrorLog")]
-    public partial class ErrorLog
+    [Table("SystemErrorLog")]
+    public partial class SystemErrorLog
     {
         [Key]
         [Column("id")]
         public int Id { get; set; }
         [Column("error_message")]
         public string ErrorMessage { get; set; } = null!;
-        [Column("error_severity")]
-        [StringLength(50)]
-        public string? ErrorSeverity { get; set; }
-        [Column("error_state")]
-        [StringLength(50)]
-        public string? ErrorState { get; set; }
         [Column("user_id")]
         public int? UserId { get; set; }
         [Column("timestamp", TypeName = "datetime")]
@@ -27,9 +21,12 @@ namespace Database.Core.Domain
         [Column("source_procedure")]
         [StringLength(255)]
         public string? SourceProcedure { get; set; }
+        [Column("error_source")]
+        [StringLength(255)]
+        public string? ErrorSource { get; set; }
 
         [ForeignKey("UserId")]
-        [InverseProperty("ErrorLogs")]
+        [InverseProperty("SystemErrorLogs")]
         public virtual User? User { get; set; }
     }
 }

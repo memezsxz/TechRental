@@ -18,23 +18,24 @@ namespace Database.Persistence
         {
         }
 
+        public virtual DbSet<AuditLog> AuditLogs { get; set; } = null!;
         public virtual DbSet<Category> Categories { get; set; } = null!;
         public virtual DbSet<Document> Documents { get; set; } = null!;
         public virtual DbSet<Equipment> Equipment { get; set; } = null!;
         public virtual DbSet<EquipmentAvailabilityStatus> EquipmentAvailabilityStatuses { get; set; } = null!;
         public virtual DbSet<EquipmentConditionStatus> EquipmentConditionStatuses { get; set; } = null!;
-        public virtual DbSet<ErrorLog> ErrorLogs { get; set; } = null!;
-        public virtual DbSet<Log> Logs { get; set; } = null!;
+        public virtual DbSet<Feedback> Feedbacks { get; set; } = null!;
+        public virtual DbSet<Image> Images { get; set; } = null!;
         public virtual DbSet<Notification> Notifications { get; set; } = null!;
         public virtual DbSet<NotificationType> NotificationTypes { get; set; } = null!;
         public virtual DbSet<Payment> Payments { get; set; } = null!;
         public virtual DbSet<PaymentMethod> PaymentMethods { get; set; } = null!;
         public virtual DbSet<PaymentStatus> PaymentStatuses { get; set; } = null!;
-        public virtual DbSet<Rating> Ratings { get; set; } = null!;
         public virtual DbSet<RentalRecord> RentalRecords { get; set; } = null!;
         public virtual DbSet<RentalRequest> RentalRequests { get; set; } = null!;
         public virtual DbSet<RentalRequestStatus> RentalRequestStatuses { get; set; } = null!;
         public virtual DbSet<ReturnConditionStatus> ReturnConditionStatuses { get; set; } = null!;
+        public virtual DbSet<SystemErrorLog> SystemErrorLogs { get; set; } = null!;
         public virtual DbSet<User> Users { get; set; } = null!;
         public virtual DbSet<UserRole> UserRoles { get; set; } = null!;
 
@@ -65,9 +66,19 @@ namespace Database.Persistence
                 //optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=RentalDB;Trusted_Connection=True;");
             }
         }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            modelBuilder.Entity<AuditLog>(entity =>
+            {
+                entity.Property(e => e.Timestamp).HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.AuditLogs)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK__AuditLog__user_i__6754599E");
+            });
+
             modelBuilder.Entity<Category>(entity =>
             {
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -84,12 +95,7 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Rental)
                     .WithMany(p => p.Documents)
                     .HasForeignKey(d => d.RentalId)
-                    .HasConstraintName("FK__Document__rental__76969D2E");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Documents)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Document__user_i__75A278F5");
+                    .HasConstraintName("FK__Document__rental__00200768");
             });
 
             modelBuilder.Entity<Equipment>(entity =>
@@ -103,37 +109,50 @@ namespace Database.Persistence
                 entity.HasOne(d => d.AvailabilityStatus)
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.AvailabilityStatusId)
-                    .HasConstraintName("FK__Equipment__avail__59FA5E80");
+                    .HasConstraintName("FK__Equipment__avail__45F365D3");
 
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.CategoryId)
-                    .HasConstraintName("FK__Equipment__categ__5BE2A6F2");
+                    .HasConstraintName("FK__Equipment__categ__47DBAE45");
 
                 entity.HasOne(d => d.ConditionStatus)
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.ConditionStatusId)
-                    .HasConstraintName("FK__Equipment__condi__5AEE82B9");
+                    .HasConstraintName("FK__Equipment__condi__46E78A0C");
+
+                entity.HasOne(d => d.Image)
+                    .WithMany(p => p.Equipment)
+                    .HasForeignKey(d => d.ImageId)
+                    .HasConstraintName("FK__Equipment__image__4BAC3F29");
             });
 
-            modelBuilder.Entity<ErrorLog>(entity =>
+            modelBuilder.Entity<Feedback>(entity =>
             {
-                entity.Property(e => e.Timestamp).HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.IsHidden).HasDefaultValueSql("((1))");
+
+                entity.Property(e => e.TimeDate).HasDefaultValueSql("(getdate())");
+
+                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.Equipment)
+                    .WithMany(p => p.Feedbacks)
+                    .HasForeignKey(d => d.EquipmentId)
+                    .HasConstraintName("FK__Feedback__equipm__6D0D32F4");
 
                 entity.HasOne(d => d.User)
-                    .WithMany(p => p.ErrorLogs)
+                    .WithMany(p => p.Feedbacks)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__ErrorLog__user_i__04E4BC85");
+                    .HasConstraintName("FK__Feedback__user_i__6C190EBB");
             });
 
-            modelBuilder.Entity<Log>(entity =>
+            modelBuilder.Entity<Image>(entity =>
             {
-                entity.Property(e => e.Timestamp).HasDefaultValueSql("(getdate())");
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
 
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Logs)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Log__user_id__01142BA1");
+                entity.Property(e => e.Guid).HasDefaultValueSql("(newid())");
             });
 
             modelBuilder.Entity<Notification>(entity =>
@@ -147,12 +166,12 @@ namespace Database.Persistence
                 entity.HasOne(d => d.NotificationType)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.NotificationTypeId)
-                    .HasConstraintName("FK__Notificat__notif__7B5B524B");
+                    .HasConstraintName("FK__Notificat__notif__73BA3083");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Notificat__user___7A672E12");
+                    .HasConstraintName("FK__Notificat__user___72C60C4A");
             });
 
             modelBuilder.Entity<Payment>(entity =>
@@ -175,27 +194,6 @@ namespace Database.Persistence
                     .HasConstraintName("FK__Payment__rental___09A971A2");
             });
 
-            modelBuilder.Entity<Rating>(entity =>
-            {
-                entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.IsHidden).HasDefaultValueSql("((1))");
-
-                entity.Property(e => e.TimeDate).HasDefaultValueSql("(getdate())");
-
-                entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
-
-                entity.HasOne(d => d.Equipment)
-                    .WithMany(p => p.Ratings)
-                    .HasForeignKey(d => d.EquipmentId)
-                    .HasConstraintName("FK__Equipment__equip__6FE99F9F");
-
-                entity.HasOne(d => d.User)
-                    .WithMany(p => p.Ratings)
-                    .HasForeignKey(d => d.UserId)
-                    .HasConstraintName("FK__Equipment__user___6EF57B66");
-            });
-
             modelBuilder.Entity<RentalRecord>(entity =>
             {
                 entity.Property(e => e.CreatedAt).HasDefaultValueSql("(getdate())");
@@ -205,12 +203,12 @@ namespace Database.Persistence
                 entity.HasOne(d => d.RentalRequest)
                     .WithMany(p => p.RentalRecords)
                     .HasForeignKey(d => d.RentalRequestId)
-                    .HasConstraintName("FK__RentalRec__renta__68487DD7");
+                    .HasConstraintName("FK__RentalRec__renta__03F0984C");
 
                 entity.HasOne(d => d.ReturnCondition)
                     .WithMany(p => p.RentalRecords)
                     .HasForeignKey(d => d.ReturnConditionId)
-                    .HasConstraintName("FK__RentalRec__retur__693CA210");
+                    .HasConstraintName("FK__RentalRec__retur__04E4BC85");
             });
 
             modelBuilder.Entity<RentalRequest>(entity =>
@@ -222,17 +220,27 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.RentalRequests)
                     .HasForeignKey(d => d.CustomerId)
-                    .HasConstraintName("FK__RentalReq__custo__628FA481");
+                    .HasConstraintName("FK__RentalReq__custo__7A672E12");
 
                 entity.HasOne(d => d.Equipment)
                     .WithMany(p => p.RentalRequests)
                     .HasForeignKey(d => d.EquipmentId)
-                    .HasConstraintName("FK__RentalReq__equip__619B8048");
+                    .HasConstraintName("FK__RentalReq__equip__797309D9");
 
                 entity.HasOne(d => d.Status)
                     .WithMany(p => p.RentalRequests)
                     .HasForeignKey(d => d.StatusId)
-                    .HasConstraintName("FK__RentalReq__statu__6383C8BA");
+                    .HasConstraintName("FK__RentalReq__statu__7B5B524B");
+            });
+
+            modelBuilder.Entity<SystemErrorLog>(entity =>
+            {
+                entity.Property(e => e.Timestamp).HasDefaultValueSql("(getdate())");
+
+                entity.HasOne(d => d.User)
+                    .WithMany(p => p.SystemErrorLogs)
+                    .HasForeignKey(d => d.UserId)
+                    .HasConstraintName("FK__SystemErr__user___0F624AF8");
             });
 
             modelBuilder.Entity<User>(entity =>
@@ -243,10 +251,15 @@ namespace Database.Persistence
 
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
 
+                entity.HasOne(d => d.Image)
+                    .WithMany(p => p.Users)
+                    .HasForeignKey(d => d.ImageId)
+                    .HasConstraintName("FK__User__image_id__6477ECF3");
+
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.RoleId)
-                    .HasConstraintName("FK__Users__role_id__4F7CD00D");
+                    .HasConstraintName("FK__User__role_id__60A75C0F");
             });
 
             OnModelCreatingPartial(modelBuilder);

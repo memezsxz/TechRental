@@ -3,9 +3,9 @@ using Database.Core.Repositories;
 
 namespace Database.Persistence.Repositories
 {
-    internal class ErrorLogRepository : Repository<ErrorLog>, IErrorLogRepository
+    internal class ImageRepository : Repository<Image>, IImageRepository
     {
-        public ErrorLogRepository(RentalDBContext context) : base(context)
+        public ImageRepository(RentalDBContext context) : base(context)
         {
         }
 

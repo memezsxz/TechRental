@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database.Core.Domain
 {
-    [Table("Log")]
-    public partial class Log
+    [Table("AuditLog")]
+    public partial class AuditLog
     {
         [Key]
         [Column("id")]
@@ -17,9 +17,6 @@ namespace Database.Core.Domain
         [Column("action_type")]
         [StringLength(100)]
         public string? ActionType { get; set; }
-        [Column("expectations")]
-        [StringLength(255)]
-        public string? Expectations { get; set; }
         [Column("timestamp", TypeName = "datetime")]
         public DateTime? Timestamp { get; set; }
         [Column("data_before_action")]
@@ -32,9 +29,12 @@ namespace Database.Core.Domain
         [Column("affected_record_key")]
         [StringLength(100)]
         public string? AffectedRecordKey { get; set; }
+        [Column("source")]
+        [StringLength(255)]
+        public string? Source { get; set; }
 
         [ForeignKey("UserId")]
-        [InverseProperty("Logs")]
+        [InverseProperty("AuditLogs")]
         public virtual User? User { get; set; }
     }
 }

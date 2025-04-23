@@ -26,8 +26,8 @@ namespace Database.Core.Domain
         public DateTime StartDate { get; set; }
         [Column("return_date", TypeName = "date")]
         public DateTime ReturnDate { get; set; }
-        [Column("cost", TypeName = "decimal(10, 2)")]
-        public decimal? Cost { get; set; }
+        [Column("rental_per_day", TypeName = "decimal(10, 2)")]
+        public decimal? RentalPerDay { get; set; }
         [Column("status_id")]
         public int? StatusId { get; set; }
         [Column("notes")]

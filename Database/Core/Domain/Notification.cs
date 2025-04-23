@@ -19,9 +19,6 @@ namespace Database.Core.Domain
         public string? MessageContent { get; set; }
         [Column("notification_type_id")]
         public int? NotificationTypeId { get; set; }
-        [Column("status")]
-        [StringLength(50)]
-        public string? Status { get; set; }
         [Column("isRead")]
         public bool? IsRead { get; set; }
         [Column("created_at", TypeName = "datetime")]
