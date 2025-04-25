@@ -1,0 +1,75 @@
+﻿@using WebApp.ViewModel;
+@model ListUsersViewModel;
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@*filter design and fuctionality, which can search by the first or last name and filter by the user role*@
+<form method="get" asp-controller="Users" asp-action="Index">
+    <div class="filter-wrapper d-flex justify-content-center mb-5 mt-4">
+        <div class="filter-bar d-flex gap-3 w-100" style="max-width: 90%;">
+
+            <select class="form-select form-select-sm" asp-for="RoleFilter"
+                    asp-items="@Model.RolesList.Select(a => new SelectListItem{Text = a.RoleName, Value = a.Id.ToString()})">
+                <option value="">All</option>
+            </select>
+
+            <input type="text" class="form-control form-control-sm" placeholder="Search" asp-for="SearchString" />
+
+            <button class="btn btn-success btn-sm px-4" type="submit">Search</button>
+
+            <a asp-controller="Users" asp-action="Index" class="btn btn-outline-danger btn-sm px-4 d-flex align-items-center">
+                Clear
+            </a>
+
+            <select class="form-select form-select-sm" asp-for="SortBy">
+                <option value="">Sort By ID</option>
+                <option value="FirstNameAZ">First Name (A–Z)</option>
+                <option value="FirstNameZA">First Name (Z–A)</option>
+                <option value="RoleAZ">Role (A–Z)</option>
+                <option value="EmailAZ">Email (A–Z)</option>
+            </select>
+        </div>
+    </div>
+</form>
+
+
+
+
+<h1 class="mb-4" style="color: #2d7d4f;">Users List</h1>
+
+<table class="table table-bordered text-center align-middle">
+    <thead style="border-bottom: 2px solid #2d7d4f;">
+        <tr style="color: #2d7d4f; font-weight: 600;">
+            <th>User ID</th>
+            <th>First Name</th>
+            <th>Last Name</th>
+            <th>Role</th>
+            <th>Email</th>
+            <th>Edit User</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.UsersList)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@item.FirstName</td>
+                <td>@item.LastName</td>
+                <td>@item.Role?.RoleName</td>
+                <td>@item.Email</td>
+                <td>
+                   
+
+                    <div role="group" class="btn-group">
+                        <a asp-controller="Users" asp-action="Edit" asp-route-id="@item.Id" class="btn btn-secondary mx-2 d-flex align-items-center gap-1" style="color: #2e7d32; font-weight:bold">
+                            <i class="bi bi-pencil-square"></i><span>Edit</span>
+                        </a>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

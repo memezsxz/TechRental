@@ -13626,3 +13626,61 @@ th {
 .card .h6 {
     color: inherit;
 }
+
+
+.table th {
+    border-bottom: 2px solid #2d7d4f;
+    text-align: center;
+}
+
+.table td, .table th {
+    vertical-align: middle;
+}
+
+a {
+    cursor: pointer;
+}
+
+.filter-wrapper {
+    width: 100%;
+}
+
+.filter-bar {
+    align-items: center;
+    padding: 0;
+    margin: 0 auto;
+}
+
+    .filter-bar .form-control,
+    .filter-bar .form-select {
+        font-size: 0.9rem;
+        height: 32px;
+    }
+
+    .filter-bar .btn {
+        height: 32px;
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .filter-bar .form-control,
+    .filter-bar .form-select,
+    .filter-bar .btn {
+        height: 38px; /* You can increase to 40 or 42 if needed */
+        font-size: 0.95rem;
+        padding-top: 0.3rem;
+        padding-bottom: 0.3rem;
+    }
+
+.table th {
+    border: none;
+    border-bottom: 2px solid #2d7d4f !important;
+    padding-bottom: 0.5rem;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #dee2e6; /* Light gray border */
+}
+
