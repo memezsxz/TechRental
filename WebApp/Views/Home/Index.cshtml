@@ -1,0 +1,98 @@
+﻿@{
+    ViewData["Title"] = "Home";
+}
+
+<!-- Hero Section -->
+<div class="container fixed-section">
+    <div class="row align-items-center w-100">
+        <div class="col-md-6">
+            <h1 class="text-success fw-bold">Tech Rental</h1>
+            <p class="lead">Your Go-To Platform for Equipment Rentals</p>
+            <a href="#" class="btn btn-success mt-3">Learn more</a>
+        </div>
+        <div class="col-md-6 text-center">
+            <img src="~/images/hero-devices.png" alt="Tech Rental Devices" class="img-fluid">
+        </div>
+    </div>
+</div>
+
+<!-- What is Tech Rental -->
+<div class="bg-success text-white text-center fixed-section">
+    <div class="container">
+        <h3 class="mb-4 text-white">What is <strong>Tech Rental?</strong></h3>
+        <p class="mb-5">Smart, Fast & Affordable Tech Rentals at Your Fingertips</p>
+
+        <h3 class="mb-4 text-white">Why <strong>Tech Rental?</strong></h3>
+        <div class="row justify-content-center gx-5">
+            <div class="col-md-3">
+                <i class="bi bi-cash-coin fs-1"></i>
+                <p class="fw-bold mt-2">Save Money</p>
+            </div>
+            <div class="col-md-3">
+                <i class="bi bi-check2-circle fs-1"></i>
+                <p class="fw-bold mt-2">No hassle</p>
+            </div>
+            <div class="col-md-3">
+                <i class="bi bi-laptop fs-1"></i>
+                <p class="fw-bold mt-2">Latest devices</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Inspire Section -->
+<div class="position-relative text-white text-center fixed-section" style="background: url('/images/photographer.jpg') center/cover no-repeat; height: 300px;">
+    <div class="position-absolute top-0 bottom-0 start-0 end-0" style="background-color: rgba(0,0,0,0.5);">
+        <div class="d-flex justify-content-center align-items-center h-100">
+            <h2 class="fw-light text-white">Chase Your dreams</h2>
+        </div>
+    </div>
+</div>
+
+<!-- Featured Categories -->
+<div class="text-center fixed-section">
+    <div class="container">
+        <h2 class="text-success fw-bold">Featured Categories</h2>
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-2 col-6 mb-4">
+                <i class="bi bi-camera fs-1 text-success"></i>
+                <p class="fw-bold">Cameras</p>
+                <a class="btn btn-success btn-sm" asp-controller="" asp-action="">Shop</a>
+            </div>
+            <div class="col-md-2 col-6 mb-4">
+                <i class="bi bi-display fs-1 text-success"></i>
+                <p class="fw-bold">Monitors</p>
+                <a class="btn btn-success btn-sm" asp-controller="" asp-action="">Shop</a>
+            </div>
+            <div class="col-md-2 col-6 mb-4">
+                <i class="bi bi-laptop fs-1 text-success"></i>
+                <p class="fw-bold">Laptops</p>
+                <a class="btn btn-success btn-sm" asp-controller="" asp-action="">Shop</a>
+            </div>
+            <div class="col-md-2 col-6 mb-4">
+                <i class="bi bi-tools fs-1 text-success"></i>
+                <p class="fw-bold">Power Tools</p>
+                <a class="btn btn-success btn-sm" asp-controller="" asp-action="">Shop</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Info Cards Full Width Section -->
+<div class="row text-white m-0 w-100" style="min-height: 500px; width: 100vw;">
+    <div class="col-md-4 p-5 bg-success bg-opacity-75 d-flex flex-column align-items-center justify-content-center">
+        <h5 class="text-uppercase text-white fw-bold">Get to know us more</h5>
+        <a class="btn btn-outline-light mt-2" asp-controller="Home" asp-action="About">About</a>
+    </div>
+    <div class="col-md-4 p-5 bg-success d-flex flex-column align-items-center justify-content-center">
+        <h5 class="text-uppercase text-white fw-bold">Need more help?</h5>
+        <a class="btn btn-outline-light mt-2" asp-controller="Home" asp-action="About">Contact us</a>
+    </div>
+    <div class="col-md-4 p-5 bg-dark d-flex flex-column align-items-center justify-content-center">
+        <h5 class="text-uppercase text-white fw-bold">Before Renting read this</h5>
+        <a class="btn btn-outline-light mt-2" asp-controller="Home" asp-action="Policy">Policy</a>
+    </div>
+</div>
+
+
