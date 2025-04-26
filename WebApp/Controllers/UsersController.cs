@@ -194,5 +194,95 @@ namespace WebApp.Controllers
         {
           return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
+
+
+
+        //Profile Actions here (change the place of the profile code)
+        public IActionResult Profile(int? id) {
+
+            if (id == 0 || id == null) {
+                return NotFound();
+            }
+
+            var user = _context.Users.Include(u => u.Role).Include(u => u.Image).SingleOrDefault(u => u.Id == id);
+
+            if(user == null)
+            {
+                return NotFound();
+            }
+
+            return View(user);
+        }
+
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Profile(User editUser)
+        {
+
+
+            if (editUser.FirstName.Length < 3)
+            {
+                ModelState.AddModelError("User.FirstName", "First name must contain more than 2 characters");
+            }
+            else if (editUser.FirstName.Length == 0)
+            {
+                ModelState.AddModelError("User.FirstName", "First name is required");
+            }
+
+            if (editUser.LastName.Length < 3)
+            {
+                ModelState.AddModelError("User.LastName", "Last name must contain more than 2 characters");
+            }
+            else if (editUser.LastName.Length == 0)
+            {
+                ModelState.AddModelError("User.LastName", "Last name is required");
+            }
+
+            if (editUser.Email == "")
+            {
+                ModelState.AddModelError("User.Email", "Email is required");
+
+            }
+
+
+            if (ModelState.IsValid)
+            {
+                try
+                {
+                    var oldUser = _context.Users.SingleOrDefault(x => x.Id == editUser.Id);
+
+                    oldUser.FirstName = editUser.FirstName;
+                    oldUser.LastName = editUser.LastName;
+                    oldUser.Email = editUser.Email;
+
+                    _context.Update(oldUser);
+                    _context.SaveChanges();
+                    
+                    return RedirectToAction("Index", "Home");
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    if (!UserExists(editUser.Id))
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        throw;
+                    }
+                }
+            }
+            else
+            {
+
+               
+                return View(editUser.Id);
+            }
+
+
+
+        }
     }
 }
