@@ -1,9 +1,19 @@
-﻿@using WebApp.ViewModel;
-@model ListUsersViewModel;
+﻿@using WebApp.ViewModel
+@model ListUsersViewModel
 
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@{
+    if (TempData["editSuccess"] != null)
+    {
+        <div class="alert alert-success" role="alert" style="margin-top:10px">
+            @TempData["editSuccess"]
+        </div>    
+    
+    }
 }
 
 @*filter design and fuctionality, which can search by the first or last name and filter by the user role*@

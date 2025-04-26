@@ -13628,19 +13628,29 @@ th {
 }
 
 
+/* Table Styling */
 .table th {
-    border-bottom: 2px solid #2d7d4f;
+    border: none;
+    border-bottom: 2px solid #2d7d4f !important;
+    padding-bottom: 0.5rem;
     text-align: center;
-}
-
-.table td, .table th {
     vertical-align: middle;
 }
 
+.table td {
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #dee2e6; /* Light gray border between rows */
+}
+
+/* Link Styling */
 a {
     cursor: pointer;
 }
 
+/* Filter Bar Styling */
 .filter-wrapper {
     width: 100%;
 }
@@ -13652,35 +13662,30 @@ a {
 }
 
     .filter-bar .form-control,
-    .filter-bar .form-select {
-        font-size: 0.9rem;
-        height: 32px;
-    }
-
+    .filter-bar .form-select,
     .filter-bar .btn {
-        height: 32px;
-        font-size: 0.85rem;
+        font-size: 0.95rem;
+        height: 38px; /* Uniform height for inputs, selects, buttons */
+        padding-top: 0.3rem;
+        padding-bottom: 0.3rem;
         display: flex;
         align-items: center;
         justify-content: center;
     }
 
-    .filter-bar .form-control,
-    .filter-bar .form-select,
-    .filter-bar .btn {
-        height: 38px; /* You can increase to 40 or 42 if needed */
-        font-size: 0.95rem;
-        padding-top: 0.3rem;
-        padding-bottom: 0.3rem;
-    }
-
-.table th {
-    border: none;
-    border-bottom: 2px solid #2d7d4f !important;
-    padding-bottom: 0.5rem;
+/* General Form Styling */
+.form-control,
+.form-select {
+    background-color: #f8f9fa;
 }
 
-.table tbody tr {
-    border-bottom: 1px solid #dee2e6; /* Light gray border */
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
 }
 
+/* Button Styling */
+.btn {
+    height: 45px;
+    font-size: 1rem;
+}

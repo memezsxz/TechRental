@@ -85,7 +85,7 @@ namespace WebApp.Controllers
         // GET: Users/Edit/5
         public IActionResult Edit(int? id)
         {
-            if (id == null || _context.Users == null)
+            if (id == null || _context.Users == null || id == 0)
             {
                 return NotFound();
             }
@@ -96,10 +96,13 @@ namespace WebApp.Controllers
                 return NotFound();
             }
 
-            //ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName", user.ImageId);
-            //ViewData["RoleId"] = new SelectList(_context.UserRoles, "Id", "RoleName", user.RoleId);
+            var viewModel = new EditUserViewModel
+            {
+                User = user,
+                RolesList = _context.UserRoles
+            };
 
-            return View(user);
+            return View(viewModel);
         }
 
 
@@ -110,20 +113,48 @@ namespace WebApp.Controllers
         
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(User user)
+        public IActionResult Edit(EditUserViewModel editUser)
         {
+            if (editUser.User.RoleId == null || editUser.User.RoleId == 0) {
+                ModelState.AddModelError("User.RoleId", "User Role should not be empty");
+            }
+
+            if (editUser.User.FirstName.Length < 3)
+            {
+                ModelState.AddModelError("User.FirstName", "First name must contain more than 2 characters");
+            }
+            else if (editUser.User.FirstName.Length == 0) {
+                ModelState.AddModelError("User.FirstName", "First name is required");
+            }
+
+            if (editUser.User.LastName.Length < 3)
+            {
+                ModelState.AddModelError("User.LastName", "Last name must contain more than 2 characters");
+            }
+            else if (editUser.User.LastName.Length == 0)
+            {
+                ModelState.AddModelError("User.LastName", "Last name is required");
+            }
+
+            if (editUser.User.Email == "") {
+                ModelState.AddModelError("User.Email", "Email is required");
+
+            }
+
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(user);
-                    _context.SaveChangesAsync();
-                    TempData["CreateSuccess"] = "User Updated Successfully";
+
+                    _context.Update(editUser.User);
+                    _context.SaveChanges();
+                    TempData["editSuccess"] = "User Updated Successfully";
                     return RedirectToAction("Index");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UserExists(user.Id))
+                    if (!UserExists(editUser.User.Id))
                     {
                         return NotFound();
                     }
@@ -134,11 +165,14 @@ namespace WebApp.Controllers
                 }
             }
             else {
-                TempData["faild"] = "Faild to Update product";
-
-                //ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName", user.ImageId);
-                //ViewData["RoleId"] = new SelectList(_context.UserRoles, "Id", "RoleName", user.RoleId);
-                return View(user);
+                
+                TempData["faild"] = "Faild to Update User";
+                var viewModel = new EditUserViewModel
+                {
+                    User = editUser.User,
+                    RolesList = _context.UserRoles
+                };
+                return View(viewModel);
             }
            
 

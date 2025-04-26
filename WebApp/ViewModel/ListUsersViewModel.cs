@@ -1,4 +1,5 @@
-﻿using Database.Core.Domain;
+﻿#nullable disable
+using Database.Core.Domain;
 
 namespace WebApp.ViewModel
 {
