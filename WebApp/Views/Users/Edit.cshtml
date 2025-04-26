@@ -9,15 +9,21 @@
 @{
     if (TempData["faild"] != null)
     {
-        <div class="alert alert-danger" role="alert" style="margin-top:10px">
-            @TempData["faild"].ToString();
-
+        <div class="alert alert-dismissible alert-danger">
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <strong>@TempData["faild"].ToString()</strong>
         </div>
-
     }
 }
-<a asp-action="Index" class="text-success mb-3 d-inline-block">&lt; Back</a>
 
+<nav aria-label="breadcrumb" style="margin-top:2%">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item">
+            <a asp-controller="Users" asp-action="Index">Users List</a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">Edit User</li>
+    </ol>
+</nav>
 
 <div class="row pt-4">
     <div class="col-6">
@@ -25,18 +31,19 @@
     </div>
 
     <div class="col-6 text-end">
-        <a asp-controller="Users" asp-action="Delete" asp-route-id="@Model.User.Id" class="btn btn-danger">
+
+        <!-- on click on the delete openDeleteModal method in JS will run -->
+        <button type="button" class="btn btn-danger" onclick="openDeleteModal(@Model.User.Id)">
             <i class="bi bi-trash3-fill"></i> Delete
-            
-        </a>
+        </button>
     </div>
 </div>
 
 
 
-
+<!-- user edit form -->
 <form method="post" asp-action="Edit">
-
+    
     <input type="hidden" asp-for="User.Id" />
 
     <div class="row mb-3">
@@ -75,6 +82,51 @@
     </div>
 </form>
 
+
+
+
+<!-- Delete Confirmation alert htnl code -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteConfirmModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteConfirmModalLabel">Confirm Deletion</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                Are you sure you want to delete this user? This action cannot be undone.
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                
+                <!-- submitting the form will trigger a listener -->
+                <form id="deleteForm" method="post">
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!-- Delete JS Script -->
+<script>
+
+    function openDeleteModal(userId) {
+        // Set the form action dynamically
+        var deleteForm = document.getElementById('deleteForm');
+        deleteForm.action = '/Users/Delete/' + userId;
+
+        // Show the Bootstrap Modal
+        var deleteModal = new bootstrap.Modal(document.getElementById('deleteConfirmModal'));
+        deleteModal.show();
+    }
+
+</script>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

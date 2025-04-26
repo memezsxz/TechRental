@@ -13689,3 +13689,14 @@ a {
     height: 45px;
     font-size: 1rem;
 }
+
+
+.notification-item {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+    .notification-item p {
+        margin: 5px 0 0 0;
+        font-size: 0.95rem;
+    }

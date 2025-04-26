@@ -60,26 +60,6 @@ namespace WebApp.Controllers
             return View(viewModel);
         }
 
-        // GET: Users/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null || _context.Users == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _context.Users
-                .Include(u => u.Image)
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
         
 
         // GET: Users/Edit/5
@@ -179,46 +159,36 @@ namespace WebApp.Controllers
             
         }
 
-  
 
+        [HttpPost, ActionName("Delete")]
+        [ValidateAntiForgeryToken]
         // GET: Users/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        public IActionResult Delete(int? id)
         {
             if (id == null || _context.Users == null)
             {
                 return NotFound();
             }
 
-            var user = await _context.Users
-                .Include(u => u.Image)
-                .Include(u => u.Role)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var user = _context.Users.SingleOrDefault(u => u.Id == id);
+
             if (user == null)
             {
                 return NotFound();
             }
+            else {
+                user.FirstName = user.FirstName + "1";//change it to active to false
+                _context.Users.Update(user); 
+                _context.SaveChanges();
+                TempData["editSuccess"] = "User Deleted Successfully";
+                return RedirectToAction("Index");
 
-            return View(user);
+            }
+
+
         }
 
-        // POST: Users/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Users == null)
-            {
-                return Problem("Entity set 'RentalDBContext.Users'  is null.");
-            }
-            var user = await _context.Users.FindAsync(id);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
+
 
         private bool UserExists(int id)
         {
