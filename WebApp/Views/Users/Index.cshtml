@@ -1,4 +1,6 @@
-﻿@using WebApp.ViewModel
+﻿@using Database.Core.Repositories
+@using Microsoft.AspNetCore.Mvc.TagHelpers
+@using WebApp.ViewModel
 @model ListUsersViewModel
 
 @{
@@ -36,14 +38,17 @@
                 Clear
             </a>
 
-            <select class="form-select form-select-sm" asp-for="SortBy">
-                <option value="">Sort By ID</option>
-                <option value="FirstNameAZ">First Name (A–Z)</option>
-                <option value="FirstNameZA">First Name (Z–A)</option>
-                <option value="RoleAZ">Role (A–Z)</option>
-                <option value="EmailAZ">Email (A–Z)</option>
+            <select id="sortBy" name="sortBy" class="form-control">
+	            <option value="">Default</option>
+	            @foreach (var option in Model.SortOptions)
+	            {
+		            <option value="@option" selected="@(Model.CurrentSort == option)">
+                        @option.GetDisplayName()
+		            </option>
+	            }
             </select>
-        </div>
+
+            </div>
     </div>
 </form>
 

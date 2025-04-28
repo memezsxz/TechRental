@@ -8,7 +8,6 @@ namespace Database
 {
     public interface IToBeTracked
     {
-        //bool IsTracked { get; set; }
         string GenerateLogDetails();
     }
 }

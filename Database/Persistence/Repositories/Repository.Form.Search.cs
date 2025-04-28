@@ -411,8 +411,7 @@ internal partial class Repository<TEntity>
     /// <returns>
     /// A <see cref="Task&lt;PaginatedResult&gt;"/> containing data, total records, and total pages.
     /// </returns>
-
-    private async Task<PaginatedResult> GetPaginatedResultAsync(IQueryable<object> query, int pageNumber, int pageSize)
+    protected async Task<PaginatedResult> GetPaginatedResultAsync(IQueryable<object> query, int pageNumber, int pageSize)
     {
         var totalRecords = await query.CountAsync();
         var records = await query
@@ -439,7 +438,7 @@ internal partial class Repository<TEntity>
     /// <returns>
     /// A <see cref="PaginatedResult"/> containing data, total records, and total pages.
     /// </returns>
-    private PaginatedResult GetPaginatedResult(IQueryable<object> query, int pageNumber, int pageSize)
+    protected PaginatedResult GetPaginatedResult(IQueryable<object> query, int pageNumber, int pageSize)
     {
         // Apply optional projection (e.g., selecting only specific columns)
         var repo = Helpers.GetRepositoryForType(typeof(TEntity));
