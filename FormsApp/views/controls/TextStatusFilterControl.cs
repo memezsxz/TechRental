@@ -226,7 +226,7 @@ namespace FormsApp.views.controls
                 .GetProperties(BindingFlags.Public | BindingFlags.Instance)
                 .FirstOrDefault(p => p.PropertyType.Name.Contains(entityProperty.PropertyType.Name));
 
-            UnitOfWork _unitOfWork = new UnitOfWork(new RentalDBContext());
+            UnitOfWork _unitOfWork = new UnitOfWork();
 
             if (repositoryProperty == null)
                 throw new MissingMemberException(

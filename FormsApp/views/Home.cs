@@ -26,7 +26,7 @@ namespace FormsApp
 
         void LoadNavigation()
         {
-            new UnitOfWork(new RentalDBContext()).Equipment.GetAll();
+            new UnitOfWork().Equipment.GetAll();
             // check user type and load the proper navigation user control
             AdminNavigationPanel navigationPanelPanel = new AdminNavigationPanel(pnlMainView);
 

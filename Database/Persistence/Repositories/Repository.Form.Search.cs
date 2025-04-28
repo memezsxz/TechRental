@@ -402,6 +402,32 @@ internal partial class Repository<TEntity>
     #endregion
 
     #region Pagination
+    /// <summary>
+    /// Paginates the given query and returns a <see cref="PaginatedResult"/> with total records and pages.
+    /// </summary>
+    /// <param name="query">The filtered <see cref="IQueryable{T}"/> to paginate.</param>
+    /// <param name="pageNumber">The page number (1-based).</param>
+    /// <param name="pageSize">The number of records per page.</param>
+    /// <returns>
+    /// A <see cref="Task&lt;PaginatedResult&gt;"/> containing data, total records, and total pages.
+    /// </returns>
+
+    private async Task<PaginatedResult> GetPaginatedResultAsync(IQueryable<object> query, int pageNumber, int pageSize)
+    {
+        var totalRecords = await query.CountAsync();
+        var records = await query
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PaginatedResult
+        {
+            TotalRecords = totalRecords,
+            TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize),
+            Data = records
+        };
+    }
+
 
     /// <summary>
     /// Paginates the given query and returns a <see cref="PaginatedResult"/> with total records and pages.

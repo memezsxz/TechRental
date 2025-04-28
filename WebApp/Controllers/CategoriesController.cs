@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Database.Core;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -12,31 +13,31 @@ namespace WebApp.Controllers
 {
     public class CategoriesController : Controller
     {
-        private readonly RentalDBContext _context;
 
-        public CategoriesController(RentalDBContext context)
+        private readonly IUnitOfWork _unitOfWork = new UnitOfWork();
+
+        public CategoriesController()
         {
-            _context = context;
+            //_unitOfWork = unitOfWork;
         }
 
         // GET: Categories
         public async Task<IActionResult> Index()
         {
-              return _context.Categories != null ? 
-                          View(await _context.Categories.ToListAsync()) :
-                          Problem("Entity set 'RentalDBContext.Categories'  is null.");
+            return _unitOfWork.Categories != null ?
+                        View(await _unitOfWork.Categories.GetAllAsync()) :
+                        Problem("Entity set 'RentalDBContext.Categories'  is null.");
         }
 
         // GET: Categories/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null || _context.Categories == null)
+            if (id == null || _unitOfWork.Categories == null)
             {
                 return NotFound();
             }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var category = await _unitOfWork.Categories.GetAsync(id.Value);
             if (category == null)
             {
                 return NotFound();
@@ -60,8 +61,8 @@ namespace WebApp.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(category);
-                await _context.SaveChangesAsync();
+                await _unitOfWork.Categories.AddAsync(category);
+                await _unitOfWork.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -70,12 +71,12 @@ namespace WebApp.Controllers
         // GET: Categories/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Categories == null)
+            if (id == null || _unitOfWork.Categories == null)
             {
                 return NotFound();
             }
 
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _unitOfWork.Categories.GetAsync(id.Value);
             if (category == null)
             {
                 return NotFound();
@@ -99,20 +100,17 @@ namespace WebApp.Controllers
             {
                 try
                 {
-                    _context.Update(category);
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.Categories.UpdateAsync(category);
+                    await _unitOfWork.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CategoryExists(category.Id))
-                    {
+                    if (!await CategoryExists(category.Id))
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
+
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -121,13 +119,12 @@ namespace WebApp.Controllers
         // GET: Categories/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null || _context.Categories == null)
+            if (id == null || _unitOfWork.Categories == null)
             {
                 return NotFound();
             }
 
-            var category = await _context.Categories
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var category = await _unitOfWork.Categories.GetAsync(id.Value);
             if (category == null)
             {
                 return NotFound();
@@ -141,23 +138,23 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            if (_context.Categories == null)
+            if (_unitOfWork.Categories == null)
             {
                 return Problem("Entity set 'RentalDBContext.Categories'  is null.");
             }
-            var category = await _context.Categories.FindAsync(id);
+            var category = await _unitOfWork.Categories.GetAsync(id);
             if (category != null)
             {
-                _context.Categories.Remove(category);
+                _unitOfWork.Categories.Remove(category);
             }
-            
-            await _context.SaveChangesAsync();
+
+            await _unitOfWork.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool CategoryExists(int id)
+        private async Task<bool> CategoryExists(int id)
         {
-          return (_context.Categories?.Any(e => e.Id == id)).GetValueOrDefault();
+            return await _unitOfWork.Categories.ExistsAsync(id);
         }
     }
 }
