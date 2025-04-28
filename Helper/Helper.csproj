@@ -10,4 +10,8 @@
     <PackageReference Include="AWSSDK.S3" Version="3.7.416.16" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="image\" />
+  </ItemGroup>
+
 </Project>

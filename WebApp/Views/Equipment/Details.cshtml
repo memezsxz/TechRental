@@ -10,9 +10,15 @@
         <!-- Left Column: Equipment Image and Details -->
         <div class="col-md-6">
             <!-- Equipment Image (Default image if null) -->
-            <img src="@Url.Content(string.IsNullOrEmpty(Model.Image?.ImageName) ? "/images/no-image-available.png" : Model.Image.ImageName)"
-                 alt="@Model.Name"
-                 class="img-fluid rounded mb-4" />
+            @if (@Model.Image != null)
+            {
+                <img src="@Url.Action("GetImage", "Equipment", new { id = @Model.Id })"
+                     alt="Equipment Image" />
+            }
+            else
+            {
+                <p>No Image Available</p>
+            }
         </div>
 
         <div class="col-md-6">

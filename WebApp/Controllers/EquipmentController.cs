@@ -3,9 +3,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
-using Helper
-using Helper.S3Uploader;  // Change this to match your class library's namespace
-
 
 namespace WebApp.Controllers
 {
@@ -19,11 +16,50 @@ namespace WebApp.Controllers
         }
 
         // GET: Equipment
+
         public async Task<IActionResult> Index()
         {
-            var rentalDBContext = _context.Equipment.Include(e => e.AvailabilityStatus).Include(e => e.Category).Include(e => e.ConditionStatus).Include(e => e.Image);
-            return View(await rentalDBContext.ToListAsync());
+            var rentalDBContext = _context.Equipment
+                .Include(e => e.AvailabilityStatus)
+                .Include(e => e.Category)
+                .Include(e => e.ConditionStatus)
+                .Include(e => e.Image);
+
+            var equipmentList = await rentalDBContext.ToListAsync();
+
+            return View(equipmentList);
         }
+
+        public async Task<IActionResult> GetImage(int id)
+        {
+            var equipment = await _context.Equipment
+                .Include(e => e.Image)
+                .FirstOrDefaultAsync(e => e.Id == id);
+
+            if (equipment?.Image == null || !equipment.Image.Guid.HasValue)
+                return NotFound();
+
+            string guid = equipment.Image.Guid.Value.ToString();
+            string extension = "";
+
+            if (!string.IsNullOrEmpty(equipment.Image.ImageType))
+            {
+                if (equipment.Image.ImageType.ToLower() == "image/png")
+                    extension = ".png";
+                else if (equipment.Image.ImageType.ToLower() == "image/jpeg")
+                    extension = ".jpg"; // or .jpeg
+            }
+
+            var fullKey = guid + extension;
+
+            var stream = await S3Uploader.GetFileByGuidAsync(fullKey);
+            if (stream == null)
+                return NotFound();
+
+            var contentType = equipment.Image.ImageType ?? "application/octet-stream";
+            return File(stream, contentType);
+        }
+
 
         // GET: Equipment/Details/5
         public async Task<IActionResult> Details(int? id)
