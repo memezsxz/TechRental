@@ -12,9 +12,10 @@
 </div>
 
 <div class="container my-4">
-    <form asp-action="Create" enctype="multipart/form-data">
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+    <form asp-action="Create" enctype="multipart/form-data" method="post">
         <div class="row">
-            <!-- Left side form -->
+            <!-- Left Side: Form -->
             <div class="col-md-8">
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
@@ -51,24 +52,25 @@
                         <select asp-for="AvailabilityStatusId" class="form-select" asp-items="ViewBag.AvailabilityStatusId"></select>
                     </div>
                 </div>
-
             </div>
 
-            <!-- Right side image upload -->
-            <div class="upload-box" onclick="document.getElementById('fileInput').click();">
-                <span id="upload-text">Add</span>
-                <input type="file" id="fileInput" name="ImageFile" style="display: none;" accept="image/*" onchange="previewImage(event)" />
+            <!-- Right Side: Image Upload Box -->
+            <div class="col-md-4 d-flex align-items-start justify-content-center">
+                <div class="upload-box" onclick="document.getElementById('fileInput').click();">
+                    <span id="upload-text">Add</span>
+                    <input type="file" id="fileInput" name="ImageFile" style="display: none;" accept="image/*" onchange="previewImage(event)" />
+                </div>
             </div>
-
         </div>
 
+        <!-- Centered Buttons Below -->
         <div class="d-flex justify-content-center gap-3 mt-4">
             <input type="submit" value="Add" class="btn custom-btn" />
             <a asp-action="Index" class="btn custom-btn-outline">Cancel</a>
         </div>
-
     </form>
 </div>
+
 
 <style>
     .page-title {
@@ -98,7 +100,10 @@
         border: 2px dashed #ccc;
         border-radius: 8px;
         cursor: pointer;
+        background-size: cover;
+        background-position: center;
     }
+
 
     .form-control, .form-select {
         border-radius: 0.375rem;
@@ -180,6 +185,7 @@
     function previewImage(event) {
         const file = event.target.files[0];
         const uploadBox = document.querySelector('.upload-box');
+        const uploadtxt = document.querySelector('.upload-text');
 
         if (file) {
             const reader = new FileReader();
@@ -187,9 +193,10 @@
                 uploadBox.style.backgroundImage = `url('${e.target.result}')`;
                 uploadBox.style.backgroundSize = 'cover';
                 uploadBox.style.backgroundPosition = 'center';
-                uploadBox.innerHTML = ''; // Remove the "Add" text
+                uploadtxt.innerHTML = ''; // Remove the "Add" text
             };
             reader.readAsDataURL(file);
         }
+
     }
 </script>
