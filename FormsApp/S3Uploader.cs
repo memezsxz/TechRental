@@ -7,7 +7,7 @@ public class S3Uploader
 {
     // ✅ CONFIGURATION
     private const string bucketName = "tech-rent-files";  // S3 bucket
-    private const string folderPath = @"C:\Users\Ruqay\Downloads\Mageradmin"; // local .png image path
+    private const string folderPath = @"C:\Users\Ruqay\Downloads\equipments"; // local .png image path
     private const string outputSqlFile = @"C:\Users\Ruqay\Downloads\uuid_insert.sql"; // output .sql file
     private static readonly RegionEndpoint bucketRegion = RegionEndpoint.MESouth1;
 
