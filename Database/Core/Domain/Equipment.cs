@@ -10,7 +10,7 @@ namespace Database.Core.Domain
     {
         public Equipment()
         {
-            Ratings = new HashSet<Rating>();
+            Feedbacks = new HashSet<Feedback>();
             RentalRequests = new HashSet<RentalRequest>();
         }
 
@@ -23,8 +23,8 @@ namespace Database.Core.Domain
         [Column("description")]
         [StringLength(255)]
         public string? Description { get; set; }
-        [Column("rental_price", TypeName = "decimal(10, 2)")]
-        public decimal RentalPrice { get; set; }
+        [Column("rental_price_per_day", TypeName = "decimal(10, 2)")]
+        public decimal RentalPricePerDay { get; set; }
         [Column("availability_status_id")]
         public int? AvailabilityStatusId { get; set; }
         [Column("condition_status_id")]
@@ -37,6 +37,8 @@ namespace Database.Core.Domain
         public DateTime? CreatedAt { get; set; }
         [Column("updated_at", TypeName = "datetime")]
         public DateTime? UpdatedAt { get; set; }
+        [Column("image_id")]
+        public int? ImageId { get; set; }
 
         [ForeignKey("AvailabilityStatusId")]
         [InverseProperty("Equipment")]
@@ -47,8 +49,11 @@ namespace Database.Core.Domain
         [ForeignKey("ConditionStatusId")]
         [InverseProperty("Equipment")]
         public virtual EquipmentConditionStatus? ConditionStatus { get; set; }
+        [ForeignKey("ImageId")]
         [InverseProperty("Equipment")]
-        public virtual ICollection<Rating> Ratings { get; set; }
+        public virtual Image? Image { get; set; }
+        [InverseProperty("Equipment")]
+        public virtual ICollection<Feedback> Feedbacks { get; set; }
         [InverseProperty("Equipment")]
         public virtual ICollection<RentalRequest> RentalRequests { get; set; }
     }

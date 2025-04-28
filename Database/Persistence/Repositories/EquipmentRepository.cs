@@ -39,7 +39,7 @@ namespace Database.Persistence.Repositories
              {
                  Id = e.Id,
                  Name = e.Name,
-                 Price = e.RentalPrice,
+                 Price = e.RentalPricePerDay,
                  Availability = e.AvailabilityStatus != null ? e.AvailabilityStatus.StatusName : "",
                  Condition = e.ConditionStatus != null ? e.ConditionStatus.ConditionName : "",
                  Category = e.Category != null ? e.Category.Name : "",

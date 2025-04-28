@@ -6,17 +6,17 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database.Core.Domain
 {
-    [Index("Email", Name = "UQ__Users__AB6E61646F63A786", IsUnique = true)]
+    [Table("User")]
+    [Index("Email", Name = "UQ__User__AB6E6164730F9299", IsUnique = true)]
     public partial class User
     {
         public User()
         {
-            Documents = new HashSet<Document>();
-            ErrorLogs = new HashSet<ErrorLog>();
-            Logs = new HashSet<Log>();
+            AuditLogs = new HashSet<AuditLog>();
+            Feedbacks = new HashSet<Feedback>();
             Notifications = new HashSet<Notification>();
-            Ratings = new HashSet<Rating>();
             RentalRequests = new HashSet<RentalRequest>();
+            SystemErrorLogs = new HashSet<SystemErrorLog>();
         }
 
         [Key]
@@ -35,28 +35,32 @@ namespace Database.Core.Domain
         public int? RoleId { get; set; }
         [Column("is_active")]
         public bool? IsActive { get; set; }
-        [Column("image_path")]
-        [StringLength(255)]
-        public string? ImagePath { get; set; }
         [Column("created_at", TypeName = "datetime")]
         public DateTime? CreatedAt { get; set; }
         [Column("updated_at", TypeName = "datetime")]
         public DateTime? UpdatedAt { get; set; }
+        [Column("image_id")]
+        public int? ImageId { get; set; }
+        [Column("phone_number")]
+        [StringLength(20)]
+        [Unicode(false)]
+        public string? PhoneNumber { get; set; }
 
+        [ForeignKey("ImageId")]
+        [InverseProperty("Users")]
+        public virtual Image? Image { get; set; }
         [ForeignKey("RoleId")]
         [InverseProperty("Users")]
         public virtual UserRole? Role { get; set; }
         [InverseProperty("User")]
-        public virtual ICollection<Document> Documents { get; set; }
+        public virtual ICollection<AuditLog> AuditLogs { get; set; }
         [InverseProperty("User")]
-        public virtual ICollection<ErrorLog> ErrorLogs { get; set; }
-        [InverseProperty("User")]
-        public virtual ICollection<Log> Logs { get; set; }
+        public virtual ICollection<Feedback> Feedbacks { get; set; }
         [InverseProperty("User")]
         public virtual ICollection<Notification> Notifications { get; set; }
-        [InverseProperty("User")]
-        public virtual ICollection<Rating> Ratings { get; set; }
         [InverseProperty("Customer")]
         public virtual ICollection<RentalRequest> RentalRequests { get; set; }
+        [InverseProperty("User")]
+        public virtual ICollection<SystemErrorLog> SystemErrorLogs { get; set; }
     }
 }

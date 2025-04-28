@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using Database.Core;
@@ -17,46 +18,48 @@ namespace Database.Persistence
         public UnitOfWork(RentalDBContext context)
         {
             _context = context;
-            Category = new CategoryRepository(_context);
-            Document = new DocumentRepository(_context);
+            AuditLogs = new AuditLogRepository(context);
+            Categories = new CategoryRepository(_context);
+            Documents = new DocumentRepository(_context);
             Equipment = new EquipmentRepository(_context);
-            EquipmentAvailabilityStatus = new EquipmentAvailabilityStatusRepository(_context);
-            EquipmentConditionStatus = new EquipmentConditionStatusRepository(_context);
-            Rating = new RatingRepository(_context);
-            ErrorLog = new ErrorLogRepository(_context);
-            Log = new LogRepository(_context);
-            Notification = new NotificationRepository(_context);
-            NotificationType = new NotificationTypeRepository(_context);
-            Payment = new PaymentRepository(_context);
-            PaymentMethod = new PaymentMethodRepository(_context);
-            PaymentStatus = new PaymentStatusRepository(_context);
-            RentalRecord = new RentalRecordRepository(_context);
-            RentalRequest = new RentalRequestRepository(_context);
-            RentalRequestStatus = new RentalRequestStatusRepository(_context);
-            ReturnConditionStatus = new ReturnConditionStatusRepository(_context);
-            User = new UserRepository(_context);
-            UserRole = new UserRoleRepository(_context);
+            EquipmentAvailabilityStatuses = new EquipmentAvailabilityStatusRepository(_context);
+            EquipmentConditionStatuses = new EquipmentConditionStatusRepository(_context);
+            Feedbacks = new FeedbackRepository(_context);
+            Images = new ImageRepository(_context);
+            Notifications = new NotificationRepository(_context);
+            NotificationTypes = new NotificationTypeRepository(_context);
+            Payments = new PaymentRepository(_context);
+            PaymentMethods = new PaymentMethodRepository(_context);
+            PaymentStatuses = new PaymentStatusRepository(_context);
+            RentalRecords = new RentalRecordRepository(_context);
+            RentalRequests = new RentalRequestRepository(_context);
+            RentalRequestStatuses = new RentalRequestStatusRepository(_context);
+            ReturnConditionStatuses = new ReturnConditionStatusRepository(_context);
+            SystemErrorLogs = new SystemErrorLogRepository(context);
+            Users = new UserRepository(_context);
+            UserRoles = new UserRoleRepository(_context);
         }
 
-        public ICategoryRepository Category { get; private set; }
-        public IDocumentRepository Document { get; private set; }
+        public IAuditLogRepository AuditLogs { get; private set; } //
+        public ICategoryRepository Categories { get; private set; }
+        public IDocumentRepository Documents { get; private set; }
         public IEquipmentRepository Equipment { get; private set; }
-        public IEquipmentAvailabilityStatusRepository EquipmentAvailabilityStatus { get; private set; }
-        public IEquipmentConditionStatusRepository EquipmentConditionStatus { get; private set; }
-        public IRatingRepository Rating { get; private set; }
-        public IErrorLogRepository ErrorLog { get; private set; }
-        public ILogRepository Log { get; private set; }
-        public INotificationRepository Notification { get; private set; }
-        public INotificationTypeRepository NotificationType { get; private set; }
-        public IPaymentRepository Payment { get; private set; }
-        public IPaymentMethodRepository PaymentMethod { get; private set; }
-        public IPaymentStatusRepository PaymentStatus { get; private set; }
-        public IRentalRecordRepository RentalRecord { get; private set; }
-        public IRentalRequestRepository RentalRequest { get; private set; }
-        public IRentalRequestStatusRepository RentalRequestStatus { get; private set; }
-        public IReturnConditionStatusRepository ReturnConditionStatus { get; private set; }
-        public IUserRepository User { get; private set; }
-        public IUserRoleRepository UserRole { get; private set; }
+        public IEquipmentAvailabilityStatusRepository EquipmentAvailabilityStatuses { get; private set; }
+        public IEquipmentConditionStatusRepository EquipmentConditionStatuses { get; private set; }
+        public IFeedbackRepository Feedbacks { get; private set; } // 
+        public IImageRepository Images { get; private set; } // 
+        public INotificationRepository Notifications { get; private set; }
+        public INotificationTypeRepository NotificationTypes { get; private set; }
+        public IPaymentRepository Payments { get; private set; }
+        public IPaymentMethodRepository PaymentMethods { get; private set; }
+        public IPaymentStatusRepository PaymentStatuses { get; private set; }
+        public IRentalRecordRepository RentalRecords { get; private set; }
+        public IRentalRequestRepository RentalRequests { get; private set; }
+        public IRentalRequestStatusRepository RentalRequestStatuses { get; private set; }
+        public IReturnConditionStatusRepository ReturnConditionStatuses { get; private set; }
+        public ISystemErrorLogRepository SystemErrorLogs { get; private set; } //
+        public IUserRepository Users { get; private set; }
+        public IUserRoleRepository UserRoles { get; private set; }
 
         public int Complete()
         {

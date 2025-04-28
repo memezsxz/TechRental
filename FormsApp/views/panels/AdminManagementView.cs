@@ -60,8 +60,8 @@ public partial class AdminManagementView : UserControl
             { lblRequests, (typeof(RentalRequest), true, true, true) },
             { lblInventory, (typeof(Equipment), true, true, true) },
             { lblReturns, (typeof(RentalRecord), true, true, true) }, // TODO: Update to rental return class later
-            { lblHistory, (typeof(Log), false, false, false) },
-            { lblExceptions, (typeof(ErrorLog), false, false, false) },
+            { lblHistory, (typeof(AuditLog), false, false, false) },
+            { lblExceptions, (typeof(SystemErrorLog), false, false, false) },
             { lblUsers, (typeof(User), true, true, true) }
         };
 

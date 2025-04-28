@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Database.Core.Domain
 {
     [Table("NotificationType")]
-    [Index("TypeName", Name = "UQ__Notifica__543C4FD949E6ED34", IsUnique = true)]
+    [Index("TypeName", Name = "UQ__Notifica__543C4FD96ADB8AE9", IsUnique = true)]
     public partial class NotificationType
     {
         public NotificationType()

@@ -88,7 +88,7 @@ namespace FormsApp.views.dialogs
         {
             lblId.Text = item.Id.ToString();
             lblName.Text = item.Name;
-            lblPrice.Text = item.RentalPrice.ToString("C");
+            lblPrice.Text = item.RentalPricePerDay.ToString("C");
             ddlAvalability.SelectedValue = item.AvailabilityStatusId;
             ddlCondition.SelectedValue = item.ConditionStatusId;
             ddlCategory.SelectedValue = item.CategoryId;
@@ -156,7 +156,7 @@ namespace FormsApp.views.dialogs
             ddlAvalability.DisplayMember = "Value";
             ddlAvalability.ValueMember = "Key";
 
-            ddlAvalability.DataSource = new BindingSource(context.EquipmentAvailabilityStatus.GetAllByName() , null) ;
+            ddlAvalability.DataSource = new BindingSource(context.EquipmentAvailabilityStatuses.GetAllByName() , null) ;
         }
 
         private void LoadConditionDropDownList()
@@ -164,14 +164,14 @@ namespace FormsApp.views.dialogs
             ddlCondition.DisplayMember = "Value";
             ddlCondition.ValueMember = "Key";
 
-            ddlCondition.DataSource = new BindingSource(context.EquipmentConditionStatus.GetAllByName(), null);
+            ddlCondition.DataSource = new BindingSource(context.EquipmentConditionStatuses.GetAllByName(), null);
         }
         private void LoadCategoryDropDownList()
         {
             ddlCategory.DisplayMember = "Value";
             ddlCategory.ValueMember = "Key";
 
-            ddlCategory.DataSource = new BindingSource(context.Category.GetAllByName(), null);
+            ddlCategory.DataSource = new BindingSource(context.Categories.GetAllByName(), null);
         }
     }
 }

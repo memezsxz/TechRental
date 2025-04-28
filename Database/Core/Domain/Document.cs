@@ -12,8 +12,6 @@ namespace Database.Core.Domain
         [Key]
         [Column("id")]
         public int Id { get; set; }
-        [Column("user_id")]
-        public int? UserId { get; set; }
         [Column("rental_id")]
         public int? RentalId { get; set; }
         [Column("file_name")]
@@ -30,8 +28,5 @@ namespace Database.Core.Domain
         [ForeignKey("RentalId")]
         [InverseProperty("Documents")]
         public virtual RentalRequest? Rental { get; set; }
-        [ForeignKey("UserId")]
-        [InverseProperty("Documents")]
-        public virtual User? User { get; set; }
     }
 }

@@ -6,8 +6,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database.Core.Domain
 {
-    [Table("Rating")]
-    public partial class Rating
+    [Table("Feedback")]
+    public partial class Feedback
     {
         [Key]
         [Column("id")]
@@ -31,10 +31,10 @@ namespace Database.Core.Domain
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("EquipmentId")]
-        [InverseProperty("Ratings")]
+        [InverseProperty("Feedbacks")]
         public virtual Equipment? Equipment { get; set; }
         [ForeignKey("UserId")]
-        [InverseProperty("Ratings")]
+        [InverseProperty("Feedbacks")]
         public virtual User? User { get; set; }
     }
 }

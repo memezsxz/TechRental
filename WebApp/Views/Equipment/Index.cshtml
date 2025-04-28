@@ -1,0 +1,56 @@
+﻿@model IEnumerable<Database.Core.Domain.Equipment>
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<div class="container my-4">
+    <div class="row">
+        @foreach (var item in Model)
+        {
+            <div class="col-md-4 mb-4">
+                <!-- Make the card clickable by wrapping it with a link -->
+                <a href="@Url.Action("Details", "Equipment", new { id = item.Id })" class="text-decoration-none">
+                    <div class="card border-shadow">
+                        <!-- Card Image (uncomment if you have an image) -->
+                        @* <img src="@item.Image.ImageName" class="card-img-top" alt="@item.Name"> *@
+
+                        <div class="card-body">
+                            <h5 class="card-title">@item.Name</h5>
+                            <p class="card-text"><strong>Rental Price:</strong> @item.RentalPricePerDay</p>
+                            <p class="card-text"><strong>Status:</strong> @item.IsActive ? "Active" : "Inactive"</p>
+                            <p class="card-text"><strong>Condition:</strong> @item.ConditionStatus.ConditionName</p>
+                            <p class="card-text"><strong>Category:</strong> @item.Category.Name</p>
+                            <p class="card-text"><strong>Availability:</strong> @item.AvailabilityStatus.StatusName</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        }
+    </div>
+</div>
+
+<!-- Custom CSS for card styling -->
+<style>
+    .card {
+        border: 1px solid #ddd; /* Add a border to the card */
+        border-radius: 0.375rem; /* Rounded corners */
+        transition: transform 0.3s ease, box-shadow 0.3s ease; /* Smooth transition for hover effect */
+    }
+
+        /* Hover effect: translate card slightly and add shadow */
+        .card:hover {
+            transform: translateY(-5px); /* Move the card slightly up */
+            box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.1); /* Add shadow on hover */
+        }
+
+    /* Make sure the link inside the card doesn't have underlines */
+    .text-decoration-none {
+        text-decoration: none;
+    }
+</style>

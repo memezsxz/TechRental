@@ -13626,3 +13626,85 @@ th {
 .card .h6 {
     color: inherit;
 }
+
+
+/* Table Styling */
+.table th {
+    border: none;
+    border-bottom: 2px solid #2d7d4f !important;
+    padding-bottom: 0.5rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.table tbody tr {
+    border-bottom: 1px solid #dee2e6; /* Light gray border between rows */
+}
+
+/* Link Styling */
+a {
+    cursor: pointer;
+}
+
+/* Filter Bar Styling */
+.filter-wrapper {
+    width: 100%;
+}
+
+.filter-bar {
+    align-items: center;
+    padding: 0;
+    margin: 0 auto;
+}
+
+    .filter-bar .form-control,
+    .filter-bar .form-select,
+    .filter-bar .btn {
+        font-size: 0.95rem;
+        height: 38px; /* Uniform height for inputs, selects, buttons */
+        padding-top: 0.3rem;
+        padding-bottom: 0.3rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+/* General Form Styling */
+.form-control,
+.form-select {
+    background-color: #f8f9fa;
+}
+
+.form-label {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+/* Button Styling */
+.btn {
+    height: 45px;
+    font-size: 1rem;
+}
+
+
+.notification-item {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+}
+
+    .notification-item p {
+        margin: 5px 0 0 0;
+        font-size: 0.95rem;
+    }
+
+.form-control {
+    background-color: #f8f9fa;
+}
+
+.form-label {
+    font-weight: 600;
+}
