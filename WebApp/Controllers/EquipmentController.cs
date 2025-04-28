@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
+using Helper;
 
 namespace WebApp.Controllers
 {
@@ -16,7 +17,6 @@ namespace WebApp.Controllers
         }
 
         // GET: Equipment
-
         public async Task<IActionResult> Index()
         {
             var rentalDBContext = _context.Equipment
@@ -28,36 +28,6 @@ namespace WebApp.Controllers
             var equipmentList = await rentalDBContext.ToListAsync();
 
             return View(equipmentList);
-        }
-
-        public async Task<IActionResult> GetImage(int id)
-        {
-            var equipment = await _context.Equipment
-                .Include(e => e.Image)
-                .FirstOrDefaultAsync(e => e.Id == id);
-
-            if (equipment?.Image == null || !equipment.Image.Guid.HasValue)
-                return NotFound();
-
-            string guid = equipment.Image.Guid.Value.ToString();
-            string extension = "";
-
-            if (!string.IsNullOrEmpty(equipment.Image.ImageType))
-            {
-                if (equipment.Image.ImageType.ToLower() == "image/png")
-                    extension = ".png";
-                else if (equipment.Image.ImageType.ToLower() == "image/jpeg")
-                    extension = ".jpg"; // or .jpeg
-            }
-
-            var fullKey = guid + extension;
-
-            var stream = await S3Uploader.GetFileByGuidAsync(fullKey);
-            if (stream == null)
-                return NotFound();
-
-            var contentType = equipment.Image.ImageType ?? "application/octet-stream";
-            return File(stream, contentType);
         }
 
 
@@ -95,21 +65,53 @@ namespace WebApp.Controllers
 
         // POST: Equipment/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,RentalPricePerDay,AvailabilityStatusId,ConditionStatusId,CategoryId,IsActive,CreatedAt,UpdatedAt,ImageId")] Equipment equipment)
+        public async Task<IActionResult> Create(Equipment equipment)
         {
+            var uploadedFile = Request.Form.Files["ImageFile"];
+            int? uploadedImageId = null;
+
+            if (uploadedFile != null && uploadedFile.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+                await uploadedFile.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                uploadedImageId = await ImageManager.UploadImageAndSaveToDatabase(
+                    _context,
+                    memoryStream,
+                    uploadedFile.FileName,
+                    uploadedFile.ContentType
+                );
+
+                if (uploadedImageId == null)
+                {
+                    ModelState.AddModelError("", "Failed to upload the image.");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "Please upload an image.");
+            }
+
             if (ModelState.IsValid)
             {
+                if (uploadedImageId.HasValue)
+                {
+                    equipment.ImageId = uploadedImageId.Value;
+                }
+
                 _context.Add(equipment);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            // Repopulate dropdowns
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName", equipment.AvailabilityStatusId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", equipment.CategoryId);
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName", equipment.ConditionStatusId);
-            ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName", equipment.ImageId);
+
             return View(equipment);
         }
 

@@ -12,7 +12,7 @@
             <!-- Equipment Image (Default image if null) -->
             @if (@Model.Image != null)
             {
-                <img src="@Url.Action("GetImage", "Equipment", new { id = @Model.Id })"
+                <img src="@Url.Action("GetImage", "Image", new { id = @Model.Image.ImageId })"
                      alt="Equipment Image" />
             }
             else
