@@ -1,77 +1,106 @@
 ﻿@model Database.Core.Domain.Equipment
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Equipment";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
-
-<h4>Equipment</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RentalPricePerDay" class="control-label"></label>
-                <input asp-for="RentalPricePerDay" class="form-control" />
-                <span asp-validation-for="RentalPricePerDay" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="AvailabilityStatusId" class="control-label"></label>
-                <select asp-for="AvailabilityStatusId" class="form-control" asp-items="ViewBag.AvailabilityStatusId"></select>
-                <span asp-validation-for="AvailabilityStatusId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ConditionStatusId" class="control-label"></label>
-                <select asp-for="ConditionStatusId" class="form-control" asp-items="ViewBag.ConditionStatusId"></select>
-                <span asp-validation-for="ConditionStatusId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CategoryId" class="control-label"></label>
-                <select asp-for="CategoryId" class="form-control" asp-items="ViewBag.CategoryId"></select>
-                <span asp-validation-for="CategoryId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IsActive" class="control-label"></label>
-                <input asp-for="IsActive" class="form-control" />
-                <span asp-validation-for="IsActive" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ImageId" class="control-label"></label>
-                <select asp-for="ImageId" class="form-control" asp-items="ViewBag.ImageId"></select>
-                <span asp-validation-for="ImageId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+<div class="text-center my-4">
+    <h1 class="page-title">Edit Equipment</h1>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="container my-4">
+    <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+    <form asp-action="Edit" enctype="multipart/form-data" method="post">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="row">
+            <!-- Left Side: Form -->
+            <div class="col-md-8">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Name" class="form-label">Name</label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="Description" class="form-label">Description</label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="RentalPricePerDay" class="form-label">Rental Price (BHD / Day)</label>
+                    <input asp-for="RentalPricePerDay" class="form-control" />
+                    <span asp-validation-for="RentalPricePerDay" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="CategoryId" class="form-label">Category</label>
+                    <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId"></select>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="ConditionStatusId" class="form-label">Equipment Condition</label>
+                        <select asp-for="ConditionStatusId" class="form-select" asp-items="ViewBag.ConditionStatusId"></select>
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label asp-for="AvailabilityStatusId" class="form-label">Equipment Availability</label>
+                        <select asp-for="AvailabilityStatusId" class="form-select" asp-items="ViewBag.AvailabilityStatusId"></select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Side: Image Upload Box -->
+            <div class="col-md-4 d-flex flex-column align-items-center">
+                <div class="upload-box" onclick="document.getElementById('fileInput').click();" id="uploadBox">
+                    @if (Model.ImageId.HasValue)
+                    {
+                        <img src="@Url.Action("GetImage", "Image", new { id = Model.ImageId })" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
+                    }
+                    else
+                    {
+                        <span id="upload-text" class="upload-text">Add</span>
+                    }
+                    <input type="file" id="fileInput" name="ImageFile" style="display: none;" accept="image/*" onchange="previewImage(event)" />
+                </div>
+
+                <!-- View Feedbacks button below image -->
+                <a href="@Url.Action("Index", "Feedback", new { equipmentId = Model.Id })" class="btn custom-btn-outline w-100" style="margin-top: 10px;">
+                    View Feedbacks
+                </a>
+
+            </div>
+        </div>
+
+        <!-- Centered Buttons -->
+        <div class="d-flex justify-content-center gap-3 mt-4">
+            <input type="submit" value="Save" class="btn custom-btn" />
+            <a asp-action="Index" class="btn custom-btn-outline">Cancel</a>
+        </div>
+    </form>
 </div>
 
+<script>
+    function previewImage(event) {
+        const file = event.target.files[0];
+        const uploadBox = document.querySelector('.upload-box');
+        const uploadtxt = document.querySelector('.upload-text');
+
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                uploadBox.style.backgroundImage = `url('${e.target.result}')`;
+                uploadBox.style.backgroundSize = 'cover';
+                uploadBox.style.backgroundPosition = 'center';
+                uploadtxt.innerHTML = ''; // Remove the "Add" text
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+</script>

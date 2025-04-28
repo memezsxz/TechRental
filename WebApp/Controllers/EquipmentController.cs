@@ -137,61 +137,68 @@ namespace WebApp.Controllers
 
         // POST: Equipment/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,RentalPricePerDay,AvailabilityStatusId,ConditionStatusId,CategoryId,IsActive,CreatedAt,UpdatedAt,ImageId")] Equipment equipment)
+        public async Task<IActionResult> Edit(int id, Equipment equipment)
         {
             if (id != equipment.Id)
             {
                 return NotFound();
             }
 
+            var existingEquipment = await _context.Equipment.FindAsync(id);
+            if (existingEquipment == null)
+            {
+                return NotFound();
+            }
+
+            var uploadedFile = Request.Form.Files["ImageFile"];
+            int? uploadedImageId = null;
+
+            if (uploadedFile != null && uploadedFile.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+                await uploadedFile.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                uploadedImageId = await ImageManager.UploadImageAndSaveToDatabase(
+                    _context,
+                    memoryStream,
+                    uploadedFile.FileName,
+                    uploadedFile.ContentType
+                );
+
+                if (uploadedImageId.HasValue)
+                {
+                    // Delete old image from S3 if needed
+                    if (existingEquipment.ImageId.HasValue)
+                    {
+                        //await ImageManager.DeleteImageFromDatabaseAndS3(_context, existingEquipment.ImageId.Value);
+                    }
+
+                    existingEquipment.ImageId = uploadedImageId.Value;
+                }
+            }
+
             if (ModelState.IsValid)
             {
-                try
-                {
-                    _context.Update(equipment);
-                    await _context.SaveChangesAsync();
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!EquipmentExists(equipment.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
-                }
+                // Update properties manually (safe updating)
+                existingEquipment.Name = equipment.Name;
+                existingEquipment.Description = equipment.Description;
+                existingEquipment.RentalPricePerDay = equipment.RentalPricePerDay;
+                existingEquipment.CategoryId = equipment.CategoryId;
+                existingEquipment.ConditionStatusId = equipment.ConditionStatusId;
+                existingEquipment.AvailabilityStatusId = equipment.AvailabilityStatusId;
+                existingEquipment.UpdatedAt = DateTime.UtcNow;
+
+                _context.Update(existingEquipment);
+                await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName", equipment.AvailabilityStatusId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", equipment.CategoryId);
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName", equipment.ConditionStatusId);
-            ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName", equipment.ImageId);
-            return View(equipment);
-        }
-
-        // GET: Equipment/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.Equipment == null)
-            {
-                return NotFound();
-            }
-
-            var equipment = await _context.Equipment
-                .Include(e => e.AvailabilityStatus)
-                .Include(e => e.Category)
-                .Include(e => e.ConditionStatus)
-                .Include(e => e.Image)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (equipment == null)
-            {
-                return NotFound();
-            }
 
             return View(equipment);
         }
@@ -199,19 +206,14 @@ namespace WebApp.Controllers
         // POST: Equipment/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        public async Task<IActionResult> Delete(int id)
         {
-            if (_context.Equipment == null)
-            {
-                return Problem("Entity set 'RentalDBContext.Equipment'  is null.");
-            }
             var equipment = await _context.Equipment.FindAsync(id);
             if (equipment != null)
             {
                 _context.Equipment.Remove(equipment);
+                await _context.SaveChangesAsync();
             }
-            
-            await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
