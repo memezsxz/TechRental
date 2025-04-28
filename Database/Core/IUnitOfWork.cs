@@ -7,10 +7,11 @@ using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Database.Core
 {
-    internal interface IUnitOfWork  : IDisposable
+    public interface IUnitOfWork  : IDisposable
     {
         //public ICategoryRepository Category { get; }
         //public IDocumentRepository Document { get; }
@@ -52,6 +53,8 @@ namespace Database.Core
         public  ISystemErrorLogRepository SystemErrorLogs { get;  } //
         public  IUserRepository Users { get;  }
         public  IUserRoleRepository UserRoles { get;  }
-        int Complete();
+        int SaveChanges();
+
+        Task<int> SaveChangesAsync();
     }
 }

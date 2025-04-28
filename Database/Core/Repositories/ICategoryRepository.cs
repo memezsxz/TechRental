@@ -11,5 +11,12 @@ namespace Database.Core.Repositories
 {
     public interface ICategoryRepository : IRepository<Category>, IStatus
     {
+        #region Main
+
+        Task<bool> ExistsAsync(int id);
+
+
+        #endregion
+
     }
 }

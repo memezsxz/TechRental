@@ -11,16 +11,29 @@ namespace Database.Core.Repositories
 {
     public interface IRepository<TEntity> where TEntity : class
     {
-        TEntity Get(int id);
+        TEntity? Get(int id);
         IEnumerable<TEntity> GetAll();
         PaginatedResult GetAll(int pageNumber, int pageSize);
-        IEnumerable<TEntity> Find(Expression<Func<TEntity, bool>> predicate);
-        TEntity SingleOrDefault(Expression<Func<TEntity, bool>> predicate);
         void Add(TEntity entity);
         void AddRange(IEnumerable<TEntity> entities);
 
         void Remove(TEntity entity);
         void RemoveRange(IEnumerable<TEntity> entities);
+        void Update(TEntity entity);
+
+        #region Async
+
+        Task<TEntity> GetAsync(int id);
+        Task<IEnumerable<TEntity>> GetAllAsync();
+        Task<PaginatedResult> GetAllAsync(int pageNumber, int pageSize);
+        Task AddAsync(TEntity entity);
+        Task AddRangeAsync(IEnumerable<TEntity> entities);
+        Task RemoveAsync(TEntity entity);
+        Task RemoveRangeAsync(IEnumerable<TEntity> entities);
+         Task UpdateAsync(TEntity entity);
+        #endregion
+
+        #region Search
 
         public List<String> GetEntityColumnsReflection();
 
@@ -28,5 +41,8 @@ namespace Database.Core.Repositories
 
         public PaginatedResult SearchByColumn(string columnName, string value, int pageNumber, int pageSize, string comparisonOperator = "");
         public IQueryable<object> SelectViewColumns(IQueryable query);
+
+
+        #endregion
     }
 }

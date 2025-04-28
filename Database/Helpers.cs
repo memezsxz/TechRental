@@ -13,7 +13,7 @@ namespace Database
     {
         public static object GetRepositoryForType(Type entityType)
         {
-            var _unitOfWork = new UnitOfWork(new RentalDBContext());
+            var _unitOfWork = new UnitOfWork();
             var unitOfWorkType = typeof(UnitOfWork);
             var properties = unitOfWorkType.GetProperties(BindingFlags.Public | BindingFlags.Instance);
 

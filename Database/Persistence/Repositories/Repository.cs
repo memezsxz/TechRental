@@ -15,6 +15,7 @@ namespace Database.Persistence.Repositories;
 
 internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 {
+
     protected readonly RentalDBContext context;
 
     public Repository(RentalDBContext context)
@@ -22,9 +23,18 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
         this.context = context;
     }
 
-    public TEntity Get(int id)
+    #region Main
+    public TEntity? Get(int id)
     {
-        return context.Set<TEntity>().Find(id);
+        try
+        {
+            return context.Set<TEntity>().Find(id);
+
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
     }
 
     public IEnumerable<TEntity> GetAll()
@@ -32,23 +42,6 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
         return context.Set<TEntity>().ToList();
     }
 
-    public PaginatedResult GetAll(int pageNumber, int pageSize)
-    {
-        IQueryable<object> query = context.Set<TEntity>();
-
-        return GetPaginatedResult(query, pageNumber, pageSize);
-    }
-
-
-    public IEnumerable<TEntity> Find(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate)
-    {
-        return context.Set<TEntity>().Where(predicate);
-    }
-
-    public TEntity SingleOrDefault(System.Linq.Expressions.Expression<Func<TEntity, bool>> predicate)
-    {
-        return context.Set<TEntity>().SingleOrDefault(predicate);
-    }
 
     public void Add(TEntity entity)
     {
@@ -68,6 +61,114 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
     public void RemoveRange(IEnumerable<TEntity> entities)
     {
         context.Set<TEntity>().RemoveRange(entities);
+    }
+
+
+    public void Update(TEntity entity)
+    {
+        if (entity is IToBeTracked trackableEntity)
+        {
+            LogUpdate(trackableEntity.GenerateLogDetails());
+        }
+
+        context.Set<TEntity>().Update(entity);
+    }
+    private async Task LogUpdate(string details)
+    {
+        var log = new AuditLog
+        {
+            //EntityName = typeof(TEntity).Name,
+            //Action = "Update",
+            //ActionTime = DateTime.UtcNow,
+            //Details = details
+        };
+
+        await context.Set<AuditLog>().AddAsync(log);
+    }
+
+    #endregion
+
+    #region Async
+
+    public async Task<TEntity?> GetAsync(int id)
+    {
+        try
+        {
+            return await context.Set<TEntity>().FindAsync(id);
+
+        }
+        catch (Exception e)
+        {
+            return null;
+        }
+    }
+
+    public async Task<IEnumerable<TEntity>> GetAllAsync()
+    {
+        return await context.Set<TEntity>().ToListAsync();
+    }
+
+    public async Task<PaginatedResult> GetAllAsync(int pageNumber, int pageSize)
+    {
+        IQueryable<object> query = context.Set<TEntity>();
+        return await GetPaginatedResultAsync(query, pageNumber, pageSize);
+    }
+
+    public async Task AddAsync(TEntity entity)
+    {
+        await context.Set<TEntity>().AddAsync(entity);
+    }
+
+    public async Task AddRangeAsync(IEnumerable<TEntity> entities)
+    {
+        await context.Set<TEntity>().AddRangeAsync(entities);
+    }
+
+    public async Task RemoveAsync(TEntity entity)
+    {
+        context.Set<TEntity>().Remove(entity);
+        await Task.CompletedTask; // Nothing async needed for Remove, but keeps the signature uniform
+    }
+
+    public async Task RemoveRangeAsync(IEnumerable<TEntity> entities)
+    {
+        context.Set<TEntity>().RemoveRange(entities);
+        await Task.CompletedTask;
+    }
+
+    public async Task UpdateAsync(TEntity entity)
+    {
+        if (entity is IToBeTracked trackableEntity)
+        {
+            await LogUpdateAsync(trackableEntity.GenerateLogDetails());
+        }
+
+        context.Set<TEntity>().Update(entity);
+        await Task.CompletedTask;
+    }
+
+    private async Task LogUpdateAsync(string details)
+    {
+        var log = new AuditLog
+        {
+            //EntityName = typeof(TEntity).Name,
+            //Action = "Update",
+            //ActionTime = DateTime.UtcNow,
+            //Details = details
+        };
+
+        await context.Set<AuditLog>().AddAsync(log);
+    }
+
+    #endregion
+
+
+    // Helper: Async PaginatedResult
+    public PaginatedResult GetAll(int pageNumber, int pageSize)
+    {
+        IQueryable<object> query = context.Set<TEntity>();
+
+        return GetPaginatedResult(query, pageNumber, pageSize);
     }
 
     public List<String> GetEntityColumnsReflection()

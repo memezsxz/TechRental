@@ -9,7 +9,7 @@ namespace FormsApp.views.dialogs;
 public abstract class BaseViewEditDeleteForm : Form
 {
     protected int? id;
-    protected UnitOfWork context = new UnitOfWork(new RentalDBContext());
+    protected UnitOfWork context = new UnitOfWork();
 
     public enum ViewType
     {

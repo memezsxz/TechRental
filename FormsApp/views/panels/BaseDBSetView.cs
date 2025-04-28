@@ -28,7 +28,7 @@ public partial class BaseDBSetView : UserControl
 {
     #region Fields
 
-    private UnitOfWork _context = new UnitOfWork(new RentalDBContext());
+    private UnitOfWork _context = new UnitOfWork();
     private Type currentType;
     private BaseSearchControl currentControl;
     private int totalPages = 0;
