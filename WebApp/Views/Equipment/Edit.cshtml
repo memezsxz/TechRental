@@ -71,7 +71,7 @@
                 </div>
 
                 <!-- View Feedbacks button below image -->
-                <a href="@Url.Action("Index", "Feedback", new { equipmentId = Model.Id })" class="btn custom-btn-outline w-100" style="margin-top: 10px;">
+                <a href="@Url.Action("Index", "Feedback", new { id = Model.Id, status = "Unhidden" })" class="btn custom-btn-outline w-100" style="margin-top: 10px;">
                     View Feedbacks
                 </a>
 
