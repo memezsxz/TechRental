@@ -21,12 +21,13 @@
                         <!-- Card Front -->
                         <div class="card-front">
 
+                            @* <img src="@Url.Action("GetImage", "Image", new { id = user.ImageId })" alt="User Image" /> *@
                             <div class="card-body p-0 position-relative">
                                 @if (item.Image != null)
                                 {
                                     <div class="image-wrapper">
-                                        <img src="@Url.Action("GetImage", "Equipment", new { id = item.Id })"
-                                             alt="Equipment Image"
+                                        <img src="@Url.Action("GetImage", "Image", new { id = item.ImageId })" 
+                                            alt="Equipment Image"
                                              class="equipment-image" />
                                         <div class="image-title-overlay-bottom">
                                             @item.Name

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Tech Rental</title>
     <link rel="stylesheet" href="~/css/Lux.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/equipmentStyle.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebApp.styles.css" asp-append-version="true" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
@@ -99,7 +100,27 @@
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
+
+        <!-- Shared Success/Error Modal -->
+        <div class="modal fade" id="generalMessageModal" tabindex="-1" aria-labelledby="generalMessageModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content rounded-4">
+                    <div class="modal-body text-center">
+                        <i id="modalIcon" class="mb-3" style="font-size: 2rem;"></i>
+                        <p id="modalMessage" class="mb-0"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+    <!-- Hidden TempData fields to be read by JS -->
+    <input type="hidden" id="tempDataMessage" value="@(TempData["MessageText"] ?? "")" />
+    <input type="hidden" id="tempDataMessageType" value="@(TempData["MessageType"] ?? "")" />
+
+    <!-- shared JS file -->
+    <script src="~/js/site-scripts.js" asp-append-version="true"></script>
+
 
     <footer class="border-top footer text-muted">
         <div class="container">
@@ -109,7 +130,6 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
-   
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
