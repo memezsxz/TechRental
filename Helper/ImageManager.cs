@@ -14,16 +14,17 @@ namespace Helper
                 extension = "." + parts[1].ToLower();
             }
 
-            var guid = await S3Uploader.UploadFileAsync(fileStream, fileName, extension);
+            var guid = Guid.NewGuid();
+            var status = await S3Uploader.UploadFileAsync(fileStream, guid, extension);
 
-            if (string.IsNullOrEmpty(guid))
+            if (status == null)
                 return null; // Upload failed
 
             var image = new Image
             {
                 ImageName = fileName,
                 ImageType = contentType,
-                Guid = Guid.Parse(guid),
+                Guid = guid,
                 CreatedAt = DateTime.UtcNow
             };
 

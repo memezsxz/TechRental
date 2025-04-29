@@ -16,11 +16,8 @@ public static class S3Uploader
     }
 
     // Method to upload any file to S3  
-    public static async Task<string> UploadFileAsync(Stream fileStream, string fileName, string fileExtension)
+    public static async Task<Guid?> UploadFileAsync(Stream fileStream, Guid guid, string fileExtension)
     {
-        string guid = Guid.NewGuid().ToString(); // Generate GUID for the file  
-        string key = $"{guid}{fileExtension}"; // Use the GUID as the filename on S3  
-
         try
         {
             // Create a TransferUtility object  
@@ -30,7 +27,7 @@ public static class S3Uploader
             var uploadRequest = new TransferUtilityUploadRequest
             {
                 InputStream = fileStream,
-                Key = key,
+                Key = guid.ToString(),
                 BucketName = _bucketName,
                 ContentType = GetContentType(fileExtension) // Set content type based on the file extension  
             };

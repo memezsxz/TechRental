@@ -53,7 +53,7 @@
             </div>
 
             <div class="mt-4">
-                <a href="@Url.Action("Rent", "Equipment", new { id = Model.Id })" class="btn btn-success custom-action-btn w-100 mb-3">Rent Now</a>
+                <a href="@Url.Action("Create", "RentalRequest", new { equipmentId = Model.Id })" class="btn btn-success custom-action-btn w-100 mb-3">Rent Now</a>
 
                 <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-outline-success custom-action-btn w-100 mb-3">Edit</a>
 
