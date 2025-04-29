@@ -26,11 +26,11 @@
 
         <!-- Right Column: Details -->
         <div class="col-md-6">
-            <h2 class="equipment-title">@Model.Name</h2>
+            <h2 class="equipment-title word-break">@Model.Name</h2>
 
             <div class="equipment-section">
                 <h5 class="section-header">Description</h5>
-                <ul class="description-list">
+                <ul class="description-list word-break">
                     @foreach (var line in (Model.Description ?? "").Split('\n'))
                     {
                         if (!string.IsNullOrWhiteSpace(line))
