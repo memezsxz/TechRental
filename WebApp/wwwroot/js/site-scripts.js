@@ -41,3 +41,14 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 });
 
+
+document.addEventListener("DOMContentLoaded", function () {
+    const priceInput = document.querySelector("input[name='RentalPricePerDay']");
+    if (priceInput) {
+        priceInput.addEventListener("input", function (e) {
+            this.value = this.value.replace(/[^0-9.]/g, '');
+        });
+    }
+});
+
+
