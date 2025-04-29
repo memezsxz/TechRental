@@ -97,14 +97,28 @@ namespace WebApp.Controllers
 
             if (ModelState.IsValid)
             {
-                if (uploadedImageId.HasValue)
+                try
                 {
-                    equipment.ImageId = uploadedImageId.Value;
-                }
+                    if (uploadedImageId.HasValue)
+                    {
+                        equipment.ImageId = uploadedImageId.Value;
+                    }
 
-                _context.Add(equipment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                    _context.Add(equipment);
+                    await _context.SaveChangesAsync();
+
+                    TempData["MessageText"] = "Equipment was saved successfully!";
+                    TempData["MessageType"] = "success";
+                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
+
+                    //return RedirectToAction(nameof(Index));
+                }
+                catch (Exception)
+                {
+                    TempData["MessageText"] = "An error occurred while saving the equipment.";
+                    TempData["MessageType"] = "error";
+                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
+                }
             }
 
             // Repopulate dropdowns
@@ -173,7 +187,7 @@ namespace WebApp.Controllers
                     // Delete old image from S3 if needed
                     if (existingEquipment.ImageId.HasValue)
                     {
-                        //await ImageManager.DeleteImageFromDatabaseAndS3(_context, existingEquipment.ImageId.Value);
+                        // await ImageManager.DeleteImageFromDatabaseAndS3(_context, existingEquipment.ImageId.Value);
                     }
 
                     existingEquipment.ImageId = uploadedImageId.Value;
@@ -182,26 +196,40 @@ namespace WebApp.Controllers
 
             if (ModelState.IsValid)
             {
-                // Update properties manually (safe updating)
-                existingEquipment.Name = equipment.Name;
-                existingEquipment.Description = equipment.Description;
-                existingEquipment.RentalPricePerDay = equipment.RentalPricePerDay;
-                existingEquipment.CategoryId = equipment.CategoryId;
-                existingEquipment.ConditionStatusId = equipment.ConditionStatusId;
-                existingEquipment.AvailabilityStatusId = equipment.AvailabilityStatusId;
-                existingEquipment.UpdatedAt = DateTime.UtcNow;
+                try
+                {
+                    // Update properties manually
+                    existingEquipment.Name = equipment.Name;
+                    existingEquipment.Description = equipment.Description;
+                    existingEquipment.RentalPricePerDay = equipment.RentalPricePerDay;
+                    existingEquipment.CategoryId = equipment.CategoryId;
+                    existingEquipment.ConditionStatusId = equipment.ConditionStatusId;
+                    existingEquipment.AvailabilityStatusId = equipment.AvailabilityStatusId;
+                    existingEquipment.UpdatedAt = DateTime.UtcNow;
 
-                _context.Update(existingEquipment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                    _context.Update(existingEquipment);
+                    await _context.SaveChangesAsync();
+
+                    TempData["MessageText"] = "Equipment was saved successfully!";
+                    TempData["MessageType"] = "success";
+                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
+                }
+                catch (Exception)
+                {
+                    TempData["MessageText"] = "An error occurred while saving the equipment.";
+                    TempData["MessageType"] = "error";
+                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
+                }
             }
 
+            // If ModelState is not valid
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName", equipment.AvailabilityStatusId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", equipment.CategoryId);
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName", equipment.ConditionStatusId);
 
             return View(equipment);
         }
+
 
         // POST: Equipment/Delete/5
         [HttpPost, ActionName("Delete")]
