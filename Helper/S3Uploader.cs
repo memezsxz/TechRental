@@ -75,20 +75,28 @@ public static class S3Uploader
         }
     }
 
-    public static async Task<string> GeneratePreSignedURL(string guid)
+    public static async Task<bool> DeleteFileAsync(Guid guid)
     {
-        string key = guid;  // Key is the GUID filename
-
-        var request = new GetPreSignedUrlRequest
+        try
         {
-            BucketName = _bucketName,
-            Key = key,
-            Expires = DateTime.UtcNow.AddMinutes(60) // URL valid for 60 minutes
-        };
+            var deleteRequest = new DeleteObjectRequest
+            {
+                BucketName = _bucketName,
+                Key = guid.ToString()
+            };
 
-        string url = _s3Client.GetPreSignedURL(request);
-        return url;
+            var response = await _s3Client.DeleteObjectAsync(deleteRequest);
+
+            Console.WriteLine($"✅ File deleted successfully with GUID: {guid}");
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"❌ Error deleting file: {ex.Message}");
+            return false;
+        }
     }
+
 
     // Helper method to return the appropriate MIME type based on file extension  
     private static string GetContentType(string extension)

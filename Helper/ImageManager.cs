@@ -33,5 +33,21 @@ namespace Helper
 
             return image.ImageId;
         }
+
+        public static async Task<bool> DeleteImageFromDatabaseAndS3(RentalDBContext context, int imageId)
+        {
+            var image = await context.Images.FindAsync(imageId);
+            if (image == null)
+                return false; // Image not found
+
+            var deletedFromS3 = await S3Uploader.DeleteFileAsync((Guid)image.Guid);
+            if (!deletedFromS3)
+                return false; // S3 deletion failed
+
+            context.Images.Remove(image);
+            await context.SaveChangesAsync();
+            return true;
+        }
     }
+
 }

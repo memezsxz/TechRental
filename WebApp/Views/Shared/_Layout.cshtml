@@ -101,22 +101,37 @@
             @RenderBody()
         </main>
 
-        <!-- Shared Success/Error Modal -->
+
+        <!-- Shared Success/Error/Info/Question Modal -->
         <div class="modal fade" id="generalMessageModal" tabindex="-1" aria-labelledby="generalMessageModalLabel" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content rounded-4">
                     <div class="modal-body text-center">
                         <i id="modalIcon" class="mb-3" style="font-size: 2rem;"></i>
                         <p id="modalMessage" class="mb-0"></p>
+
+                        <!-- Dynamic question buttons -->
+                        <div id="questionActions" class="mt-4 d-none gap-3 justify-content-center">
+                            <form id="confirmForm" method="post">
+                                <input type="hidden" name="id" id="confirmId" />
+                                <button type="submit" class="btn btn-success px-4">Yes</button>
+                            </form>
+                            <button type="button" class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+
+
+        <!-- Hidden TempData fields to be read by JS -->
+        <input type="hidden" id="tempDataMessage" value="@(TempData["MessageText"] ?? "")" />
+        <input type="hidden" id="tempDataMessageType" value="@(TempData["MessageType"] ?? "")" />
+        <input type="hidden" id="deleteTargetId" value="@(TempData["DeleteTargetId"] ?? "")" />
+
     </div>
 
-    <!-- Hidden TempData fields to be read by JS -->
-    <input type="hidden" id="tempDataMessage" value="@(TempData["MessageText"] ?? "")" />
-    <input type="hidden" id="tempDataMessageType" value="@(TempData["MessageType"] ?? "")" />
+
 
     <!-- shared JS file -->
     <script src="~/js/site-scripts.js" asp-append-version="true"></script>

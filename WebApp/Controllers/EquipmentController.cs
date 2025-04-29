@@ -241,16 +241,92 @@ namespace WebApp.Controllers
             var equipment = await _context.Equipment.FindAsync(id);
             if (equipment != null)
             {
+                var flag = await ImageManager.DeleteImageFromDatabaseAndS3(_context, equipment.ImageId.Value);
+
+                if (!flag)
+                {
+                    TempData["MessageText"] = "Failed to delete the equipment from S3.";
+                    TempData["MessageType"] = "error";
+                    return RedirectToAction(nameof(Index));
+                }
+
                 _context.Equipment.Remove(equipment);
+                TempData["MessageText"] = "Equipment deleted successfully.";
+                TempData["MessageType"] = "success";
                 await _context.SaveChangesAsync();
             }
             return RedirectToAction(nameof(Index));
         }
 
-        private bool EquipmentExists(int id)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCheck(int id)
         {
-            return (_context.Equipment?.Any(e => e.Id == id)).GetValueOrDefault();
+            var equipment = await _context.Equipment.FindAsync(id);
+            if (equipment == null)
+            {
+                TempData["MessageText"] = "Equipment not found.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+
+            bool isReferenced = await _context.RentalRequests.AnyAsync(r => r.EquipmentId == id);
+
+            if (!isReferenced)
+            {
+                // Safe to delete
+                if (equipment.ImageId.HasValue)
+                {
+                    var flag = await ImageManager.DeleteImageFromDatabaseAndS3(_context, equipment.ImageId.Value);
+                    if (!flag)
+                    {
+                        TempData["MessageText"] = "Failed to delete equipment image.";
+                        TempData["MessageType"] = "error";
+                        return RedirectToAction(nameof(Index));
+                    }
+                }
+
+                _context.Equipment.Remove(equipment);
+                await _context.SaveChangesAsync();
+
+                TempData["MessageText"] = "Equipment deleted successfully.";
+                TempData["MessageType"] = "success";
+                return RedirectToAction(nameof(Index));
+            }
+            else
+            {
+                // Has FK references → Ask if user wants to set it as inactive
+                TempData["MessageText"] = "This equipment is in use and cannot be deleted. Do you want to mark it as inactive instead?";
+                TempData["MessageType"] = "question";
+                TempData["DeleteTargetId"] = id;
+
+                return RedirectToAction(nameof(Details), new { id });
+            }
         }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetInactive(int id)
+        {
+            var equipment = await _context.Equipment.FindAsync(id);
+            if (equipment == null)
+            {
+                TempData["MessageText"] = "Equipment not found.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction(nameof(Index));
+            }
+
+            equipment.IsActive = false;
+            _context.Equipment.Update(equipment);
+            await _context.SaveChangesAsync();
+
+            TempData["MessageText"] = "Equipment marked as inactive.";
+            TempData["MessageType"] = "success";
+            return RedirectToAction(nameof(Index));
+        }
+
+
+
 
         //[HttpGet]
         //public async Task ConvertImageToWebpAndUpdateAsync(int id = 1)

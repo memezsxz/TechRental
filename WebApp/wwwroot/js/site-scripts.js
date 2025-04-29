@@ -18,29 +18,40 @@
 document.addEventListener("DOMContentLoaded", function () {
     const message = document.getElementById("tempDataMessage")?.value;
     const type = document.getElementById("tempDataMessageType")?.value;
+    const targetId = document.getElementById("deleteTargetId")?.value;
 
     if (message && type) {
         const icon = document.getElementById("modalIcon");
         const msgText = document.getElementById("modalMessage");
+        const questionActions = document.getElementById("questionActions");
+        const modal = new bootstrap.Modal(document.getElementById("generalMessageModal"));
 
         msgText.textContent = message;
 
         if (type === "success") {
             icon.className = "fas fa-check-circle text-success mb-3";
-        } else {
-            icon.className = "fas fa-exclamation-circle text-danger mb-3";
+        } else if (type === "error") {
+            icon.className = "fas fa-times-circle text-danger mb-3";
+        } else if (type === "warning") {
+            icon.className = "fas fa-exclamation-triangle text-warning mb-3";
+        } else if (type === "question") {
+            icon.className = "fas fa-question-circle text-info mb-3";
+
+            // Show Yes/Cancel buttons
+            questionActions.classList.remove("d-none");
+            document.getElementById("confirmId").value = targetId;
+            document.getElementById("confirmForm").action = "/Equipment/SetInactive";
         }
 
-        const modal = new bootstrap.Modal(document.getElementById("generalMessageModal"));
         modal.show();
 
-        // Auto close after 1.5 seconds
-        setTimeout(() => {
-            modal.hide();
-        }, 1500);
+        if (type !== "question") {
+            setTimeout(() => {
+                modal.hide();
+            }, 2500);
+        }
     }
 });
-
 
 document.addEventListener("DOMContentLoaded", function () {
     const priceInput = document.querySelector("input[name='RentalPricePerDay']");
