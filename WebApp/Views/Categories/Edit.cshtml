@@ -32,14 +32,14 @@
                 <!-- Name -->
                 <div class="mb-3">
                     <label asp-for="Name" class="form-label fw-semibold"></label>
-                    <input asp-for="Name" class="form-control form-control" />
+                    <input asp-for="Name" class="form-control form-control" required />
                     <span asp-validation-for="Name" class="text-danger small"></span>
                 </div>
 
                 <!-- Description -->
                 <div class="mb-4">
                     <label asp-for="Description" class="form-label fw-semibold"></label>
-                    <textarea asp-for="Description" rows="3" class="form-control"></textarea>
+                    <textarea asp-for="Description" rows="3" class="form-control" required></textarea>
                     <span asp-validation-for="Description" class="text-danger small"></span>
                 </div>
 
