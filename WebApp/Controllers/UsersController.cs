@@ -11,6 +11,8 @@ using WebApp.ViewModel;
 using Database.Core;
 using static Database.Core.Repositories.IUserRepository;
 using Database.Core.Repositories;
+using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Drawing.Printing;
 
 
 namespace WebApp.Controllers
@@ -28,10 +30,12 @@ namespace WebApp.Controllers
         
 
         //Index ==> Get method (Display the view)
-        public async Task<IActionResult> Index(string? searchString, string? roleFilter, SortOption? sortBy)
+        public async Task<IActionResult> Index(string? searchString, string? roleFilter, SortOption? sortBy, int page = 1, int pageSize = 10)
         {
-            var users = await _unitOfWork.Users.GetUsersAsync(searchString, roleFilter, sortBy);
+            var allUsers = await _unitOfWork.Users.GetUsersAsync(searchString, roleFilter, sortBy);
             var roles = await _unitOfWork.UserRoles.GetAllAsync();
+            var totalUsers = allUsers.Count();
+            var users = allUsers.Skip((page - 1) * pageSize).Take(pageSize).ToList();
 
             var viewModel = new ListUsersViewModel
             {
@@ -40,7 +44,9 @@ namespace WebApp.Controllers
                 SearchString = searchString,
                 RoleFilter = roleFilter,
                 CurrentSort = sortBy,
-                SortOptions = Enum.GetValues(typeof(IUserRepository.SortOption)).Cast<IUserRepository.SortOption>()
+                SortOptions = Enum.GetValues(typeof(IUserRepository.SortOption)).Cast<IUserRepository.SortOption>(),
+                CurrentPage = page,
+                TotalPages = (int)Math.Ceiling(totalUsers / (double)pageSize)
             };
 
             return View(viewModel);

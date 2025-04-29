@@ -6,7 +6,8 @@ namespace WebApp.ViewModel
 {
     public class ListUsersViewModel
     {
-
+        public int CurrentPage { get; set; }
+        public int TotalPages { get; set; }
         public IEnumerable<UserRole> RolesList { get; set; }
         public IEnumerable<User> UsersList { get; set; }
         public string? SearchString { get; set; }
