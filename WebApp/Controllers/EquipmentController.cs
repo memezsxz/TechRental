@@ -4,11 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
 using Helper;
-using Amazon.S3.Model;
-using Amazon.S3;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Webp;
-using SixLabors.ImageSharp.Processing;
 
 namespace WebApp.Controllers
 {
@@ -257,35 +252,35 @@ namespace WebApp.Controllers
             return (_context.Equipment?.Any(e => e.Id == id)).GetValueOrDefault();
         }
 
-        [HttpGet]
-        public async Task ConvertImageToWebpAndUpdateAsync(int id = 1)
-        {
-            var imageRecord = await _context.Images.FirstOrDefaultAsync(i => i.ImageId == id);
-            if (imageRecord == null) return;
+        //[HttpGet]
+        //public async Task ConvertImageToWebpAndUpdateAsync(int id = 1)
+        //{
+        //    var imageRecord = await _context.Images.FirstOrDefaultAsync(i => i.ImageId == id);
+        //    if (imageRecord == null) return;
 
-            using var getResponse = await S3Uploader.GetFileByGuidAsync(imageRecord.Guid.ToString()!);
-            using var originalImage = await SixLabors.ImageSharp.Image.LoadAsync(getResponse);
+        //    using var getResponse = await S3Uploader.GetFileByGuidAsync(imageRecord.Guid.ToString()!);
+        //    using var originalImage = await SixLabors.ImageSharp.Image.LoadAsync(getResponse);
 
-            // Convert to WebP
-            using var webpStream = new MemoryStream();
-            await originalImage.SaveAsync(webpStream, new WebpEncoder { Quality = 80 });
-            webpStream.Position = 0;
+        //    // Convert to WebP
+        //    using var webpStream = new MemoryStream();
+        //    await originalImage.SaveAsync(webpStream, new WebpEncoder { Quality = 80 });
+        //    webpStream.Position = 0;
 
-            // Generate new filename and GUID
-            var newGuid = Guid.NewGuid();
-            var newFileName = Path.GetFileNameWithoutExtension(imageRecord.ImageName) + ".webp";
+        //    // Generate new filename and GUID
+        //    var newGuid = Guid.NewGuid();
+        //    var newFileName = Path.GetFileNameWithoutExtension(imageRecord.ImageName) + ".webp";
 
-            // Upload to S3
-            await S3Uploader.UploadFileAsync(webpStream, newGuid, ".webp");
+        //    // Upload to S3
+        //    await S3Uploader.UploadFileAsync(webpStream, newGuid, ".webp");
 
-            // Update DB record
-            imageRecord.ImageName = newFileName;
-            imageRecord.ImageType = "image/webp";
-            imageRecord.Guid = newGuid;
-            imageRecord.CreatedAt = DateTime.UtcNow;
+        //    // Update DB record
+        //    imageRecord.ImageName = newFileName;
+        //    imageRecord.ImageType = "image/webp";
+        //    imageRecord.Guid = newGuid;
+        //    imageRecord.CreatedAt = DateTime.UtcNow;
 
-            await _context.SaveChangesAsync();
-        }
+        //    await _context.SaveChangesAsync();
+        //}
 
     }
 }
