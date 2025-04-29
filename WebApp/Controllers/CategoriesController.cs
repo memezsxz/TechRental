@@ -14,11 +14,11 @@ namespace WebApp.Controllers
     public class CategoriesController : Controller
     {
 
-        private readonly IUnitOfWork _unitOfWork = new UnitOfWork();
+        private readonly IUnitOfWork _unitOfWork;
 
-        public CategoriesController()
+        public CategoriesController(IUnitOfWork unitOfWork)
         {
-            //_unitOfWork = unitOfWork;
+            _unitOfWork = unitOfWork;
         }
 
         // GET: Categories
