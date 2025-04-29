@@ -40,11 +40,13 @@ namespace WebApp.Controllers
             }
 
             var equipment = await _context.Equipment
-                .Include(e => e.AvailabilityStatus)
-                .Include(e => e.Category)
-                .Include(e => e.ConditionStatus)
-                .Include(e => e.Image)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                    .Include(e => e.Image)
+                    .Include(e => e.AvailabilityStatus)
+                    .Include(e => e.ConditionStatus)
+                    .Include(e => e.Feedbacks)
+                        .ThenInclude(f => f.User)
+                    .FirstOrDefaultAsync(e => e.Id == id);
+
             if (equipment == null)
             {
                 return NotFound();

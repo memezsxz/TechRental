@@ -78,16 +78,39 @@
             <div class="list-group">
                 @foreach (var comment in Model.Feedbacks)
                 {
-                    <div class="list-group-item mb-2 rounded border">
+                    <div class="list-group-item mb-4 p-3 border rounded shadow-sm">
                         <div class="d-flex align-items-center mb-2">
-                            <div class="rounded-circle bg-light d-flex justify-content-center align-items-center" style="width:40px; height:40px;">
-                                <i class="fas fa-user"></i>
+                            @if (comment.User.ImageId != null)
+                            {
+                                <img src="@Url.Action("GetImage", "Image", new { id = comment.User.ImageId })"
+                                     class="user-avatar me-3"
+                                     alt="User Avatar" />
+                            }
+                            else
+                            {
+                                <div class="rounded-circle bg-light text-muted d-flex justify-content-center align-items-center me-3"
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            }
+
+                            <div>
+                                <strong>@comment.User.FirstName @comment.User.LastName</strong>
+                                <div class="text-warning">
+                                    <div>
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fa fa-star @(i <= comment.Rate ? "star-green" : "star-gray")"></i>
+                                        }
+                                    </div>
+
+                                </div>
                             </div>
-                            <strong class="ms-3">@comment.User.FirstName @comment.User.LastName</strong>
                         </div>
-                        <p class="text-muted mb-1">@comment.Note</p>
+                        <p class="text-dark mb-0">@comment.Note</p>
                     </div>
                 }
+
             </div>
         </div>
     </div>
@@ -115,3 +138,8 @@
         </div>
     </div>
 </div>
+
+<style>
+
+
+</style>
