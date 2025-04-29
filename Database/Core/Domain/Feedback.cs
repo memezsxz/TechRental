@@ -29,10 +29,15 @@ namespace Database.Core.Domain
         public DateTime? CreatedAt { get; set; }
         [Column("updated_at", TypeName = "datetime")]
         public DateTime? UpdatedAt { get; set; }
+        [Column("rental_record_id")]
+        public int? RentalRecordId { get; set; }
 
         [ForeignKey("EquipmentId")]
         [InverseProperty("Feedbacks")]
         public virtual Equipment? Equipment { get; set; }
+        [ForeignKey("RentalRecordId")]
+        [InverseProperty("Feedbacks")]
+        public virtual RentalRecord? RentalRecord { get; set; }
         [ForeignKey("UserId")]
         [InverseProperty("Feedbacks")]
         public virtual User? User { get; set; }

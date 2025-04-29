@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Database.Core.Domain;
-using DotNetEnv;
 
 namespace Database.Persistence
 {
@@ -19,7 +18,7 @@ namespace Database.Persistence
         }
 
         public virtual DbSet<AuditLog> AuditLogs { get; set; } = null!;
-        public virtual DbSet<Category?> Categories { get; set; } = null!;
+        public virtual DbSet<Category> Categories { get; set; } = null!;
         public virtual DbSet<Document> Documents { get; set; } = null!;
         public virtual DbSet<Equipment> Equipment { get; set; } = null!;
         public virtual DbSet<EquipmentAvailabilityStatus> EquipmentAvailabilityStatuses { get; set; } = null!;
@@ -43,30 +42,11 @@ namespace Database.Persistence
         {
             if (!optionsBuilder.IsConfigured)
             {
-                // Load environment variables from .env file
-                string projectRoot = Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\"));
-                string customEnvFilePath = Path.Combine(projectRoot, "Config.env");
-                //Console.WriteLine(customEnvFilePath);
-                Env.Load(customEnvFilePath);
-
-                // Retrieve credentials from environment variables
-                string server = Env.GetString("DB_SERVER");
-                string database = Env.GetString("DB_NAME");
-                string user = Env.GetString("DB_USER");
-                string password = Env.GetString("DB_PASSWORD");
-                string encrypt = Env.GetString("DB_ENCRYPT", "False");
-                string trustServerCert = Env.GetString("DB_TRUST_SERVER_CERT", "True");
-
-                // Build the connection string
-                string connectionString = $"Server={server};Database={database};User Id={user};Password={password};Encrypt={encrypt};TrustServerCertificate={trustServerCert};";
-
-                // Configure the database connection
-                optionsBuilder.UseSqlServer(connectionString);
-
-                //optionsBuilder.UseSqlServer("Server=(localdb)\\MSSQLLocalDB;Database=RentalDB;Trusted_Connection=True;");
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see http://go.microsoft.com/fwlink/?LinkId=723263.
+                optionsBuilder.UseSqlServer("Server=reboot08.com;Database=RentalDB;User Id=sa;Password='caliber,willpower,enjoyably,ending,giggling,P5';Encrypt=True;TrustServerCertificate=True;");
             }
         }
-        
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<AuditLog>(entity =>
@@ -141,6 +121,11 @@ namespace Database.Persistence
                     .WithMany(p => p.Feedbacks)
                     .HasForeignKey(d => d.EquipmentId)
                     .HasConstraintName("FK__Feedback__equipm__6D0D32F4");
+
+                entity.HasOne(d => d.RentalRecord)
+                    .WithMany(p => p.Feedbacks)
+                    .HasForeignKey(d => d.RentalRecordId)
+                    .HasConstraintName("FK_Feedback_RentalRecord");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Feedbacks)
