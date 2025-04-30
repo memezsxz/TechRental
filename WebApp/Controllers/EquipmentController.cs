@@ -259,7 +259,13 @@ namespace WebApp.Controllers
                 _context.Equipment.Remove(equipment);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true });
+                return Json(new
+                {
+                    success = true,
+                    message = "Equipment deleted successfully.",
+                    redirectUrl = Url.Action("Index"),
+                    type = "success"
+                });
             }
         }
 
