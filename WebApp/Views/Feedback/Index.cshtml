@@ -1,78 +1,63 @@
 ﻿@model IEnumerable<Database.Core.Domain.Feedback>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Feedback";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Index</h1>
+<div class="container my-5">
+    <div class="mb-3">
+        <a asp-action="Index" asp-controller="Equipment" class="text-success text-decoration-none">&lt; Back</a>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Note)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Rate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TimeDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.IsHidden)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Equipment)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.User)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.Note)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Rate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TimeDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.IsHidden)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Equipment.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.User.Email)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+    <!-- Title -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="page-title">FEEDBACK</h2>
+
+        <!-- Toggle Buttons -->
+        <div class="btn-group" role="group">
+            <a href="@Url.Action("Index", "Feedback", new { id = ViewBag.EquipmentId, status = "Hidden" })"
+               class="btn btn-outline-success px-4 @(ViewBag.Status == "Hidden" ? "active" : "")"
+               style="border-radius: 8px 0 0 8px;">
+                HIDDEN
+            </a>
+            <a href="@Url.Action("Index", "Feedback", new { id = ViewBag.EquipmentId, status = "Unhidden" })"
+               class="btn btn-outline-success px-4 @(ViewBag.Status == "Unhidden" ? "active" : "")"
+               style="border-radius: 0 8px 8px 0;">
+                UNHIDDEN
+            </a>
+        </div>
+    </div>
+
+    <!-- Feedback Cards -->
+    @foreach (var comment in Model)
+    {
+        <div class="feedback-card d-flex justify-content-between align-items-center py-3 border-bottom">
+            <div class="d-flex align-items-start">
+                <img src="@Url.Action("GetImage", "Image", new { id = comment.User.ImageId })"
+                     class="user-avatar me-3"
+                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; margin-top: -6px;"
+                     alt="User Avatar"
+                     loading="lazy" />
+                <div>
+                    <strong>@comment.User.FirstName @comment.User.LastName</strong>
+                    <p class="text-muted mb-1">@comment.Note</p>
+                    <div class="rating-stars">
+                        @for (int i = 1; i <= 5; i++)
+                        {
+                            <i class="fa fa-star @(i <= comment.Rate ? "text-success" : "text-secondary")"></i>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <form asp-action="Edit" asp-route-id="@comment.Id" method="post" class="align-self-center">
+                <button type="submit"
+                        class="btn text-white"
+                        style="background-color: #dc3545; border-radius: 8px; border: 1px solid #dc3545; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); padding: 6px 18px;">
+                    @(comment.IsHidden == true ? "Unhide" : "Hide")
+                </button>
+            </form>
+        </div>
+    }
+</div>

@@ -11,6 +11,8 @@ namespace Database.Core.Repositories
 {
     public interface IRepository<TEntity> where TEntity : class
     {
+        #region Main
+
         TEntity? Get(int id);
         IEnumerable<TEntity> GetAll();
         PaginatedResult GetAll(int pageNumber, int pageSize);
@@ -21,6 +23,8 @@ namespace Database.Core.Repositories
         void RemoveRange(IEnumerable<TEntity> entities);
         void Update(TEntity entity);
 
+        #endregion
+
         #region Async
 
         Task<TEntity> GetAsync(int id);
@@ -30,7 +34,7 @@ namespace Database.Core.Repositories
         Task AddRangeAsync(IEnumerable<TEntity> entities);
         Task RemoveAsync(TEntity entity);
         Task RemoveRangeAsync(IEnumerable<TEntity> entities);
-         Task UpdateAsync(TEntity entity);
+        Task UpdateAsync(TEntity entity);
         #endregion
 
         #region Search
@@ -41,7 +45,6 @@ namespace Database.Core.Repositories
 
         public PaginatedResult SearchByColumn(string columnName, string value, int pageNumber, int pageSize, string comparisonOperator = "");
         public IQueryable<object> SelectViewColumns(IQueryable query);
-
 
         #endregion
     }

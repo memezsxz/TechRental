@@ -11,6 +11,7 @@ namespace Database.Core.Domain
     {
         public RentalRecord()
         {
+            Feedbacks = new HashSet<Feedback>();
             Payments = new HashSet<Payment>();
         }
 
@@ -52,6 +53,8 @@ namespace Database.Core.Domain
         [ForeignKey("ReturnConditionId")]
         [InverseProperty("RentalRecords")]
         public virtual ReturnConditionStatus? ReturnCondition { get; set; }
+        [InverseProperty("RentalRecord")]
+        public virtual ICollection<Feedback> Feedbacks { get; set; }
         [InverseProperty("RentalRecord")]
         public virtual ICollection<Payment> Payments { get; set; }
     }

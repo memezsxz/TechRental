@@ -10,6 +10,10 @@ namespace Database.Core.Repositories
 {
     public interface IEquipmentRepository : IRepository<Equipment>, IStatus
     {
-      
+        Task<IEnumerable<Equipment>> GetAllWithDetailsAsync();
+        Task<Equipment?> GetByIdWithDetailsAsync(int id);
+        Task<Equipment?> GetEquipmentWithImageAsync(int id);
+        Task<bool> EquipmentExistsAsync(int id);
+
     }
 }

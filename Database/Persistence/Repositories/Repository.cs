@@ -42,6 +42,12 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
         return context.Set<TEntity>().ToList();
     }
 
+    public PaginatedResult GetAll(int pageNumber, int pageSize)
+    {
+        IQueryable<object> query = context.Set<TEntity>();
+
+        return GetPaginatedResult(query, pageNumber, pageSize);
+    }
 
     public void Add(TEntity entity)
     {
@@ -63,7 +69,6 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
         context.Set<TEntity>().RemoveRange(entities);
     }
 
-
     public void Update(TEntity entity)
     {
         if (entity is IToBeTracked trackableEntity)
@@ -75,15 +80,16 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
     }
     private async Task LogUpdate(string details)
     {
-        var log = new AuditLog
-        {
-            //EntityName = typeof(TEntity).Name,
-            //Action = "Update",
-            //ActionTime = DateTime.UtcNow,
-            //Details = details
-        };
+        Console.WriteLine("Logged");
+        //var log = new AuditLog
+        //{
+        //    //EntityName = typeof(TEntity).Name,
+        //    //Action = "Update",
+        //    //ActionTime = DateTime.UtcNow,
+        //    //Details = details
+        //};
 
-        await context.Set<AuditLog>().AddAsync(log);
+        //await context.Set<AuditLog>().AddAsync(log);
     }
 
     #endregion
@@ -113,7 +119,6 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
         IQueryable<object> query = context.Set<TEntity>();
         return await GetPaginatedResultAsync(query, pageNumber, pageSize);
     }
-
     public async Task AddAsync(TEntity entity)
     {
         await context.Set<TEntity>().AddAsync(entity);
@@ -162,19 +167,15 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
 
     #endregion
 
+    #region Columns
 
-    // Helper: Async PaginatedResult
-    public PaginatedResult GetAll(int pageNumber, int pageSize)
-    {
-        IQueryable<object> query = context.Set<TEntity>();
-
-        return GetPaginatedResult(query, pageNumber, pageSize);
-    }
-
-    public List<String> GetEntityColumnsReflection()
+        public List<String> GetEntityColumnsReflection()
     {
         return typeof(TEntity).GetProperties(BindingFlags.Public | BindingFlags.Instance)
             .Select(p => p.Name)
             .ToList();
     }
+
+
+    #endregion
 }

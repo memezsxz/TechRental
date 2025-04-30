@@ -118,7 +118,7 @@ namespace FormsApp.views.dialogs
 
         private bool FetchItem()
         {
-            item = context.Equipment.Find(e => e.Id == id).FirstOrDefault();
+            item = context.Equipment.Get(id.Value);
 
             if (item == null)
             {

@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
+using Helper;
 
 namespace WebApp.Controllers
 {
@@ -16,7 +17,6 @@ namespace WebApp.Controllers
         }
 
         // GET: Equipment
-
         public async Task<IActionResult> Index()
         {
             var rentalDBContext = _context.Equipment
@@ -30,36 +30,6 @@ namespace WebApp.Controllers
             return View(equipmentList);
         }
 
-        public async Task<IActionResult> GetImage(int id)
-        {
-            var equipment = await _context.Equipment
-                .Include(e => e.Image)
-                .FirstOrDefaultAsync(e => e.Id == id);
-
-            if (equipment?.Image == null || !equipment.Image.Guid.HasValue)
-                return NotFound();
-
-            string guid = equipment.Image.Guid.Value.ToString();
-            string extension = "";
-
-            if (!string.IsNullOrEmpty(equipment.Image.ImageType))
-            {
-                if (equipment.Image.ImageType.ToLower() == "image/png")
-                    extension = ".png";
-                else if (equipment.Image.ImageType.ToLower() == "image/jpeg")
-                    extension = ".jpg"; // or .jpeg
-            }
-
-            var fullKey = guid + extension;
-
-            var stream = await S3Uploader.GetFileByGuidAsync(fullKey);
-            if (stream == null)
-                return NotFound();
-
-            var contentType = equipment.Image.ImageType ?? "application/octet-stream";
-            return File(stream, contentType);
-        }
-
 
         // GET: Equipment/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -70,11 +40,13 @@ namespace WebApp.Controllers
             }
 
             var equipment = await _context.Equipment
-                .Include(e => e.AvailabilityStatus)
-                .Include(e => e.Category)
-                .Include(e => e.ConditionStatus)
-                .Include(e => e.Image)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                    .Include(e => e.Image)
+                    .Include(e => e.AvailabilityStatus)
+                    .Include(e => e.ConditionStatus)
+                    .Include(e => e.Feedbacks)
+                        .ThenInclude(f => f.User)
+                    .FirstOrDefaultAsync(e => e.Id == id);
+
             if (equipment == null)
             {
                 return NotFound();
@@ -95,21 +67,67 @@ namespace WebApp.Controllers
 
         // POST: Equipment/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Name,Description,RentalPricePerDay,AvailabilityStatusId,ConditionStatusId,CategoryId,IsActive,CreatedAt,UpdatedAt,ImageId")] Equipment equipment)
+        public async Task<IActionResult> Create(Equipment equipment)
         {
+            var uploadedFile = Request.Form.Files["ImageFile"];
+            int? uploadedImageId = null;
+
+            if (uploadedFile != null && uploadedFile.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+                await uploadedFile.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                uploadedImageId = await ImageManager.UploadImageAndSaveToDatabase(
+                    _context,
+                    memoryStream,
+                    uploadedFile.FileName,
+                    uploadedFile.ContentType
+                );
+
+                if (uploadedImageId == null)
+                {
+                    ModelState.AddModelError("", "Failed to upload the image.");
+                }
+            }
+            else
+            {
+                ModelState.AddModelError("", "Please upload an image.");
+            }
+
             if (ModelState.IsValid)
             {
-                _context.Add(equipment);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                try
+                {
+                    if (uploadedImageId.HasValue)
+                    {
+                        equipment.ImageId = uploadedImageId.Value;
+                    }
+
+                    _context.Add(equipment);
+                    await _context.SaveChangesAsync();
+
+                    TempData["MessageText"] = "Equipment was saved successfully!";
+                    TempData["MessageType"] = "success";
+                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
+
+                    //return RedirectToAction(nameof(Index));
+                }
+                catch (Exception)
+                {
+                    TempData["MessageText"] = "An error occurred while saving the equipment.";
+                    TempData["MessageType"] = "error";
+                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
+                }
             }
+
+            // Repopulate dropdowns
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName", equipment.AvailabilityStatusId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", equipment.CategoryId);
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName", equipment.ConditionStatusId);
-            ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName", equipment.ImageId);
+
             return View(equipment);
         }
 
@@ -135,87 +153,164 @@ namespace WebApp.Controllers
 
         // POST: Equipment/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,RentalPricePerDay,AvailabilityStatusId,ConditionStatusId,CategoryId,IsActive,CreatedAt,UpdatedAt,ImageId")] Equipment equipment)
+        public async Task<IActionResult> Edit(int id, Equipment equipment)
         {
             if (id != equipment.Id)
             {
                 return NotFound();
             }
 
+            var existingEquipment = await _context.Equipment.FindAsync(id);
+            if (existingEquipment == null)
+            {
+                return NotFound();
+            }
+
+            var uploadedFile = Request.Form.Files["ImageFile"];
+            int? uploadedImageId = null;
+
+            if (uploadedFile != null && uploadedFile.Length > 0)
+            {
+                using var memoryStream = new MemoryStream();
+                await uploadedFile.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                uploadedImageId = await ImageManager.UploadImageAndSaveToDatabase(
+                    _context,
+                    memoryStream,
+                    uploadedFile.FileName,
+                    uploadedFile.ContentType
+                );
+
+                if (uploadedImageId.HasValue)
+                {
+                    // Delete old image from S3 if needed
+                    if (existingEquipment.ImageId.HasValue)
+                    {
+                        // await ImageManager.DeleteImageFromDatabaseAndS3(_context, existingEquipment.ImageId.Value);
+                    }
+
+                    existingEquipment.ImageId = uploadedImageId.Value;
+                }
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(equipment);
+                    // Update properties manually
+                    existingEquipment.Name = equipment.Name;
+                    existingEquipment.Description = equipment.Description;
+                    existingEquipment.RentalPricePerDay = equipment.RentalPricePerDay;
+                    existingEquipment.CategoryId = equipment.CategoryId;
+                    existingEquipment.ConditionStatusId = equipment.ConditionStatusId;
+                    existingEquipment.AvailabilityStatusId = equipment.AvailabilityStatusId;
+                    existingEquipment.UpdatedAt = DateTime.UtcNow;
+
+                    _context.Update(existingEquipment);
                     await _context.SaveChangesAsync();
+
+                    TempData["MessageText"] = "Equipment was saved successfully!";
+                    TempData["MessageType"] = "success";
+                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (Exception)
                 {
-                    if (!EquipmentExists(equipment.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    TempData["MessageText"] = "An error occurred while saving the equipment.";
+                    TempData["MessageType"] = "error";
+                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
                 }
-                return RedirectToAction(nameof(Index));
             }
+
+            // If ModelState is not valid
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName", equipment.AvailabilityStatusId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", equipment.CategoryId);
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName", equipment.ConditionStatusId);
-            ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName", equipment.ImageId);
+
             return View(equipment);
         }
 
-        // GET: Equipment/Delete/5
-        public async Task<IActionResult> Delete(int? id)
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCheck(int id)
         {
-            if (id == null || _context.Equipment == null)
-            {
-                return NotFound();
-            }
+            var equipment = await _context.Equipment.FindAsync(id);
+            if (equipment == null)
+                return Json(new { success = false, message = "Not found" });
 
-            var equipment = await _context.Equipment
-                .Include(e => e.AvailabilityStatus)
-                .Include(e => e.Category)
-                .Include(e => e.ConditionStatus)
-                .Include(e => e.Image)
-                .FirstOrDefaultAsync(m => m.Id == id);
+            bool isReferenced = await _context.RentalRequests.AnyAsync(r => r.EquipmentId == id);
+
+            if (isReferenced)
+            {
+                return Json(new
+                {
+                    requiresInactive = true,
+                    message = "This equipment is in use. Do you want to mark it as inactive instead?",
+                    setInactiveUrl = Url.Action("SetInactive", "Equipment", new { id })
+                });
+            }
+            else
+            {
+                if (equipment.ImageId.HasValue)
+                    await ImageManager.DeleteImageFromDatabaseAndS3(_context, equipment.ImageId.Value);
+
+                _context.Equipment.Remove(equipment);
+                await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
+            }
+        }
+
+
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetInactive(int id)
+        {
+            var equipment = await _context.Equipment.FindAsync(id);
             if (equipment == null)
             {
-                return NotFound();
+                return Json(new { success = false, message = "Equipment not found.", type = "error" });
             }
 
-            return View(equipment);
-        }
-
-        // POST: Equipment/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.Equipment == null)
-            {
-                return Problem("Entity set 'RentalDBContext.Equipment'  is null.");
-            }
-            var equipment = await _context.Equipment.FindAsync(id);
-            if (equipment != null)
-            {
-                _context.Equipment.Remove(equipment);
-            }
-            
+            equipment.IsActive = false;
+            _context.Equipment.Update(equipment);
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+
+            return Json(new { success = true, message = "Equipment marked as inactive.", type = "success" });
         }
 
-        private bool EquipmentExists(int id)
-        {
-          return (_context.Equipment?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
+
+        //[HttpGet]
+        //public async Task ConvertImageToWebpAndUpdateAsync(int id = 1)
+        //{
+        //    var imageRecord = await _context.Images.FirstOrDefaultAsync(i => i.ImageId == id);
+        //    if (imageRecord == null) return;
+
+        //    using var getResponse = await S3Uploader.GetFileByGuidAsync(imageRecord.Guid.ToString()!);
+        //    using var originalImage = await SixLabors.ImageSharp.Image.LoadAsync(getResponse);
+
+        //    // Convert to WebP
+        //    using var webpStream = new MemoryStream();
+        //    await originalImage.SaveAsync(webpStream, new WebpEncoder { Quality = 80 });
+        //    webpStream.Position = 0;
+
+        //    // Generate new filename and GUID
+        //    var newGuid = Guid.NewGuid();
+        //    var newFileName = Path.GetFileNameWithoutExtension(imageRecord.ImageName) + ".webp";
+
+        //    // Upload to S3
+        //    await S3Uploader.UploadFileAsync(webpStream, newGuid, ".webp");
+
+        //    // Update DB record
+        //    imageRecord.ImageName = newFileName;
+        //    imageRecord.ImageType = "image/webp";
+        //    imageRecord.Guid = newGuid;
+        //    imageRecord.CreatedAt = DateTime.UtcNow;
+
+        //    await _context.SaveChangesAsync();
+        //}
+
     }
 }

@@ -1,0 +1,270 @@
+﻿.page-title {
+    color: #3CAD68;
+    font-weight: bold;
+    font-size: 2rem;
+    padding-top: 20px; /* Top padding for the title */
+}
+
+.back-link {
+    color: #3CAD68;
+    text-decoration: none;
+    font-size: 1rem;
+    margin-bottom: 20px;
+    display: inline-block;
+}
+
+.upload-box {
+    width: 100%;
+    height: 250px;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 1.2rem;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+}
+
+
+.form-control, .form-select {
+    border-radius: 0.375rem;
+}
+
+.btn-success {
+    background-color: #3CAD68;
+    border-color: #3CAD68;
+    font-weight: bold;
+}
+
+    .btn-success:hover {
+        background-color: #349e5a;
+        border-color: #349e5a;
+    }
+
+.btn-outline-success {
+    color: #3CAD68;
+    border-color: #3CAD68;
+    font-weight: bold;
+}
+
+    .btn-outline-success:hover {
+        background-color: #3CAD68;
+        color: white;
+    }
+
+.custom-btn {
+    width: 150px; /* Same width for both buttons */
+    background-color: #3CAD68;
+    color: white;
+    font-weight: bold;
+    border: none;
+    padding: 10px 0;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+}
+
+    .custom-btn:hover {
+        background-color: #349e5a;
+        color: white;
+    }
+
+.custom-btn-outline {
+    width: 150px; /* Same width */
+    background-color: transparent;
+    color: #3CAD68;
+    font-weight: bold;
+    border: 2px solid #3CAD68;
+    padding: 10px 0;
+    border-radius: 5px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+    .custom-btn-outline:hover {
+        background-color: #3CAD68;
+        color: white;
+    }
+
+.upload-box {
+    width: 100%;
+    height: 250px;
+    background-color: #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6c757d;
+    font-size: 1.2rem;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    background-size: cover;
+    background-position: center;
+}
+
+.btn-success {
+    background-color: #3CAD68;
+    border-color: #3CAD68;
+    font-size: 1.2rem;
+    padding: 12px 20px;
+    font-weight: bold;
+}
+
+.btn-outline-success {
+    color: #3CAD68;
+    border: 2px solid #3CAD68;
+    background-color: white;
+    font-size: 1.2rem;
+    padding: 10px 0;
+    font-weight: bold;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+    .btn-outline-success:hover {
+        background-color: #3CAD68;
+        color: white;
+        border-color: #3CAD68;
+    }
+
+.btn-danger {
+    background-color: #dc3545;
+    border-color: #dc3545;
+    font-size: 1.2rem;
+    padding: 12px 20px;
+    font-weight: bold;
+}
+
+    .btn-danger:hover {
+        background-color: #c82333;
+        border-color: #bd2130;
+    }
+
+/* Modal Buttons */
+.modal-cancel-btn {
+    width: 150px;
+    background-color: transparent;
+    color: #6c757d;
+    font-weight: bold;
+    border: none;
+    padding: 10px 0;
+    border-radius: 8px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+    .modal-cancel-btn:hover {
+        background-color: #6c757d;
+        color: white;
+    }
+
+.modal-delete-btn {
+    width: 150px;
+    background-color: #dc3545;
+    border: none;
+    color: white;
+    font-weight: bold;
+    padding: 10px 0;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+    .modal-delete-btn:hover {
+        background-color: #c82333;
+    }
+
+/* Optional: Center Modal Text */
+.modal-body p {
+    font-size: 1rem;
+    color: #555;
+}
+
+/* General Action Buttons (Rent / Edit / Delete) */
+.custom-action-btn {
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 12px 0;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.word-break {
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+
+.fa-star.checked {
+    color: #f1c40f;
+}
+
+.list-group-item {
+    background-color: #fefefe;
+    transition: box-shadow 0.2s ease;
+}
+
+    .list-group-item:hover {
+        box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+
+.star-green {
+    color: #28a745; /* Bootstrap success green */
+}
+
+.star-gray {
+    color: #ced4da; /* Bootstrap secondary gray */
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    object-fit: cover;
+    object-position: center top; /* moves focus to the top of the image */
+    border-radius: 50%;
+}
+
+.feedback-toggle-group .toggle-btn {
+    border: 1px solid #28a745;
+    background-color: white;
+    color: #28a745;
+    padding: 10px 20px;
+    border-radius: 0; /* square corners initially */
+    font-weight: bold;
+    min-width: 120px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+    .feedback-toggle-group .toggle-btn:first-child {
+        border-top-left-radius: 10px;
+        border-bottom-left-radius: 10px;
+    }
+
+    .feedback-toggle-group .toggle-btn:last-child {
+        border-top-right-radius: 10px;
+        border-bottom-right-radius: 10px;
+        margin-left: -1px; /* removes double border */
+    }
+
+    .feedback-toggle-group .toggle-btn.active {
+        background-color: #28a745;
+        color: white;
+    }
+
+.feedback-card {
+    border-bottom: 1px solid #dee2e6;
+}
+
+.toggle-btn.active {
+    background-color: #28a745;
+    color: white;
+    border-color: #28a745;
+}
+
+.feedback-card button {
+    background-color: #dc3545;
+    color: white;
+    border-radius: 8px;
+    border: 1px solid #dc3545;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+    padding: 6px 18px;
+}

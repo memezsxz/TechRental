@@ -8,69 +8,52 @@ using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
 using WebApp.ViewModel;
+using Database.Core;
+using static Database.Core.Repositories.IUserRepository;
+using Database.Core.Repositories;
 
 
 namespace WebApp.Controllers
 {
     public class UsersController : Controller
     {
-        private readonly RentalDBContext _context;
+        private readonly IUnitOfWork _unitOfWork = new UnitOfWork();
 
-        public UsersController(RentalDBContext context)
+        public UsersController()
         {
-            _context = context;
+            //_unitOfWork = context;
         }
 
         // GET: Users
-        public IActionResult Index(string SearchString, string RoleFilter, string SortBy)
+        public async Task<IActionResult> Index(string? searchString, string? roleFilter, SortOption? sortBy)
         {
-
-            IEnumerable<User> userList;
-
-            userList = _context.Users.Include(u => u.Role);
-
-            if (!String.IsNullOrEmpty(SearchString))
-            {
-                userList = userList.Where(x => x.FirstName.ToLower().Contains(SearchString.ToLower()) || x.LastName.ToLower().Contains(SearchString.ToLower()));
-            }
-
-            if (!String.IsNullOrEmpty(RoleFilter))
-            {
-                userList = userList.Where(x => x.RoleId == Convert.ToInt32(RoleFilter));
-            }
-
-            userList = SortBy switch
-            {
-                "FirstNameAZ" => userList.OrderBy(x => x.FirstName),
-                "FirstNameZA" => userList.OrderByDescending(x => x.FirstName),
-                "RoleAZ" => userList.OrderBy(x => x.Role.RoleName),
-                "EmailAZ" => userList.OrderBy(x => x.Email),
-                _ => userList.OrderBy(x => x.Id) // default
-            };
+            var users = await _unitOfWork.Users.GetUsersAsync(searchString, roleFilter, sortBy);
+            var roles = await _unitOfWork.UserRoles.GetAllAsync();
 
             var viewModel = new ListUsersViewModel
             {
-               RolesList = _context.UserRoles,
-               UsersList = userList,
-
+                UsersList = users,
+                RolesList = roles,
+                SearchString = searchString,
+                RoleFilter = roleFilter,
+                CurrentSort = sortBy,
+                SortOptions = Enum.GetValues(typeof(IUserRepository.SortOption)).Cast<IUserRepository.SortOption>()
             };
-
-
 
             return View(viewModel);
         }
 
-        
+
 
         // GET: Users/Edit/5
-        public IActionResult Edit(int? id)
+        public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null || _context.Users == null || id == 0)
+            if (id == null || _unitOfWork.Users == null || id == 0)
             {
                 return NotFound();
             }
 
-            var user = _context.Users.Include(i => i.Role).SingleOrDefault(x => x.Id == id); 
+            var user = await _unitOfWork.Users.GetUserWithRoleAsync(id.Value);
             if (user == null)
             {
                 return NotFound();
@@ -79,7 +62,7 @@ namespace WebApp.Controllers
             var viewModel = new EditUserViewModel
             {
                 User = user,
-                RolesList = _context.UserRoles
+                RolesList = await _unitOfWork.UserRoles.GetAllAsync()
             };
 
             return View(viewModel);
@@ -87,127 +70,95 @@ namespace WebApp.Controllers
 
 
 
+
         // POST: Users/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Edit(EditUserViewModel editUser)
+        public async Task<IActionResult> Edit(EditUserViewModel editUser)
         {
-            if (editUser.User.RoleId == null || editUser.User.RoleId == 0) {
-                ModelState.AddModelError("User.RoleId", "User Role should not be empty");
-            }
-
-            if (editUser.User.FirstName.Length < 3)
-            {
-                ModelState.AddModelError("User.FirstName", "First name must contain more than 2 characters");
-            }
-            else if (editUser.User.FirstName.Length == 0) {
-                ModelState.AddModelError("User.FirstName", "First name is required");
-            }
-
-            if (editUser.User.LastName.Length < 3)
-            {
-                ModelState.AddModelError("User.LastName", "Last name must contain more than 2 characters");
-            }
-            else if (editUser.User.LastName.Length == 0)
-            {
-                ModelState.AddModelError("User.LastName", "Last name is required");
-            }
-
-            if (editUser.User.Email == "") {
-                ModelState.AddModelError("User.Email", "Email is required");
-
-            }
-
+            ValidateUser(editUser.User);
 
             if (ModelState.IsValid)
             {
                 try
                 {
 
-                    _context.Update(editUser.User);
-                    _context.SaveChanges();
+                    await _unitOfWork.Users.UpdateAsync(editUser.User);
+                    await _unitOfWork.SaveChangesAsync();
                     TempData["editSuccess"] = "User Updated Successfully";
-                    return RedirectToAction("Index");
+                    return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException) // TODO Fatima: check the for the other error from SaveChangesAsync 
                 {
-                    if (!UserExists(editUser.User.Id))
-                    {
+                    if (!await _unitOfWork.Users.UserExistsAsync(editUser.User.Id))
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
+
                 }
             }
-            else {
-                
-                TempData["faild"] = "Faild to Update User";
-                var viewModel = new EditUserViewModel
-                {
-                    User = editUser.User,
-                    RolesList = _context.UserRoles
-                };
-                return View(viewModel);
-            }
-           
 
-            
+            TempData["faild"] = "Failed to Update User";
+
+            var roles = await _unitOfWork.UserRoles.GetAllAsync();
+            editUser.RolesList = roles;
+            return View(editUser);
         }
 
 
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        // GET: Users/Delete/5
-        public IActionResult Delete(int? id)
+        public async Task<IActionResult> DeleteConfirmed(int? id)
         {
-            if (id == null || _context.Users == null)
+            if (id == null || _unitOfWork.Users == null)
             {
                 return NotFound();
             }
 
-            var user = _context.Users.SingleOrDefault(u => u.Id == id);
+            var user = await _unitOfWork.Users.GetAsync(id.Value);
 
             if (user == null)
             {
                 return NotFound();
             }
-            else {
-                user.FirstName = user.FirstName + "1";//change it to active to false
-                _context.Users.Update(user); 
-                _context.SaveChanges();
-                TempData["editSuccess"] = "User Deleted Successfully";
-                return RedirectToAction("Index");
+            else
+            {
+                try
+                {
+                    user.FirstName += "1"; // Or set IsActive = false if soft delete
+                    await _unitOfWork.Users.UpdateAsync(user);
+                    await _unitOfWork.SaveChangesAsync();
 
+                    TempData["editSuccess"] = "User Deleted Successfully";
+                    return RedirectToAction(nameof(Index));
+
+                }
+                catch (Exception e)
+                {
+                    if (!await _unitOfWork.Users.UserExistsAsync(user.Id))
+                        return NotFound();
+                    else
+                        throw;
+                }
             }
-
-
         }
 
 
 
-        private bool UserExists(int id)
+        public async Task<IActionResult> Profile(int? id)
         {
-          return (_context.Users?.Any(e => e.Id == id)).GetValueOrDefault();
-        }
 
-
-
-
-        //Profile Actions here (change the place of the profile code)
-        public IActionResult Profile(int? id) {
-
-            if (id == 0 || id == null) {
+            if (id == 0 || id == null)
+            {
                 return NotFound();
             }
 
-            var user = _context.Users.Include(u => u.Role).Include(u => u.Image).SingleOrDefault(u => u.Id == id);
+            var user = await _unitOfWork.Users.GetUserWithProfileAsync(id.Value);
 
-            if(user == null)
+            if (user == null)
             {
                 return NotFound();
             }
@@ -218,71 +169,64 @@ namespace WebApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult Profile(User editUser)
+        public async Task<IActionResult> Profile(User editUser)
         {
 
 
-            if (editUser.FirstName.Length < 3)
-            {
-                ModelState.AddModelError("User.FirstName", "First name must contain more than 2 characters");
-            }
-            else if (editUser.FirstName.Length == 0)
-            {
-                ModelState.AddModelError("User.FirstName", "First name is required");
-            }
+            ValidateUser(editUser);
 
-            if (editUser.LastName.Length < 3)
-            {
-                ModelState.AddModelError("User.LastName", "Last name must contain more than 2 characters");
-            }
-            else if (editUser.LastName.Length == 0)
-            {
-                ModelState.AddModelError("User.LastName", "Last name is required");
-            }
-
-            if (editUser.Email == "")
-            {
-                ModelState.AddModelError("User.Email", "Email is required");
-
-            }
 
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var oldUser = _context.Users.SingleOrDefault(x => x.Id == editUser.Id);
-
-                    oldUser.FirstName = editUser.FirstName;
-                    oldUser.LastName = editUser.LastName;
-                    oldUser.Email = editUser.Email;
-
-                    _context.Update(oldUser);
-                    _context.SaveChanges();
-                    
+                    await _unitOfWork.Users.UpdateAsync(editUser);
+                    await _unitOfWork.SaveChangesAsync();
                     return RedirectToAction("Index", "Home");
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!UserExists(editUser.Id))
-                    {
+                    if (!await _unitOfWork.Users.UserExistsAsync(editUser.Id))
                         return NotFound();
-                    }
                     else
-                    {
                         throw;
-                    }
                 }
             }
-            else
-            {
 
-               
-                return View(editUser.Id);
+            return View(editUser);
+        }
+
+        private void ValidateUser(User user)
+        {
+            if (user.RoleId == null || user.RoleId == 0)
+            {
+                ModelState.AddModelError(nameof(user.RoleId), "User Role must be selected.");
             }
 
+            if (string.IsNullOrWhiteSpace(user.FirstName))
+            {
+                ModelState.AddModelError(nameof(user.FirstName), "First name is required.");
+            }
+            else if (user.FirstName.Length < 3)
+            {
+                ModelState.AddModelError(nameof(user.FirstName), "First name must contain at least 3 characters.");
+            }
 
+            if (string.IsNullOrWhiteSpace(user.LastName))
+            {
+                ModelState.AddModelError(nameof(user.LastName), "Last name is required.");
+            }
+            else if (user.LastName.Length < 3)
+            {
+                ModelState.AddModelError(nameof(user.LastName), "Last name must contain at least 3 characters.");
+            }
 
+            if (string.IsNullOrWhiteSpace(user.Email))
+            {
+                ModelState.AddModelError(nameof(user.Email), "Email is required.");
+            }
         }
+
     }
 }

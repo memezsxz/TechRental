@@ -1,44 +1,69 @@
 ﻿@model Database.Core.Domain.Feedback
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Add Feedback";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<div class="container my-5">
+    <div class="mb-3">
+        <a asp-action="Index" asp-controller="Equipment" class="text-success text-decoration-none">&lt; Back</a>
+    </div>
 
-<h4>Feedback</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Note" class="control-label"></label>
-                <input asp-for="Note" class="form-control" />
-                <span asp-validation-for="Note" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Rate" class="control-label"></label>
-                <input asp-for="Rate" class="form-control" />
+    <h2 class="fw-bold text-success mb-4">Add Feedback</h2>
+
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <div class="form-group mb-4">
+            <label asp-for="Note" class="form-label">Note</label>
+            <textarea asp-for="Note" class="form-control" rows="5"></textarea>
+            <span asp-validation-for="Note" class="text-danger"></span>
+        </div>
+
+        <div class="form-group mb-4">
+            <label asp-for="Rate" class="form-label">Rate</label>
+            <div class="rating-stars">
+                @* @for (int i = 1; i <= 5; i++) *@
+                @* { *@
+                @*     <i class="fa fa-star star @(i <= Model.Rate ? "text-success" : "text-muted")" onclick="document.getElementById('Rate').value = '@i'; updateStars(@i)"></i> *@
+                @* } *@
+                <input type="hidden" id="Rate" name="Rate" asp-for="Rate" />
                 <span asp-validation-for="Rate" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="UserId" class="control-label"></label>
-                <select asp-for="UserId" class ="form-control" asp-items="ViewBag.UserId"></select>
-            </div>
-            <div class="form-group">
-                <label asp-for="EquipmentId" class="control-label"></label>
-                <select asp-for="EquipmentId" class ="form-control" asp-items="ViewBag.EquipmentId"></select>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+        </div>
+
+        <input type="hidden" asp-for="UserId" />
+        <input type="hidden" asp-for="EquipmentId" />
+
+        <div class="d-flex gap-3">
+            <input type="submit" value="Save Changes" class="btn custom-btn px-4" />
+            <a asp-action="Index" asp-controller="Equipment" class="btn custom-btn-outline px-4">Cancel</a>
+        </div>
+    </form>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+<style>
+    .rating-stars .fa-star {
+        font-size: 1.5rem;
+        cursor: pointer;
+        margin-right: 5px;
+    }
+</style>
 
+@section Scripts {
+    <script>
+        function updateStars(rate) {
+            const stars = document.querySelectorAll('.rating-stars .fa-star');
+            stars.forEach((star, index) => {
+                if (index < rate) {
+                    star.classList.remove('text-muted');
+                    star.classList.add('text-success');
+                } else {
+                    star.classList.remove('text-success');
+                    star.classList.add('text-muted');
+                }
+            });
+        }
+    </script>
+}

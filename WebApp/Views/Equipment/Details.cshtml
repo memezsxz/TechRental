@@ -4,142 +4,118 @@
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+<div class="container my-5">
 
-<div class="container my-4">
+    <!-- Back to List Button -->
+    <div class="mb-4 text-start">
+        <a asp-action="Index" class="back-link">&lt; Back to List</a>
+    </div>
+
     <div class="row">
-        <!-- Left Column: Equipment Image and Details -->
-        <div class="col-md-6">
-            <!-- Equipment Image (Default image if null) -->
-            @if (@Model.Image != null)
+        <!-- Left Column: Image -->
+        <div class="col-md-6 d-flex justify-content-center align-items-center">
+            @if (Model.Image != null)
             {
-                <img src="@Url.Action("GetImage", "Equipment", new { id = @Model.Id })"
-                     alt="Equipment Image" />
+                <img src="@Url.Action("GetImage", "Image", new { id = Model.Image.ImageId })" alt="Equipment Image" class="img-fluid rounded" style="max-height: 350px;" />
             }
             else
             {
-                <p>No Image Available</p>
+                <div class="border p-5 text-muted text-center" style="width:100%; height:300px;">No Image Available</div>
             }
         </div>
 
+        <!-- Right Column: Details -->
         <div class="col-md-6">
-            <!-- Equipment Name -->
-            <h1 class="display-4 font-weight-bold">@Model.Name</h1>
+            <h2 class="equipment-title word-break">@Model.Name</h2>
 
-            <!-- Rental Price per Day -->
-            <p class="lead text-muted">Price: <strong>@Model.RentalPricePerDay</strong> / Day</p>
+            <div class="equipment-section">
+                <h5 class="section-header">Description</h5>
+                <ul class="description-list word-break">
+                    @foreach (var line in (Model.Description ?? "").Split('\n'))
+                    {
+                        if (!string.IsNullOrWhiteSpace(line))
+                        {
+                            <li>@line</li>
+                        }
+                    }
+                </ul>
+            </div>
 
-            <!-- Condition Status -->
-            <p class="text-muted">Condition: <span class="badge badge-pill badge-info">@Model.ConditionStatus.ConditionName</span></p>
+            <div class="equipment-section">
+                <h5 class="section-header">Condition</h5>
+                <p class="condition-text">@Model.ConditionStatus?.ConditionName</p>
+            </div>
 
-            <!-- Availability -->
-            <p><strong>Availability:</strong> @Model.AvailabilityStatus.StatusName</p>
+            <div class="rental-price mt-4">
+                <h3 class="price-text">
+                    @Model.RentalPricePerDay <span class="currency">BHD</span> <span class="per-day">/ Day</span>
+                </h3>
+            </div>
 
-            <!-- Description -->
-            <p><strong>Description:</strong></p>
-            <p>@Model.Description</p> <!-- Added description -->
-            <!-- Rent Now Button -->
-            <a href="@Url.Action("Rent", "Equipment", new { id = Model.Id })" class="btn btn-success btn-lg btn-block">Rent Now</a>
+            <div class="mt-4">
+                <a href="@Url.Action("Create", "RentalRequest", new { equipmentId = Model.Id })" class="btn btn-success custom-action-btn w-100 mb-3">Rent Now</a>
+
+                <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-outline-success custom-action-btn w-100 mb-3">Edit</a>
+
+                <!-- Custom delete button -->
+                <button type="button"
+                        class="btn btn-danger w-100"
+                        data-delete-url="@Url.Action("DeleteCheck", "Equipment", new { id = Model.Id })"
+                        data-confirm-message="Are you sure you want to delete this equipment?">
+                    Delete
+                </button>
+            </div>
+
         </div>
+
     </div>
 
-    <!-- Overall Rating Section -->
+    <!-- Ratings and Comments Section -->
     <div class="row mt-5">
         <div class="col-md-12">
-            <!-- Calculate Overall Rating -->
             @{
-                var averageRating = Model.Feedbacks.Any() ? Model.Feedbacks.Average(c => c.Rate) : 0;
+                var averageRating = Model.Feedbacks.Any() ? Model.Feedbacks.Average(f => f.Rate) : 0;
             }
+            <h5 class="mb-3">Overall Rating: <strong>@Math.Round(averageRating, 1)</strong></h5>
 
-            <!-- Display Average Rating -->
-            <h4>Overall Rating: <span class="text-warning">@Math.Round(averageRating, 1)</span> <i class="fas fa-star"></i></h4>
-            <hr />
-
-            <!-- Customer Comments Section -->
-            <h5>Customer Comments:</h5>
+            <h5 class="mb-3">Comments</h5>
             <div class="list-group">
                 @foreach (var comment in Model.Feedbacks)
                 {
-                    <div class="list-group-item">
-                        <strong>@comment.User.FirstName @comment.User.LastName</strong>
-                        <p>@comment.Note</p>
-                        <div class="rating">
-                            @for (int i = 1; i <= 5; i++)
+                    <div class="list-group-item mb-4 p-3 border rounded shadow-sm">
+                        <div class="d-flex align-items-center mb-2">
+                            @if (comment.User.ImageId != null)
                             {
-                                <span class="fa fa-star @((i <= comment.Rate) ? "checked" : "")"></span>
+                                <img src="@Url.Action("GetImage", "Image", new { id = comment.User.ImageId })"
+                                     class="user-avatar me-3"
+                                     alt="User Avatar" />
                             }
+                            else
+                            {
+                                <div class="rounded-circle bg-light text-muted d-flex justify-content-center align-items-center me-3"
+                                     style="width: 50px; height: 50px;">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            }
+
+                            <div>
+                                <strong>@comment.User.FirstName @comment.User.LastName</strong>
+                                <div class="text-warning">
+                                    <div>
+                                        @for (int i = 1; i <= 5; i++)
+                                        {
+                                            <i class="fa fa-star @(i <= comment.Rate ? "star-green" : "star-gray")"></i>
+                                        }
+                                    </div>
+
+                                </div>
+                            </div>
                         </div>
+                        <p class="text-dark mb-0">@comment.Note</p>
                     </div>
                 }
+
             </div>
         </div>
     </div>
-
-    <!-- Action Links -->
-    <div class="mt-4">
-        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning">Edit</a>
-        <a asp-action="Index" class="btn btn-secondary">Back to List</a>
-    </div>
 </div>
-
-<!-- Add custom CSS for styling -->
-<style>
-    /* Overall Rating */
-    .rating {
-        font-size: 1.2rem;
-        color: #f39c12;
-    }
-
-        .rating .fa-star.checked {
-            color: #f1c40f;
-        }
-
-    /* Equipment Name */
-    .display-4 {
-        font-size: 2.5rem;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-
-    /* Description Section */
-    p {
-        font-size: 1rem;
-        margin-bottom: 15px;
-    }
-
-    .lead {
-        font-size: 1.25rem;
-        margin-bottom: 20px;
-    }
-
-    /* Rent Now Button */
-    .btn-block {
-        width: 100%;
-    }
-
-    .btn-success {
-        background-color: #28a745;
-        border-color: #28a745;
-        font-size: 1.2rem;
-        padding: 12px 20px;
-    }
-
-    /* Comments Section */
-    .list-group-item {
-        padding: 10px;
-    }
-
-        .list-group-item strong {
-            font-weight: bold;
-        }
-
-        .list-group-item p {
-            margin-top: 5px;
-        }
-
-    /* Placeholder image styles */
-    .img-fluid {
-        width: 100%;
-        height: auto;
-        object-fit: cover;
-    }
-</style>
