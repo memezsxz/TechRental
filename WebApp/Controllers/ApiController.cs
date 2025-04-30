@@ -7,6 +7,7 @@ namespace WebApp.Controllers
     public class ApiController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        
 
         public ApiController(IUnitOfWork unitOfWork)
         {
@@ -20,13 +21,10 @@ namespace WebApp.Controllers
 
         public IActionResult categories()
         {
-            Console.WriteLine("here");
             var categories = _unitOfWork.Categories.GetAllAsync().Result;
 
-            // Fix for CS0165: Initialize the variable
-            var categorieslist = new List<string>();
+            List<string> categorieslist = new List<string>();
 
-            // Fix for CA1806: Use the result of Append correctly
             foreach (var category in categories)
             {
                 if(category.IsActive == false)
@@ -45,7 +43,7 @@ namespace WebApp.Controllers
 
             foreach (var notification in notifications)
             {
-                if (notification.Id != id)
+                if (notification.UserId != id)
                     continue;
 
                 notificationList.Add(notification);
