@@ -1,52 +1,84 @@
 ﻿@model Database.Core.Domain.Category
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Category";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
+<div class="container py-4">
 
-<h4>Category</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="IsActive" class="control-label"></label>
-                <input asp-for="IsActive" class="form-control" />
-                <span asp-validation-for="IsActive" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
+    <!-- Back link -->
+    <a asp-action="Index" class="text-success text-decoration-none small d-inline-flex align-items-center mb-3">
+        <i class="bi bi-arrow-left-short fs-5"></i> Back
+    </a>
+
+    <div class="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
+        <h2 class="text-success fw-bold">Edit Category</h2>
+
+        <!-- Delete Button -->
+        <form asp-action="Delete" method="post" asp-route-id="@Model.Id" onsubmit="return confirm('Are you sure you want to delete this category?');">
+            <button type="submit" class="btn btn-danger">
+                Delete Category
+            </button>
         </form>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Edit" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+                <input type="hidden" asp-for="Id" />
+
+                <!-- Name -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-semibold"></label>
+                    <input asp-for="Name" class="form-control form-control" required />
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label fw-semibold"></label>
+                    <textarea asp-for="Description" rows="3" class="form-control" required></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <!-- Is Active -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Is Active</label>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" asp-for="IsActive" value="true" id="activeYes"/>
+                        <label class="form-check-label" for="activeYes">Yes</label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                        <input class="form-check-input" type="radio" asp-for="IsActive" value="false" id="activeNo"/>
+                        <label class="form-check-label" for="activeNo">No</label>
+                    </div>
+                    <span asp-validation-for="IsActive" class="text-danger small d-block"></span>
+                </div>
+
+                <!-- Hidden or read-only timestamps -->
+                <input type="hidden" asp-for="CreatedAt" />
+                <input type="hidden" asp-for="UpdatedAt" />
+
+                <!-- Action Buttons -->
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <button type="submit" class="btn btn-success w-100 py-2">
+                            Save Changes
+                        </button>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <a asp-action="Index" class="btn btn-outline-success w-100 py-2">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -19,6 +19,8 @@ namespace WebApp.Controllers
         // GET: Equipment
         public async Task<IActionResult> Index(string search, string category, string sortBy, int page = 1, int pageSize = 9)
         {
+            page = page < 1 ? 1 : page;
+
             var query = _context.Equipment
                 .Include(e => e.Category)
                 .Include(e => e.ConditionStatus)
@@ -55,7 +57,12 @@ namespace WebApp.Controllers
             }
 
             var totalItems = await query.CountAsync();
+        
+            var totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+            page = page > totalPages ? totalPages : page;
+
             var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+            
 
             ViewBag.Categories = await _context.Categories
                 .Select(c => c.Name)
