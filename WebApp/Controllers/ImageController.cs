@@ -33,7 +33,7 @@ namespace WebApp.Controllers
                 }
             }
 
-            var fullKey = imageEntity.Guid.ToString() + extension;
+            var fullKey = imageEntity.Guid.ToString();
 
             var stream = await S3Uploader.GetFileByGuidAsync(fullKey);
 

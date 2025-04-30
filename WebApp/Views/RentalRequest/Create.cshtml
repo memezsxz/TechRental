@@ -1,0 +1,104 @@
+﻿@model Database.Core.Domain.RentalRequest
+
+@{
+    ViewData["Title"] = "Create Rental Request";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var equipment = ViewBag.Equipment as Database.Core.Domain.Equipment;
+}
+
+<div class="container my-5">
+    <h2 class="text-center mb-5 page-title">Rental Request</h2>
+
+    <div class="row justify-content-center">
+        <div class="col-md-10 d-flex flex-wrap justify-content-between gap-5">
+
+            <!-- Left: Equipment Details -->
+            <div class="flex-fill" style="min-width: 300px;">
+                <h4>Equipment Details</h4>
+                <p><strong>Equipment title:</strong> @equipment?.Name</p>
+                <p><strong>Condition:</strong> @equipment?.ConditionStatus?.ConditionName</p>
+
+                @{
+                    var averageRating = equipment?.Feedbacks?.Any() == true
+                    ? equipment.Feedbacks.Average(f => f.Rate)
+                    : 0;
+                }
+                <p><strong>Rating:</strong> @Math.Round(averageRating, 1) ⭐</p>
+                <p><strong>Price:</strong> @equipment?.RentalPricePerDay BHD / Day</p>
+
+                <button type="submit" form="rentalForm" class="btn btn-success mt-4 w-100">Send Request</button>
+
+                <!-- Cancel Button -->
+                <a href="@Url.Action("Details", "Equipment", new { id = equipment?.Id })"
+                   class="btn btn-outline-success mt-2 w-100"
+                   >
+                    Cancel
+                </a>
+            </div>
+
+            <!-- Right: Request Form -->
+            <div class="flex-fill" style="min-width: 300px;">
+                <h4>Request Details</h4>
+                <form asp-action="Create" id="rentalForm">
+                    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                    <input type="hidden" asp-for="EquipmentId" value="@equipment?.Id" />
+
+                    <!-- Start Date -->
+                    <div class="mb-3">
+                        <label asp-for="StartDate" class="form-label">From</label>
+                        <input asp-for="StartDate" type="date" class="form-control" id="startDate" />
+                        <span asp-validation-for="StartDate" class="text-danger"></span>
+                    </div>
+
+                    <!-- Return Date -->
+                    <div class="mb-3">
+                        <label asp-for="ReturnDate" class="form-label">To</label>
+                        <input asp-for="ReturnDate" type="date" class="form-control" id="returnDate" />
+                        <span asp-validation-for="ReturnDate" class="text-danger"></span>
+                    </div>
+
+                    <!-- Price Calculation -->
+                    <div class="mb-3">
+                        <span id="priceDetails">@equipment?.RentalPricePerDay BD/Day → 0 BD/0 Days</span>
+                    </div>
+
+                    <!-- Notes -->
+                    <div class="mb-3">
+                        <label asp-for="Notes" class="form-label"></label>
+                        <textarea asp-for="Notes" class="form-control" placeholder="e.g. I will pick it up at 5pm."></textarea>
+                        <span asp-validation-for="Notes" class="text-danger"></span>
+                    </div>
+
+                    <!-- Hidden Fields -->
+                    <input type="hidden" asp-for="CustomerId" />
+                    <input type="hidden" asp-for="RentalPerDay" value="@equipment?.RentalPricePerDay" />
+                    <input type="hidden" asp-for="StatusId" value="1" />
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function calculateDaysAndTotal() {
+            const start = new Date(document.getElementById('startDate').value);
+            const end = new Date(document.getElementById('returnDate').value);
+            const perDay = parseFloat('@equipment?.RentalPricePerDay' || 0);
+
+            if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end >= start) {
+                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
+                const total = perDay * days;
+
+                document.getElementById('totalDays').textContent = days;
+                document.getElementById('totalCost').textContent = total.toFixed(2);
+                document.getElementById('priceDetails').textContent = `${perDay} BD/Day → ${total} BD/${days} Days`;
+            }
+        }
+
+        document.getElementById('startDate').addEventListener('change', calculateDaysAndTotal);
+        document.getElementById('returnDate').addEventListener('change', calculateDaysAndTotal);
+    </script>
+}

@@ -232,24 +232,85 @@ namespace WebApp.Controllers
             return View(equipment);
         }
 
-
-        // POST: Equipment/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Delete(int id)
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteCheck(int id)
         {
             var equipment = await _context.Equipment.FindAsync(id);
-            if (equipment != null)
+            if (equipment == null)
+                return Json(new { success = false, message = "Not found" });
+
+            bool isReferenced = await _context.RentalRequests.AnyAsync(r => r.EquipmentId == id);
+
+            if (isReferenced)
             {
+                return Json(new
+                {
+                    requiresInactive = true,
+                    message = "This equipment is in use. Do you want to mark it as inactive instead?",
+                    setInactiveUrl = Url.Action("SetInactive", "Equipment", new { id })
+                });
+            }
+            else
+            {
+                if (equipment.ImageId.HasValue)
+                    await ImageManager.DeleteImageFromDatabaseAndS3(_context, equipment.ImageId.Value);
+
                 _context.Equipment.Remove(equipment);
                 await _context.SaveChangesAsync();
+
+                return Json(new { success = true });
             }
-            return RedirectToAction(nameof(Index));
         }
 
-        private bool EquipmentExists(int id)
+
+        [HttpPost]
+        //[ValidateAntiForgeryToken]
+        public async Task<IActionResult> SetInactive(int id)
         {
-          return (_context.Equipment?.Any(e => e.Id == id)).GetValueOrDefault();
+            var equipment = await _context.Equipment.FindAsync(id);
+            if (equipment == null)
+            {
+                return Json(new { success = false, message = "Equipment not found.", type = "error" });
+            }
+
+            equipment.IsActive = false;
+            _context.Equipment.Update(equipment);
+            await _context.SaveChangesAsync();
+
+            return Json(new { success = true, message = "Equipment marked as inactive.", type = "success" });
         }
+
+
+        //[HttpGet]
+        //public async Task ConvertImageToWebpAndUpdateAsync(int id = 1)
+        //{
+        //    var imageRecord = await _context.Images.FirstOrDefaultAsync(i => i.ImageId == id);
+        //    if (imageRecord == null) return;
+
+        //    using var getResponse = await S3Uploader.GetFileByGuidAsync(imageRecord.Guid.ToString()!);
+        //    using var originalImage = await SixLabors.ImageSharp.Image.LoadAsync(getResponse);
+
+        //    // Convert to WebP
+        //    using var webpStream = new MemoryStream();
+        //    await originalImage.SaveAsync(webpStream, new WebpEncoder { Quality = 80 });
+        //    webpStream.Position = 0;
+
+        //    // Generate new filename and GUID
+        //    var newGuid = Guid.NewGuid();
+        //    var newFileName = Path.GetFileNameWithoutExtension(imageRecord.ImageName) + ".webp";
+
+        //    // Upload to S3
+        //    await S3Uploader.UploadFileAsync(webpStream, newGuid, ".webp");
+
+        //    // Update DB record
+        //    imageRecord.ImageName = newFileName;
+        //    imageRecord.ImageType = "image/webp";
+        //    imageRecord.Guid = newGuid;
+        //    imageRecord.CreatedAt = DateTime.UtcNow;
+
+        //    await _context.SaveChangesAsync();
+        //}
+
     }
 }

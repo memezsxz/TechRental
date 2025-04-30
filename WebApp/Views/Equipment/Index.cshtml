@@ -28,7 +28,8 @@
                                     <div class="image-wrapper">
                                         <img src="@Url.Action("GetImage", "Image", new { id = item.ImageId })" 
                                             alt="Equipment Image"
-                                             class="equipment-image" />
+                                             class="equipment-image"
+                                             loading="lazy" />
                                         <div class="image-title-overlay-bottom">
                                             @item.Name
                                         </div>
