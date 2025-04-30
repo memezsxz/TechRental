@@ -52,8 +52,8 @@ namespace WebApp.Controllers
         public IActionResult Create(int equipmentId)
         {
             var equipment = _context.Equipment
-                    .Include(e => e.Feedbacks) // Include feedbacks for rating
-                    .Include(e => e.ConditionStatus) // accessing ConditionStatus.ConditionName
+                    .Include(e => e.Feedbacks)
+                    .Include(e => e.ConditionStatus)
                     .FirstOrDefault(e => e.Id == equipmentId);
 
             if (equipment == null)
@@ -61,7 +61,25 @@ namespace WebApp.Controllers
                 return NotFound();
             }
 
+            var reservedDates = _context.RentalRequests
+                .Include(r => r.Status)
+                .Where(r => r.EquipmentId == equipmentId && r.Status.StatusName == "Approved")
+                .Select(r => new { r.StartDate, r.ReturnDate })
+                .ToList();
+
+            var unavailableDates = new List<string>();
+
+            foreach (var range in reservedDates)
+            {
+                for (DateTime date = range.StartDate.Date; date <= range.ReturnDate.Date; date = date.AddDays(1))
+                {
+                    if (date >= DateTime.Today)
+                        unavailableDates.Add(date.ToString("yyyy-MM-dd"));
+                }
+            }
+
             ViewBag.Equipment = equipment;
+            ViewBag.UnavailableDates = unavailableDates;
 
             return View();
         }
@@ -74,35 +92,61 @@ namespace WebApp.Controllers
         {
             if (rentalRequest.StartDate == default)
             {
-                ModelState.AddModelError("StartDate", "Please select a start date.");
+                TempData["MessageText"] = "Please select a start date.";
+                TempData["MessageType"] = "error";
             }
 
             if (rentalRequest.ReturnDate == default)
             {
-                ModelState.AddModelError("ReturnDate", "Please select a return date.");
+                TempData["MessageText"] = "Please select a return date.";
+                TempData["MessageType"] = "error";
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid || rentalRequest.ReturnDate == default || rentalRequest.StartDate == default)
             {
-                // Simulated logged-in user
-                var userId = "9";
+                // Re-fetch equipment for redisplay
+                var equipment = _context.Equipment
+                    .Include(e => e.ConditionStatus)
+                    .Include(e => e.Feedbacks)
+                    .FirstOrDefault(e => e.Id == rentalRequest.EquipmentId);
 
-                rentalRequest.CustomerId = int.Parse(userId);
-                _context.Add(rentalRequest);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+                ViewBag.Equipment = equipment;
+
+                // You must also re-pass reserved dates if you're using ViewBag.UnavailableDates
+                var reservedDates = _context.RentalRequests
+                    .Include(r => r.Status)
+                    .Where(r => r.EquipmentId == rentalRequest.EquipmentId && r.Status.StatusName == "Approved")
+                    .Select(r => new { r.StartDate, r.ReturnDate })
+                    .ToList();
+
+                var unavailableDates = new List<string>();
+                foreach (var range in reservedDates)
+                {
+                    for (DateTime date = range.StartDate.Date; date <= range.ReturnDate.Date; date = date.AddDays(1))
+                    {
+                        if (date >= DateTime.Today)
+                            unavailableDates.Add(date.ToString("yyyy-MM-dd"));
+                    }
+                }
+
+                ViewBag.UnavailableDates = unavailableDates;
+
+                return View(rentalRequest);
             }
 
-            // ✅ Fix: Re-fetch equipment
-            var equipment = _context.Equipment
-                .Include(e => e.ConditionStatus)
-                .Include(e => e.Feedbacks)
-                .FirstOrDefault(e => e.Id == rentalRequest.EquipmentId);
+            // Simulate logged-in user
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "9";
+            rentalRequest.CustomerId = int.Parse(userId);
 
-            ViewBag.Equipment = equipment;
+            _context.Add(rentalRequest);
+            await _context.SaveChangesAsync();
 
-            return View(rentalRequest);
+            TempData["MessageText"] = "Rental request submitted successfully.";
+            TempData["MessageType"] = "success";
+
+            return RedirectToAction(nameof(Index));
         }
+
 
         // GET: RentalRequest/Edit/5
         public async Task<IActionResult> Edit(int? id)
