@@ -1,84 +1,182 @@
 ﻿@model IEnumerable<Database.Core.Domain.RentalRequest>
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Rental Requests";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var statusOptions = ViewBag.StatusOptions as List<string> ?? new List<string>();
+    var currentStatus = ViewBag.StatusFilter as string;
+    var currentSearch = ViewBag.Search as string;
+    var currentSort = ViewBag.SortBy as string;
 }
 
-<h1>Index</h1>
+<style>
+    table.table tbody tr.clickable-row {
+        background-color: #ffffff !important;
+        transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    }
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.StartDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.ReturnDate)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.RentalPerDay)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Notes)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CreatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.UpdatedAt)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Customer)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Equipment)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.StartDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.ReturnDate)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.RentalPerDay)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Notes)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CreatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.UpdatedAt)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Customer.Email)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Equipment.Name)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status.StatusName)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
+    table.table tbody tr.clickable-row:hover {
+        background-color: #54d18b !important;
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
+</style>
+
+<div class="container mt-5">
+    <h2 class="fw-bold text-success mb-4">Rental Requests</h2>
+
+<form method="get" class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="max-width: 1100px;">
+
+    <!-- Left: Status Filter -->
+    <div style="flex: 1; min-width: 200px;">
+        <select name="statusFilter" class="form-select">
+            <option value="">All Statuses</option>
+            @foreach (var status in statusOptions)
+            {
+                var selected = currentStatus == status ? "selected" : "";
+                @:<option value="@status" @selected>@status</option>
+            }
+        </select>
+    </div>
+
+    <!-- Center: Search Field -->
+    <div style="flex: 2; min-width: 300px;">
+        <input type="text" name="search" class="form-control"
+               placeholder="Search by Equipment, Email, or ID"
+               value="@currentSearch" />
+    </div>
+
+    <!-- Right: Sort Dropdown -->
+    <div style="flex: 1; min-width: 180px;">
+        <select name="sortBy" class="form-select">
+            @{
+                var selectedSort = currentSort == "date_desc" ? "selected" : "";
+                @:<option value="date_desc" @selectedSort>Newest First</option>
+
+                selectedSort = currentSort == "date_asc" ? "selected" : "";
+                @:<option value="date_asc" @selectedSort>Oldest First</option>
+            }
+        </select>
+    </div>
+
+    <!-- Submit -->
+    <div>
+        <button type="submit" class="btn btn-success px-4">Search</button>
+    </div>
+</form>
+
+    <table class="table text-center align-middle">
+        <thead>
+            <tr>
+                <th>Request ID</th>
+                <th>User ID</th>
+                <th>Equipment Title</th>
+                <th>Status</th>
+                <th>Pick up Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr class="clickable-row"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Click to view details"
+                    data-href="@Url.Action("Details", "RentalRequest", new { id = item.Id })"
+                    style="cursor: pointer;">
+                    <td>@item.Id</td>
+                    <td>@item.Customer?.Id</td>
+                    <td>@item.Equipment?.Name</td>
+                    <td>
+                        @{
+                            var status = item.Status?.StatusName?.ToLower();
+                            var badgeClass = status switch
+                            {
+                                "approved" => "success",
+                                "pending" => "warning",
+                                "rejected" => "danger",
+                                "cancelled" => "dark",
+                                _ => "secondary"
+                            };
+                        }
+                        <span class="badge bg-@badgeClass text-uppercase">
+                            @item.Status?.StatusName
+                        </span>
+                    </td>
+                    <td>@item.StartDate.ToString("d/M/yyyy h:mmtt")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Rental pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <li class="page-item">
+                <a class="page-link text-success"
+                   asp-action="Index"
+                   asp-route-page="@(ViewBag.CurrentPage - 1)"
+                   asp-route-search="@currentSearch"
+                   asp-route-statusFilter="@currentStatus"
+                   asp-route-sortBy="@currentSort">
+                    <i class="bi bi-chevron-left"></i> Previous
+                </a>
+            </li>
+        }
+
+        @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+        {
+            var isActive = (int)ViewBag.CurrentPage == i ? "active" : "";
+            var linkClass = (int)ViewBag.CurrentPage == i ? "bg-success text-white border-success" : "text-success";
+
+            <li class="page-item @isActive">
+                <a class="page-link @linkClass"
+                   asp-action="Index"
+                   asp-route-page="@i"
+                   asp-route-search="@currentSearch"
+                   asp-route-statusFilter="@currentStatus"
+                   asp-route-sortBy="@currentSort"
+                   style="border-radius: 8px; margin: 0 4px;">
+                    @i
+                </a>
+            </li>
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <li class="page-item">
+                <a class="page-link text-success"
+                   asp-action="Index"
+                   asp-route-page="@(ViewBag.CurrentPage + 1)"
+                   asp-route-search="@currentSearch"
+                   asp-route-statusFilter="@currentStatus"
+                   asp-route-sortBy="@currentSort">
+                    Next <i class="bi bi-chevron-right"></i>
+                </a>
+            </li>
+        }
+
+    </ul>
+</nav>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
+                new bootstrap.Tooltip(tooltipTriggerEl);
+            });
+
+            document.querySelectorAll(".clickable-row").forEach(function (row) {
+                row.addEventListener("click", function () {
+                    window.location.href = this.dataset.href;
+                });
+            });
+        });
+    </script>
 }
-    </tbody>
-</table>

@@ -7,6 +7,7 @@
 <div class="container-fluid">
     <div class="row" style="min-height: 90vh;">
 
+
         <!-- Left Panel (Profile Info) -->
         <div class="col-md-3 d-flex flex-column align-items-center justify-content-center border-end">
             <h2 style="color: #2d7d4f;">Your Profile</h2>
@@ -30,6 +31,18 @@
         <!-- Right Panel (Form) -->
         <div class="col-md-9 p-5">
             <form method="post" asp-action="Profile">
+
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="IsActive" />
+                <input type="hidden" asp-for="CreatedAt" />
+                <input type="hidden" asp-for="UpdatedAt" />
+                <input type="hidden" asp-for="ImageId" />
+                <input type="hidden" asp-for="PhoneNumber" />
+                <input type="hidden" asp-for="RoleId" />
+
+
+
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <label asp-for="FirstName" class="form-label">First Name</label>
