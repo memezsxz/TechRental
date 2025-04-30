@@ -21,10 +21,66 @@ namespace WebApp.Controllers
         }
 
         // GET: RentalRequest
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, string statusFilter, string sortBy, int page = 1, int pageSize = 10)
         {
-            var rentalDBContext = _context.RentalRequests.Include(r => r.Customer).Include(r => r.Equipment).Include(r => r.Status);
-            return View(await rentalDBContext.ToListAsync());
+            var query = _context.RentalRequests
+                .Include(r => r.Customer)
+                .Include(r => r.Equipment)
+                .Include(r => r.Status)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(r =>
+                    r.Equipment.Name.Contains(search) ||
+                    r.Customer.Email.Contains(search) ||
+                    r.Id.ToString().Contains(search));
+            }
+
+            if (!string.IsNullOrWhiteSpace(statusFilter))
+            {
+                query = query.Where(r => r.Status.StatusName == statusFilter);
+            }
+
+            // Apply sorting
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                switch (sortBy)
+                {
+                    case "date_asc":
+                        query = query.OrderBy(r => r.StartDate);
+                        break;
+                    case "date_desc":
+                        query = query.OrderByDescending(r => r.StartDate);
+                        break;
+                    default:
+                        query = query.OrderByDescending(r => r.CreatedAt);
+                        break;
+                }
+            }
+            else
+            {
+                query = query.OrderByDescending(r => r.CreatedAt);
+            }
+
+            var total = await query.CountAsync();
+
+            var requests = await query
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            ViewBag.SortBy = sortBy;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
+            ViewBag.Search = search;
+            ViewBag.StatusFilter = statusFilter;
+            ViewBag.StatusOptions = await _context.RentalRequestStatuses
+                .Select(s => s.StatusName)
+                .Distinct()
+                .ToListAsync();
+
+            return View(requests);
         }
 
         // GET: RentalRequest/Details/5

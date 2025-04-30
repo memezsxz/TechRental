@@ -185,3 +185,16 @@
     border-bottom: 1px solid #dee2e6;
 }
 
+
+.table th, .table td {
+    vertical-align: middle;
+    font-size: 0.95rem;
+}
+
+.text-success {
+    color: #28a745 !important;
+}
+
+    .text-success:hover {
+        text-decoration: underline;
+    }

@@ -17,17 +17,58 @@ namespace WebApp.Controllers
         }
 
         // GET: Equipment
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, string category, string sortBy, int page = 1, int pageSize = 9)
         {
-            var rentalDBContext = _context.Equipment
-                .Include(e => e.AvailabilityStatus)
+            var query = _context.Equipment
                 .Include(e => e.Category)
                 .Include(e => e.ConditionStatus)
-                .Include(e => e.Image);
+                .Include(e => e.Image)
+                .AsQueryable();
 
-            var equipmentList = await rentalDBContext.ToListAsync();
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(e => e.Name.Contains(search));
+            }
 
-            return View(equipmentList);
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                query = query.Where(e => e.Category.Name == category);
+            }
+
+            switch (sortBy)
+            {
+                case "name_asc":
+                    query = query.OrderBy(e => e.Name);
+                    break;
+                case "name_desc":
+                    query = query.OrderByDescending(e => e.Name);
+                    break;
+                case "price_asc":
+                    query = query.OrderBy(e => e.RentalPricePerDay);
+                    break;
+                case "price_desc":
+                    query = query.OrderByDescending(e => e.RentalPricePerDay);
+                    break;
+                default:
+                    query = query.OrderBy(e => e.Name); // Default sort
+                    break;
+            }
+
+            var totalItems = await query.CountAsync();
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            ViewBag.Categories = await _context.Categories
+                .Select(c => c.Name)
+                .Distinct()
+                .ToListAsync();
+
+            ViewBag.Search = search;
+            ViewBag.Category = category;
+            ViewBag.SortBy = sortBy;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            return View(items);
         }
 
 
