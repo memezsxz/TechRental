@@ -9,7 +9,7 @@
 @{
     if (TempData["faild"] != null)
     {
-        <div class="alert alert-dismissible alert-danger">
+        <div class="alert alert-dismissible alert-danger" style="margin-top:2%">
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             <strong>@TempData["faild"].ToString()</strong>
         </div>
@@ -45,6 +45,13 @@
 <form method="post" asp-action="Edit">
     
     <input type="hidden" asp-for="User.Id" />
+    <input type="hidden" asp-for="User.IsActive" />
+    <input type="hidden" asp-for="User.CreatedAt" />
+    <input type="hidden" asp-for="User.UpdatedAt" />
+    <input type="hidden" asp-for="User.ImageId" />
+    <input type="hidden" asp-for="User.PhoneNumber" />
+
+
 
     <div class="row mb-3">
         <div class="col-md-6">

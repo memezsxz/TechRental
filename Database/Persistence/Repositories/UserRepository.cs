@@ -21,7 +21,7 @@ namespace Database.Persistence.Repositories
 
         public async Task<IEnumerable<User>> GetUsersAsync(string? searchString, string? roleFilter, IUserRepository.SortOption? sortBy)
         {
-            var query = RentalDBContext.Users.Include(u => u.Role).AsQueryable();
+            var query = RentalDBContext.Users.Include(u => u.Role).Where(u => u.IsActive == true).AsQueryable();
 
             if (!string.IsNullOrEmpty(searchString))
             {
