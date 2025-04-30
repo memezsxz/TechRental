@@ -101,22 +101,38 @@
             @RenderBody()
         </main>
 
-        <!-- Shared Success/Error Modal -->
-        <div class="modal fade" id="generalMessageModal" tabindex="-1" aria-labelledby="generalMessageModalLabel" aria-hidden="true">
+
+        <!-- Flash Message Modal (Auto close) -->
+        <div class="modal fade" id="flashMessageModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content rounded-4">
-                    <div class="modal-body text-center">
-                        <i id="modalIcon" class="mb-3" style="font-size: 2rem;"></i>
-                        <p id="modalMessage" class="mb-0"></p>
+                <div class="modal-content text-center p-4">
+                    <i id="flashIcon" class="mb-3" style="font-size: 2rem;"></i>
+                    <p id="flashText" class="mb-0"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Confirmation Modal -->
+        <div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-center p-4">
+                    <i class="fas fa-question-circle text-info mb-3" style="font-size: 2rem;"></i>
+                    <p id="confirmationText" class="mb-3"></p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <button id="confirmYes" class="btn btn-success px-4">Yes</button>
+                        <button class="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </div>
         </div>
+
+        <!-- TempData bindings -->
+        <input type="hidden" id="tempDataMessage" value="@(TempData["MessageText"] ?? "")" />
+        <input type="hidden" id="tempDataMessageType" value="@(TempData["MessageType"] ?? "")" />
+
     </div>
 
-    <!-- Hidden TempData fields to be read by JS -->
-    <input type="hidden" id="tempDataMessage" value="@(TempData["MessageText"] ?? "")" />
-    <input type="hidden" id="tempDataMessageType" value="@(TempData["MessageType"] ?? "")" />
+
 
     <!-- shared JS file -->
     <script src="~/js/site-scripts.js" asp-append-version="true"></script>
