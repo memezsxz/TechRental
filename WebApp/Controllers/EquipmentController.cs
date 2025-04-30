@@ -259,7 +259,16 @@ namespace WebApp.Controllers
                 _context.Equipment.Remove(equipment);
                 await _context.SaveChangesAsync();
 
-                return Json(new { success = true });
+                //TempData["MessageText"] = "Equipment deleted successfully!";
+                //TempData["MessageType"] = "success";
+                return Json(new
+                {
+                    success = true,
+                    message = "Equipment deleted successfully.",
+                    redirectUrl = Url.Action("Index"),
+                    type = "success"
+                });
+                //return Json(new { success = true });
             }
         }
 

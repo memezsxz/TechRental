@@ -57,8 +57,14 @@ document.addEventListener("DOMContentLoaded", function () {
                                         }
                                     });
                             });
+                        } else if (res.success && res.redirectUrl) {
+                            showFlash(res.message, res.type || "success");
+                            setTimeout(() => window.location.href = res.redirectUrl, 2000);
+                        } else if (res.success && res.message) {
+                            showFlash(res.message, res.type || "success");
+                            setTimeout(() => location.reload(), 2000);
                         } else {
-                            location.reload(); // Direct delete was successful
+                            showFlash(res.message || "An error occurred.", res.type || "error");
                         }
                     });
             });
