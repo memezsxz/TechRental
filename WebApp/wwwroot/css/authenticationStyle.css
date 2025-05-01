@@ -1,0 +1,217 @@
+﻿
+
+.forgot-confirm-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* move it to top */
+    padding: 60px 20px 20px 20px; /* top padding for spacing */
+}
+
+.forgot-confirm-title {
+    color: #3CAD68;
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 16px;
+}
+
+.forgot-confirm-message {
+    font-size: 18px;
+    color: #333;
+    text-align: center;
+    max-width: 500px;
+}
+
+.forgot-confirm-card {
+    border: 1px solid #b2dfdb;
+    border-radius: 16px;
+    padding: 30px;
+    background-color: #ffffff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+    max-width: 440px;
+    width: 100%;
+    text-align: center;
+}
+
+
+.forgot-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start; /* move it to top */
+    padding: 60px 20px 20px 20px; /* top padding for spacing */
+}
+
+.forgot-title {
+    color: #3CAD68;
+    font-size: 32px;
+    font-weight: bold;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.forgot-subtitle {
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.forgot-card {
+    border: 1px solid #b2dfdb;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 440px;
+    background-color: #ffffff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.forgot-btn {
+    background-color: #3CAD68;
+    border: none;
+    color: white;
+}
+
+    .forgot-btn:hover {
+        background-color: #388e3c;
+    }
+
+.forgot-form-group {
+    margin-bottom: 1rem;
+}
+
+
+.login-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.login-title {
+    color: #3CAD68;
+    font-size: 36px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.login-card {
+    border: 1px solid #b2dfdb;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 440px;
+    background-color: #ffffff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.login-btn {
+    background-color: #3CAD68;
+    border: none;
+    color: white;
+}
+
+    .login-btn:hover {
+        background-color: #388e3c;
+    }
+
+.login-footer {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+
+    .login-footer a {
+        color: #2e7d32;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+.login-form-group {
+    margin-bottom: 1rem;
+}
+
+.login-form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 1rem;
+}
+
+
+.register-container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.register-title {
+    color: #3CAD68;
+    font-size: 35px;
+    font-weight: bold;
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.register-card {
+    border: 1px solid #b2dfdb;
+    border-radius: 16px;
+    padding: 30px;
+    width: 100%;
+    max-width: 500px;
+    background-color: #ffffff;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.05);
+}
+
+.register-btn {
+    background-color: #3CAD68;
+    border: none;
+    color: white;
+}
+
+    .register-btn:hover {
+        background-color: #388e3c;
+    }
+
+.register-form-group {
+    margin-bottom: 1rem;
+}
+
+.register-form-row {
+    display: flex;
+    gap: 10px;
+}
+
+    .register-form-row .register-form-group {
+        flex: 1;
+    }
+
+.register-footer-text {
+    text-align: center;
+    margin-top: 1rem;
+    font-size: 0.95rem;
+}
+
+    .register-footer-text a {
+        color: #2e7d32;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+        .register-footer-text a:hover {
+            text-decoration: underline;
+        }

@@ -1,0 +1,96 @@
+﻿using Database.Core.Domain;
+using Database.Persistence;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Sprache;
+
+namespace WebApp.Areas.Identity.Data
+{
+    public class ContextSeed
+    {
+  
+
+
+        public static async Task SeedRoleAsync(UserManager<IdentityUser> userManager , RoleManager<IdentityRole> roleManager) {
+
+
+            //check each role seperated , so if the role is not exsist create it.
+            if (!await roleManager.RoleExistsAsync("Admin"))
+                await roleManager.CreateAsync(new IdentityRole("Admin"));
+
+            if (!await roleManager.RoleExistsAsync("Customer"))
+                await roleManager.CreateAsync(new IdentityRole("Customer"));
+
+            if (!await roleManager.RoleExistsAsync("Manager"))
+                await roleManager.CreateAsync(new IdentityRole("Manager"));
+
+
+        }
+
+
+
+        public static async Task SeedAdminAsync(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, RentalDBContext _context)
+        {
+
+            try
+            {
+                // 1. Get Role from main DB
+                var adminRole = _context.UserRoles.FirstOrDefault(r => r.RoleName == "Admin");
+                if (adminRole == null)
+                    throw new Exception("Role 'Admin' not found.");
+
+                // 2. Check if Identity user already exists
+                var existingUser = await userManager.FindByEmailAsync("Admin1@gmail.com");
+                if (existingUser != null)
+                {
+                    Console.WriteLine("Admin user already exists");
+                    return;
+                }
+
+                // 3. Insert into main app DB first
+                var newAdmin = new User
+                {
+                    FirstName = "Default",
+                    LastName = "Admin",
+                    Email = "Admin1@gmail.com",
+                    RoleId = adminRole.Id,
+                    IsActive = true
+                };
+
+                _context.Users.Add(newAdmin);
+                _context.SaveChanges();
+
+                // 4. Create Identity user and link UserID to main DB
+                var defaultUser = new ApplicationUser
+                {
+                    UserName = "Admin1@gmail.com",
+                    Email = "Admin1@gmail.com",
+                    FirstName = "Default",
+                    LastName = "Admin",
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    UserID = newAdmin.Id
+                };
+
+                var result = await userManager.CreateAsync(defaultUser, "Pa$$word123");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(defaultUser, "Admin");
+                    Console.WriteLine("Admin user created and linked successfully");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to create Identity user:");
+                    foreach (var error in result.Errors)
+                        Console.WriteLine($"- {error.Description}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error during admin seeding: " + ex.Message);
+            }
+
+        }
+
+    }
+}
