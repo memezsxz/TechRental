@@ -1,36 +1,77 @@
 ﻿@model Database.Core.Domain.Category
-
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Add Category";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Create</h1>
+<div class="container py-4">
 
-<h4>Category</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Create">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="Name" class="control-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Description" class="control-label"></label>
-                <input asp-for="Description" class="form-control" />
-                <span asp-validation-for="Description" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+    <!-- back link -->
+    <a asp-action="Index" class="text-success text-decoration-none small mb-3 d-inline-flex align-items-center">
+        <i class="bi bi-arrow-left-short fs-5"></i> Back
+    </a>
+
+    <h2 class="fw-bold text-success mb-4">Add Category</h2>
+
+    <div class="row justify-content-start">
+        <div class="col-12 col-md-6">
+
+            <form asp-action="Create" class="needs-validation" novalidate>
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <!-- Name  -->
+                <div class="mb-3">
+                    <label asp-for="Name" class="form-label fw-semibold"></label>
+                    <input asp-for="Name" class="form-control form-control"  required/>
+                    <span asp-validation-for="Name" class="text-danger small"></span>
+                </div>
+
+                <!-- Description -->
+                <div class="mb-4">
+                    <label asp-for="Description" class="form-label fw-semibold"></label>
+                    <textarea asp-for="Description" rows="3" class="form-control" required></textarea>
+                    <span asp-validation-for="Description" class="text-danger small"></span>
+                </div>
+
+                <!-- IsActive radio  -->
+                <div class="mb-4">
+                    <label class="form-label fw-semibold">Is&nbsp;Active</label>
+
+                    <div class="form-check form-check-inline">
+                        <input asp-for="IsActive" class="form-check-input"
+                               type="radio" value="true" id="activeYes" checked />
+                        <label class="form-check-label" for="activeYes">Yes</label>
+                    </div>
+
+                    <div class="form-check form-check-inline">
+                        <input asp-for="IsActive" class="form-check-input"
+                               type="radio" value="false" id="activeNo" />
+                        <label class="form-check-label" for="activeNo">No</label>
+                    </div>
+
+                    <span asp-validation-for="IsActive" class="text-danger small d-block"></span>
+                </div>
+
+                <!-- buttons -->
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <button type="submit" class="btn btn-success w-100 py-2">
+                            Save&nbsp;Changes
+                        </button>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <a asp-action="Index" class="btn btn-outline-success w-100 py-2">
+                            Cancel
+                        </a>
+                    </div>
+                </div>
+
+            </form>
+
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
