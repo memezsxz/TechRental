@@ -3,6 +3,7 @@ using Database.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Sprache;
+using WebApp.Helpers;
 
 namespace WebApp.Areas.Identity.Data
 {
@@ -15,14 +16,14 @@ namespace WebApp.Areas.Identity.Data
 
 
             //check each role seperated , so if the role is not exsist create it.
-            if (!await roleManager.RoleExistsAsync("Admin"))
-                await roleManager.CreateAsync(new IdentityRole("Admin"));
+            if (!await roleManager.RoleExistsAsync(RoleConstants.Admin))
+                await roleManager.CreateAsync(new IdentityRole(RoleConstants.Admin));
 
-            if (!await roleManager.RoleExistsAsync("Customer"))
-                await roleManager.CreateAsync(new IdentityRole("Customer"));
+            if (!await roleManager.RoleExistsAsync(RoleConstants.Customer))
+                await roleManager.CreateAsync(new IdentityRole(RoleConstants.Customer));
 
-            if (!await roleManager.RoleExistsAsync("Manager"))
-                await roleManager.CreateAsync(new IdentityRole("Manager"));
+            if (!await roleManager.RoleExistsAsync(RoleConstants.Manager))
+                await roleManager.CreateAsync(new IdentityRole(RoleConstants.Manager));
 
 
         }
@@ -35,7 +36,7 @@ namespace WebApp.Areas.Identity.Data
             try
             {
                 // 1. Get Role from main DB
-                var adminRole = _context.UserRoles.FirstOrDefault(r => r.RoleName == "Admin");
+                var adminRole = _context.UserRoles.FirstOrDefault(r => r.RoleName == RoleConstants.Admin);
                 if (adminRole == null)
                     throw new Exception("Role 'Admin' not found.");
 
@@ -75,7 +76,7 @@ namespace WebApp.Areas.Identity.Data
                 var result = await userManager.CreateAsync(defaultUser, "Pa$$word123");
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(defaultUser, "Admin");
+                    await userManager.AddToRoleAsync(defaultUser, RoleConstants.Admin);
                     Console.WriteLine("Admin user created and linked successfully");
                 }
                 else

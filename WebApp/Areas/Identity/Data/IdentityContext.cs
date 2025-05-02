@@ -20,5 +20,6 @@ public class IdentityContext : IdentityDbContext<IdentityUser>
         // Add your customizations after calling base.OnModelCreating(builder);
     }
 
-    DbSet<ApplicationUser> ApplicationUser { get; set; }
+    public DbSet<ApplicationUser> ApplicationUser { get; set; }
+
 }

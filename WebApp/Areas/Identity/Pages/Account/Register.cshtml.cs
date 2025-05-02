@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Threading;
@@ -21,6 +22,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
 using WebApp.Areas.Identity.Data;
+using WebApp.Helpers;
 
 namespace WebApp.Areas.Identity.Pages.Account
 {
@@ -158,7 +160,9 @@ namespace WebApp.Areas.Identity.Pages.Account
                 if (result.Succeeded)
                 {
                     _logger.LogInformation("User created a new account with password.");
-                    await _userManager.AddToRoleAsync(user, "Customer");
+                    await _userManager.AddToRoleAsync(user, RoleConstants.Customer);
+
+                    await _userManager.AddClaimAsync(user, new Claim("UserID", user.UserID.ToString()));
 
 
                     var userId = await _userManager.GetUserIdAsync(user);
@@ -198,7 +202,8 @@ namespace WebApp.Areas.Identity.Pages.Account
             try
             {
                 //get the customer role id 
-                var customerRole = _context.UserRoles.FirstOrDefault(r => r.RoleName == "Customer");
+                var customerRole = _context.UserRoles.FirstOrDefault(r => r.RoleName == RoleConstants.Customer);
+
 
                 if (customerRole == null)
                     throw new Exception("Role 'Customer' not found.");

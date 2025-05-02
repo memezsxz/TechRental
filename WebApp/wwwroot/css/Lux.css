@@ -13708,3 +13708,7 @@ a {
 .form-label {
     font-weight: 600;
 }
+
+.offcanvas.wide-panel {
+    width: 450px; /* Change to any value you like */
+}
