@@ -1,5 +1,6 @@
-﻿@{
-    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout !=  null)
+﻿
+@{
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout != null)
     {
         Layout = parentLayout.ToString();
     }
@@ -9,16 +10,19 @@
     }
 }
 
-<h1>Manage your account</h1>
+<div class="container py-4">
+    <!-- Page Title -->
 
-<div>
-    <h2>Change your account settings</h2>
-    <hr />
     <div class="row">
-        <div class="col-md-3">
+        @* <h2 class="fw-bold text-success mb-4">Manage Your Account</h2> *@
+
+        <!-- Sidebar on the left -->
+        <div class="col-lg-3" style="margin-top:1%; margin-bottom:1%">
             <partial name="_ManageNav" />
         </div>
-        <div class="col-md-9">
+
+        <!-- Content on the right, aligned with top -->
+        <div class="col-lg-9" >
             @RenderBody()
         </div>
     </div>

@@ -28,19 +28,19 @@ namespace WebApp.Areas.Identity.Pages.Account
 {
     public class RegisterModel : PageModel
     {
-        private readonly SignInManager<IdentityUser> _signInManager;
-        private readonly UserManager<IdentityUser> _userManager;
-        private readonly IUserStore<IdentityUser> _userStore;
-        private readonly IUserEmailStore<IdentityUser> _emailStore;
+        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IUserStore<ApplicationUser> _userStore;
+        private readonly IUserEmailStore<ApplicationUser> _emailStore;
         private readonly ILogger<RegisterModel> _logger;
         private readonly IEmailSender _emailSender;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly RentalDBContext _context;
 
         public RegisterModel(
-            UserManager<IdentityUser> userManager,
-            IUserStore<IdentityUser> userStore,
-            SignInManager<IdentityUser> signInManager,
+            UserManager<ApplicationUser> userManager,
+            IUserStore<ApplicationUser> userStore,
+            SignInManager<ApplicationUser> signInManager,
             ILogger<RegisterModel> logger,
             IEmailSender emailSender,
             RoleManager<IdentityRole> roleManager,
@@ -145,7 +145,7 @@ namespace WebApp.Areas.Identity.Pages.Account
             //validate the email 
             ValidateEmail(Input.Email);
 
-          
+
 
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
@@ -208,53 +208,52 @@ namespace WebApp.Areas.Identity.Pages.Account
                 if (customerRole == null)
                     throw new Exception("Role 'Customer' not found.");
 
-                
+
                 User newCustomer = new User
-                    {
-                        FirstName = Input.FirstName,
-                        LastName = Input.LastName,
-                        Email = Input.Email,
-                        RoleId = customerRole.Id, //asign the customer role id with customer 
-                        IsActive = true,
+                {
+                    FirstName = Input.FirstName,
+                    LastName = Input.LastName,
+                    Email = Input.Email,
+                    RoleId = customerRole.Id, //asign the customer role id with customer 
+                    IsActive = true,
 
-                    };
+                };
 
-                    _context.Users.Add(newCustomer);
-                    _context.SaveChanges();
+                _context.Users.Add(newCustomer);
+                _context.SaveChanges();
 
 
-                    return new ApplicationUser
-                    {
-                        FirstName = Input.FirstName,
-                        LastName = Input.LastName,
-                        UserID = newCustomer.Id
-                    };
-                
+                return new ApplicationUser
+                {
+                    FirstName = Input.FirstName,
+                    LastName = Input.LastName,
+                    UserID = newCustomer.Id
+                };
+
 
 
             }
             catch
             {
-                throw new InvalidOperationException($"Can't create an instance of '{nameof(IdentityUser)}'. " +
-                    $"Ensure that '{nameof(IdentityUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+                throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
+                    $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
                     $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
             }
 
         }
 
-        private IUserEmailStore<IdentityUser> GetEmailStore()
+        private IUserEmailStore<ApplicationUser> GetEmailStore()
         {
             if (!_userManager.SupportsUserEmail)
             {
                 throw new NotSupportedException("The default UI requires a user store with email support.");
             }
-            return (IUserEmailStore<IdentityUser>)_userStore;
+            return (IUserEmailStore<ApplicationUser>)_userStore;
         }
 
 
         private void ValidateEmail(string email)
         {
-
 
             if (string.IsNullOrWhiteSpace(email))
             {
@@ -265,24 +264,18 @@ namespace WebApp.Areas.Identity.Pages.Account
             if (_context.Users.Any(u => u.Email == email))
             {
                 ModelState.AddModelError("Input.Email", "This email is already registered in the system.");
+                return;
             }
 
-            try
+            // Basic regex for email validation with domain
+            var emailPattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(email, emailPattern))
             {
-                var addr = new System.Net.Mail.MailAddress(email);
-                if (addr.Address != email)
-                {
-                    ModelState.AddModelError("Input.Email", "Invalid email address format.");
-                }
+                ModelState.AddModelError("Input.Email", "Please enter a valid email with a domain like example.com.");
             }
-            catch
-            {
-                ModelState.AddModelError("Input.Email", "Invalid email address format.");
-            }
+
 
         }
-
-
-
     }
 }

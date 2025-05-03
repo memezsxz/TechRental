@@ -215,3 +215,12 @@
         .register-footer-text a:hover {
             text-decoration: underline;
         }
+
+
+.manage-link.active {
+    background-color: #e9fce9 !important;
+    color: #198754 !important;
+    border-color: #198754;
+    font-weight: 600;
+}
+

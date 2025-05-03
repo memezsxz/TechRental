@@ -12,7 +12,7 @@ namespace WebApp.Areas.Identity.Data
   
 
 
-        public static async Task SeedRoleAsync(UserManager<IdentityUser> userManager , RoleManager<IdentityRole> roleManager) {
+        public static async Task SeedRoleAsync(UserManager<ApplicationUser> userManager , RoleManager<IdentityRole> roleManager) {
 
 
             //check each role seperated , so if the role is not exsist create it.
@@ -30,7 +30,7 @@ namespace WebApp.Areas.Identity.Data
 
 
 
-        public static async Task SeedAdminAsync(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, RentalDBContext _context)
+        public static async Task SeedAdminAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, RentalDBContext _context)
         {
 
             try

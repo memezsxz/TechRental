@@ -45,7 +45,12 @@ namespace WebApp.Controllers
                 return Unauthorized("What are you doing here ??? Go and Login");
             }
 
-            var id = _contxet.Users.Where(u => u.Email == User.Identity.Name).FirstOrDefault().Id;
+            var user = _contxet.Users.FirstOrDefault(u => u.Email == User.Identity.Name);
+            if (user == null)
+            {
+                return Unauthorized("User not found in database.");
+            }
+            var id = user.Id;
 
             var notifications = _unitOfWork.Notifications.GetAllAsync().Result;
 
