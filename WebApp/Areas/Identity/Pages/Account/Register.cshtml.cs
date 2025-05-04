@@ -126,7 +126,9 @@ namespace WebApp.Areas.Identity.Pages.Account
         {
             await ContextSeed.SeedRoleAsync(_userManager, _roleManager);
             await ContextSeed.SeedAdminAsync(_userManager, _roleManager, _context);
+            await ContextSeed.SeedManagerAsync(_userManager, _roleManager, _context);
 
+            
 
             //if (!_roleManager.RoleExistsAsync("Admin").GetAwaiter().GetResult())
             //{
