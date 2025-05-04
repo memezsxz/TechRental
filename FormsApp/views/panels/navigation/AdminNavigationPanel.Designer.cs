@@ -35,7 +35,7 @@
             lblAuditTrails = new Label();
             panel1 = new Panel();
             tableLayoutPanel2 = new TableLayoutPanel();
-            panel2 = new Panel();
+            pnlLogo = new Panel();
             tableLayoutPanel1 = new TableLayoutPanel();
             pnlNotification = new Panel();
             pnlProfile = new Panel();
@@ -142,7 +142,7 @@
             tableLayoutPanel2.BackgroundImageLayout = ImageLayout.Zoom;
             tableLayoutPanel2.ColumnCount = 1;
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 28.57143F));
-            tableLayoutPanel2.Controls.Add(panel2, 0, 0);
+            tableLayoutPanel2.Controls.Add(pnlLogo, 0, 0);
             tableLayoutPanel2.Location = new Point(0, 0);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
             tableLayoutPanel2.Padding = new Padding(20);
@@ -151,15 +151,15 @@
             tableLayoutPanel2.Size = new Size(334, 87);
             tableLayoutPanel2.TabIndex = 1;
             // 
-            // panel2
+            // pnlLogo
             // 
-            panel2.BackgroundImage = (Image)resources.GetObject("panel2.BackgroundImage");
-            panel2.BackgroundImageLayout = ImageLayout.Zoom;
-            panel2.Dock = DockStyle.Fill;
-            panel2.Location = new Point(23, 23);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(288, 41);
-            panel2.TabIndex = 0;
+            pnlLogo.BackgroundImage = (Image)resources.GetObject("pnlLogo.BackgroundImage");
+            pnlLogo.BackgroundImageLayout = ImageLayout.Zoom;
+            pnlLogo.Dock = DockStyle.Fill;
+            pnlLogo.Location = new Point(23, 23);
+            pnlLogo.Name = "pnlLogo";
+            pnlLogo.Size = new Size(288, 41);
+            pnlLogo.TabIndex = 0;
             // 
             // tableLayoutPanel1
             // 
@@ -289,7 +289,7 @@
         private TableLayoutPanel pnlPanel;
         private Panel panel1;
         private TableLayoutPanel tableLayoutPanel2;
-        private Panel panel2;
+        private Panel pnlLogo;
         private Label lblDashboard;
         private Label lblAuditTrails;
         private Label lblUsers;

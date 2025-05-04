@@ -21,7 +21,9 @@ namespace FormsApp
         #region Brand Colors
 
         public static Color Green = Color.FromArgb(60, 173, 104);
-        public static Color LightGreen = Color.FromArgb(200, 228, 221);
+        public static Color LightGreen = Color.FromArgb(200, 228, 211);
+        public static Color DarkGreen = Color.FromArgb(49, 129, 80);
+        public static Color NeonGreen = Color.FromArgb(120, 226, 161);
         #endregion
         public static void Panel_Paint(object sender, PaintEventArgs e)
         {
