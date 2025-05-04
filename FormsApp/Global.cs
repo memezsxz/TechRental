@@ -20,8 +20,8 @@ namespace FormsApp
 
         #region Brand Colors
 
-        public static Color Gray = Color.FromArgb(191, 199, 217);
-
+        public static Color Green = Color.FromArgb(60, 173, 104);
+        public static Color LightGreen = Color.FromArgb(200, 228, 221);
         #endregion
         public static void Panel_Paint(object sender, PaintEventArgs e)
         {
