@@ -13,6 +13,13 @@ using static Database.Core.Repositories.IUserRepository;
 using Database.Core.Repositories;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Drawing.Printing;
+using Microsoft.AspNetCore.Identity;
+using WebApp.Areas.Identity.Data;
+using Sprache;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using Microsoft.AspNetCore.WebUtilities;
+using System.Text.Encodings.Web;
+using System.Text;
 
 
 namespace WebApp.Controllers
@@ -20,11 +27,16 @@ namespace WebApp.Controllers
     public class UsersController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly IEmailSender _emailSender;
+
 
         //unit of work "DBContext" refrence passed auto using the depandency injection
-        public UsersController(IUnitOfWork unitOfWork)
+        public UsersController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
         {
             _unitOfWork = unitOfWork;
+            _userManager = userManager;
+            _emailSender = emailSender;
         }
 
         
@@ -96,7 +108,30 @@ namespace WebApp.Controllers
 
                     await _unitOfWork.Users.UpdateAsync(editUser.User);
                     await _unitOfWork.SaveChangesAsync();
-                    
+
+                    var identityUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserID == editUser.User.Id); // match using your foreign key
+
+
+                    if (identityUser != null)
+                    {
+                        identityUser.FirstName = editUser.User.FirstName;
+                        identityUser.LastName = editUser.User.LastName;
+                        identityUser.Email = editUser.User.Email;
+                        identityUser.UserName = editUser.User.Email;
+                        identityUser.PhoneNumber = editUser.User.PhoneNumber;
+                        identityUser.NormalizedEmail = editUser.User.Email.ToUpper();
+                        identityUser.NormalizedUserName = editUser.User.Email.ToUpper();
+
+                        var result = await _userManager.UpdateAsync(identityUser);
+                        if (!result.Succeeded)
+                        {
+                            TempData["faild"] = "Failed to update Identity User.";
+                            return RedirectToAction("Index");
+                        }
+                    }
+
+
+
                     //to show successful message at the top using the TempData
                     TempData["editSuccess"] = "User Updated Successfully";
                     return RedirectToAction(nameof(Index));
@@ -137,78 +172,40 @@ namespace WebApp.Controllers
             {
                 return NotFound();
             }
-            else
+
+            try
             {
-                try
-                {
-                    user.IsActive =false; // Or set IsActive = false if soft delete
-                    await _unitOfWork.Users.UpdateAsync(user);
-                    await _unitOfWork.SaveChangesAsync();
+                var dbUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserID == user.Id);
 
-                    TempData["editSuccess"] = "User Deleted Successfully";
-                    return RedirectToAction(nameof(Index));
-
-                }
-                catch (Exception e)
+                if (dbUser != null)
                 {
-                    if (!await _unitOfWork.Users.UserExistsAsync(user.Id))
-                        return NotFound();
-                    else
-                        throw;
+                    
+                    var identityResult = await _userManager.DeleteAsync(dbUser);
+
+                    if (!identityResult.Succeeded)
+                    {
+                        TempData["faild"] = "Failed to delete user from Identity DB.";
+                        return RedirectToAction(nameof(Index));
+                    }
                 }
+
+                // Soft delete from your main DB
+                user.IsActive = false;
+                await _unitOfWork.Users.UpdateAsync(user);
+                await _unitOfWork.SaveChangesAsync();
+
+                TempData["editSuccess"] = "User Deleted Successfully";
+                return RedirectToAction(nameof(Index));
+            }
+            catch (Exception)
+            {
+                if (!await _unitOfWork.Users.UserExistsAsync(user.Id))
+                    return NotFound();
+                else
+                    throw;
             }
         }
 
-
-
-        public async Task<IActionResult> Profile(int? id)
-        {
-
-            if (id == 0 || id == null)
-            {
-                return NotFound();
-            }
-
-            var user = await _unitOfWork.Users.GetUserWithProfileAsync(id.Value);
-
-            if (user == null)
-            {
-                return NotFound();
-            }
-
-            return View(user);
-        }
-
-
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Profile(User editUser)
-        {
-
-
-            ValidateUser(editUser);
-
-
-
-            if (ModelState.IsValid)
-            {
-                try
-                {
-                    await _unitOfWork.Users.UpdateAsync(editUser);
-                    await _unitOfWork.SaveChangesAsync();
-                    return RedirectToAction("Index", "Home");
-                }
-                catch (DbUpdateConcurrencyException)
-                {
-                    if (!await _unitOfWork.Users.UserExistsAsync(editUser.Id))
-                        return NotFound();
-                    else
-                        throw;
-                }
-            }
-
-            return View(editUser);
-        }
 
         private void ValidateUser(User user)
         {
@@ -278,6 +275,35 @@ namespace WebApp.Controllers
                     ModelState.AddModelError("User.Email", "Invalid email address format.");
                 }
             }
+        }
+
+
+
+
+        public async Task<IActionResult> SendResetLink(int id)
+        {
+            var identityUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserID == id);
+
+            if (identityUser == null)
+            {
+                return RedirectToAction("Index", "Users"); // or show a message
+                //return NotFound("error like your head");
+            }
+
+            var code = await _userManager.GeneratePasswordResetTokenAsync(identityUser);
+            code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+
+            var callbackUrl = Url.Page(
+                "/Account/ResetPassword",
+            null,
+                new { area = "Identity", code },
+                protocol: Request.Scheme);
+
+            await _emailSender.SendEmailAsync(identityUser.Email, "Reset Password",
+                $"Reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
+
+            TempData["editSuccess"] = "Password reset link sent to the user's email.";
+            return RedirectToAction("Index");
         }
 
     }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
@@ -8,6 +8,8 @@
 
   <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.416.16" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.36" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.35" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.35" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="6.0.35">
       <PrivateAssets>all</PrivateAssets>

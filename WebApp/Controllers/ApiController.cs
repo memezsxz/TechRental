@@ -1,5 +1,6 @@
 ﻿using Database.Core;
 using Database.Core.Domain;
+using Database.Persistence;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApp.Controllers
@@ -7,11 +8,13 @@ namespace WebApp.Controllers
     public class ApiController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly RentalDBContext _contxet;
         
 
-        public ApiController(IUnitOfWork unitOfWork)
+        public ApiController(IUnitOfWork unitOfWork, RentalDBContext context)
         {
             _unitOfWork = unitOfWork;
+            _contxet = context;
         }
 
         public IActionResult ping()
@@ -36,7 +39,19 @@ namespace WebApp.Controllers
             return Json(categorieslist);
         }
 
-        public IActionResult notifications(int id) {
+        public IActionResult notifications() {
+
+            if (User.Identity.Name == null || User.Identity.Name == "") {
+                return Unauthorized("What are you doing here ??? Go and Login");
+            }
+
+            var user = _contxet.Users.FirstOrDefault(u => u.Email == User.Identity.Name);
+            if (user == null)
+            {
+                return Unauthorized("User not found in database.");
+            }
+            var id = user.Id;
+
             var notifications = _unitOfWork.Notifications.GetAllAsync().Result;
 
             var notificationList = new List<Notification>();
@@ -49,6 +64,18 @@ namespace WebApp.Controllers
                 notificationList.Add(notification);
             }
             return Json(notificationList);
+        }
+
+        [HttpPost("/api/notifications/markread/{id}")]
+        public IActionResult MarkAsRead(int id)
+        {
+            var notification = _unitOfWork.Notifications.GetAsync(id).Result;
+            if (notification == null) return NotFound();
+
+            notification.IsRead = true;
+            _unitOfWork.SaveChanges(); // Or SaveChanges()
+
+            return Ok();
         }
 
         public IActionResult Index() {

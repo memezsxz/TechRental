@@ -125,6 +125,13 @@ namespace Database.Persistence.Repositories
             return query.Cast<object>();
         }
 
+        public int GetUserByEmail(string email)
+        {
+            return  RentalDBContext.Users.Where(u => u.Email == email).FirstOrDefault().Id;
+        }
+
+
+
 
         #endregion
     }
