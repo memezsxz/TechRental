@@ -1,0 +1,42 @@
+﻿@model IEnumerable<Database.Core.Domain.SystemErrorLog>
+
+@{
+    ViewData["Title"] = "Error Logs";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<div class="container py-4">
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="text-success fw-bold">Error Logs</h2>
+    <div class="btn-group">
+        <a class="btn btn-outline-success" href="/auditlogs" >Audit Trails</a>
+        <a class="btn btn-success active">Error Logs</a>
+    </div>
+</div>
+
+<table class="table audit-table table-bordered">
+    <thead class="table-light text-success">
+        <tr>
+            <th>Timestamp</th>
+            <th>User ID</th>
+            <th>Source</th>
+            <th>Error Produce</th>
+            <th>Error Message</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Timestamp</td>
+                <td>@item.User?.Id</td>
+                <td>@item.ErrorSource</td>
+                <td>@item.SourceProcedure</td>
+                <td>@item.ErrorMessage</td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
