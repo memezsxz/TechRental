@@ -97,7 +97,13 @@
         @if (Model.CurrentPage > 1)
         {
             <li class="page-item">
-                <a class="page-link text-success" asp-action="Index" asp-route-page="@(Model.CurrentPage - 1)">
+                <a class="page-link text-success"
+                   asp-action="Index"
+                   asp-route-page="@(Model.CurrentPage - 1)"
+                   asp-route-SearchString="@Model.SearchString"
+                   asp-route-RoleFilter="@Model.RoleFilter"
+                   asp-route-sortBy="@Model.CurrentSort">
+
                     <i class="bi bi-chevron-left"></i> Previous
                 </a>
             </li>
@@ -109,6 +115,9 @@
                 <a class="page-link @(Model.CurrentPage == i ? "bg-success text-white border-success" : "text-success")"
                    asp-action="Index"
                    asp-route-page="@i"
+                   asp-route-SearchString="@Model.SearchString"
+                   asp-route-RoleFilter="@Model.RoleFilter"
+                   asp-route-sortBy="@Model.CurrentSort"
                    style="border-radius: 8px; margin: 0 4px;">
                     @i
                 </a>
@@ -118,7 +127,12 @@
         @if (Model.CurrentPage < Model.TotalPages)
         {
             <li class="page-item">
-                <a class="page-link text-success" asp-action="Index" asp-route-page="@(Model.CurrentPage + 1)">
+                <a class="page-link text-success"
+                   asp-action="Index"
+                   asp-route-page="@(Model.CurrentPage + 1)"
+                   asp-route-SearchString="@Model.SearchString"
+                   asp-route-RoleFilter="@Model.RoleFilter"
+                   asp-route-sortBy="@Model.CurrentSort">
                     Next <i class="bi bi-chevron-right"></i>
                 </a>
             </li>

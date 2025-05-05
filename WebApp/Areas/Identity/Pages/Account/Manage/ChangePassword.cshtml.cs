@@ -120,8 +120,9 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
 
             await _signInManager.RefreshSignInAsync(user);
             _logger.LogInformation("User changed their password successfully.");
-            StatusMessage = "Your password has been changed.";
-
+            //StatusMessage = "Your password has been changed.";
+            TempData["MessageText"] = "Your password has been changed successfully!";
+            TempData["MessageType"] = "success";
             return RedirectToPage();
         }
     }

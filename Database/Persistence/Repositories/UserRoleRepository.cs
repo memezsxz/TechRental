@@ -18,5 +18,10 @@ namespace Database.Persistence.Repositories
         {
             return context.UserRoles.ToDictionary(ur => ur.Id, ur => ur.RoleName);
         }
+
+        public  string getRoleNameByID(int id)
+        {
+            return  context.UserRoles.FirstOrDefault(r => r.Id == id).RoleName.ToString();
+        }
     }
 }
