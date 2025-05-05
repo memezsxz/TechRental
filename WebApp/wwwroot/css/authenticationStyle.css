@@ -187,6 +187,14 @@
         background-color: #388e3c;
     }
 
+.reg {
+    color: #3CAD68;
+}
+
+    .reg:hover {
+        color: white;
+    }
+
 .register-form-group {
     margin-bottom: 1rem;
 }
