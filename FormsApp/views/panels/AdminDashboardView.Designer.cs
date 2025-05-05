@@ -28,33 +28,42 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.CustomLabel customLabel3 = new System.Windows.Forms.DataVisualization.Charting.CustomLabel();
+            System.Windows.Forms.DataVisualization.Charting.CustomLabel customLabel4 = new System.Windows.Forms.DataVisualization.Charting.CustomLabel();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.LegendCellColumn legendCellColumn3 = new System.Windows.Forms.DataVisualization.Charting.LegendCellColumn();
+            System.Windows.Forms.DataVisualization.Charting.LegendCellColumn legendCellColumn4 = new System.Windows.Forms.DataVisualization.Charting.LegendCellColumn();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint4 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, "10,0");
+            System.Windows.Forms.DataVisualization.Charting.Series series5 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint5 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 90D);
+            System.Windows.Forms.DataVisualization.Charting.DataPoint dataPoint6 = new System.Windows.Forms.DataVisualization.Charting.DataPoint(0D, 6D);
+            System.Windows.Forms.DataVisualization.Charting.Title title2 = new System.Windows.Forms.DataVisualization.Charting.Title();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series6 = new System.Windows.Forms.DataVisualization.Charting.Series();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AdminDashboardView));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             label1 = new Label();
             panel1 = new Panel();
             tableLayoutPanel1 = new TableLayoutPanel();
             tableLayoutPanel8 = new TableLayoutPanel();
             splitContainer5 = new SplitContainer();
             flowLayoutPanel4 = new FlowLayoutPanel();
-            panel4 = new Panel();
+            pnlQuarterPrevious = new Panel();
             flowLayoutPanel5 = new FlowLayoutPanel();
-            panel5 = new Panel();
+            pnlQuarterNext = new Panel();
             label15 = new Label();
-            chart2 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartQuarterEarnings = new System.Windows.Forms.DataVisualization.Charting.Chart();
             tableLayoutPanel7 = new TableLayoutPanel();
             label14 = new Label();
-            chart1 = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            chartCategories = new System.Windows.Forms.DataVisualization.Charting.Chart();
             tableLayoutPanel3 = new TableLayoutPanel();
             splitContainer4 = new SplitContainer();
             flowLayoutPanel2 = new FlowLayoutPanel();
-            pnlPrevios = new Panel();
+            pnlTopPrevios = new Panel();
             flowLayoutPanel3 = new FlowLayoutPanel();
-            pnlNext = new Panel();
+            pnlTopNext = new Panel();
             label3 = new Label();
             splitContainer1 = new SplitContainer();
             splitContainer2 = new SplitContainer();
@@ -80,7 +89,7 @@
             dataGridView1 = new DataGridView();
             tableLayoutPanel9 = new TableLayoutPanel();
             flowLayoutPanel6 = new FlowLayoutPanel();
-            panel2 = new Panel();
+            pnlRefresh = new Panel();
             panel1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel8.SuspendLayout();
@@ -90,9 +99,9 @@
             splitContainer5.SuspendLayout();
             flowLayoutPanel4.SuspendLayout();
             flowLayoutPanel5.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)chart2).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)chartQuarterEarnings).BeginInit();
             tableLayoutPanel7.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)chart1).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)chartCategories).BeginInit();
             tableLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)splitContainer4).BeginInit();
             splitContainer4.Panel1.SuspendLayout();
@@ -167,7 +176,7 @@
             tableLayoutPanel8.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel8.Controls.Add(splitContainer5, 0, 2);
             tableLayoutPanel8.Controls.Add(label15, 0, 0);
-            tableLayoutPanel8.Controls.Add(chart2, 0, 1);
+            tableLayoutPanel8.Controls.Add(chartQuarterEarnings, 0, 1);
             tableLayoutPanel8.Dock = DockStyle.Fill;
             tableLayoutPanel8.Location = new Point(854, 428);
             tableLayoutPanel8.Margin = new Padding(20, 10, 20, 10);
@@ -198,7 +207,7 @@
             // 
             // flowLayoutPanel4
             // 
-            flowLayoutPanel4.Controls.Add(panel4);
+            flowLayoutPanel4.Controls.Add(pnlQuarterPrevious);
             flowLayoutPanel4.Dock = DockStyle.Fill;
             flowLayoutPanel4.FlowDirection = FlowDirection.RightToLeft;
             flowLayoutPanel4.Location = new Point(0, 0);
@@ -206,34 +215,36 @@
             flowLayoutPanel4.Size = new Size(283, 47);
             flowLayoutPanel4.TabIndex = 0;
             // 
-            // panel4
+            // pnlQuarterPrevious
             // 
-            panel4.Anchor = AnchorStyles.Right;
-            panel4.BackgroundImage = (Image)resources.GetObject("panel4.BackgroundImage");
-            panel4.BackgroundImageLayout = ImageLayout.Zoom;
-            panel4.Location = new Point(186, 3);
-            panel4.Name = "panel4";
-            panel4.Size = new Size(94, 43);
-            panel4.TabIndex = 9;
+            pnlQuarterPrevious.Anchor = AnchorStyles.Right;
+            pnlQuarterPrevious.BackgroundImage = (Image)resources.GetObject("pnlQuarterPrevious.BackgroundImage");
+            pnlQuarterPrevious.BackgroundImageLayout = ImageLayout.Zoom;
+            pnlQuarterPrevious.Location = new Point(186, 3);
+            pnlQuarterPrevious.Name = "pnlQuarterPrevious";
+            pnlQuarterPrevious.Size = new Size(94, 43);
+            pnlQuarterPrevious.TabIndex = 9;
+            pnlQuarterPrevious.Click += HandleQuarterEarningsSwitching;
             // 
             // flowLayoutPanel5
             // 
-            flowLayoutPanel5.Controls.Add(panel5);
+            flowLayoutPanel5.Controls.Add(pnlQuarterNext);
             flowLayoutPanel5.Dock = DockStyle.Fill;
             flowLayoutPanel5.Location = new Point(0, 0);
             flowLayoutPanel5.Name = "flowLayoutPanel5";
             flowLayoutPanel5.Size = new Size(310, 47);
             flowLayoutPanel5.TabIndex = 1;
             // 
-            // panel5
+            // pnlQuarterNext
             // 
-            panel5.Anchor = AnchorStyles.Left;
-            panel5.BackgroundImage = (Image)resources.GetObject("panel5.BackgroundImage");
-            panel5.BackgroundImageLayout = ImageLayout.Zoom;
-            panel5.Location = new Point(3, 3);
-            panel5.Name = "panel5";
-            panel5.Size = new Size(94, 43);
-            panel5.TabIndex = 10;
+            pnlQuarterNext.Anchor = AnchorStyles.Left;
+            pnlQuarterNext.BackgroundImage = (Image)resources.GetObject("pnlQuarterNext.BackgroundImage");
+            pnlQuarterNext.BackgroundImageLayout = ImageLayout.Zoom;
+            pnlQuarterNext.Location = new Point(3, 3);
+            pnlQuarterNext.Name = "pnlQuarterNext";
+            pnlQuarterNext.Size = new Size(94, 43);
+            pnlQuarterNext.TabIndex = 10;
+            pnlQuarterNext.Click += HandleQuarterEarningsSwitching;
             // 
             // label15
             // 
@@ -248,29 +259,55 @@
             label15.Text = "Earnings";
             label15.TextAlign = ContentAlignment.TopCenter;
             // 
-            // chart2
+            // chartQuarterEarnings
             // 
-            chartArea1.Name = "ChartArea1";
-            chart2.ChartAreas.Add(chartArea1);
-            chart2.Dock = DockStyle.Fill;
-            legend1.Name = "Legend1";
-            chart2.Legends.Add(legend1);
-            chart2.Location = new Point(3, 73);
-            chart2.Name = "chart2";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            chart2.Series.Add(series1);
-            chart2.Size = new Size(597, 269);
-            chart2.TabIndex = 1;
-            chart2.Text = "chart2";
+            customLabel3.Text = "cdcd";
+            customLabel4.Text = "cdcd";
+            chartArea3.AxisX.CustomLabels.Add(customLabel3);
+            chartArea3.AxisX.CustomLabels.Add(customLabel4);
+            chartArea3.Name = "ChartArea1";
+            chartQuarterEarnings.ChartAreas.Add(chartArea3);
+            chartQuarterEarnings.Dock = DockStyle.Fill;
+            legendCellColumn3.Name = "Column1";
+            legendCellColumn3.Text = "yjhbj";
+            legendCellColumn4.ColumnType = System.Windows.Forms.DataVisualization.Charting.LegendCellColumnType.SeriesSymbol;
+            legendCellColumn4.Name = "Column2";
+            legend3.CellColumns.Add(legendCellColumn3);
+            legend3.CellColumns.Add(legendCellColumn4);
+            legend3.Name = "Legend1";
+            chartQuarterEarnings.Legends.Add(legend3);
+            chartQuarterEarnings.Location = new Point(3, 73);
+            chartQuarterEarnings.Name = "chartQuarterEarnings";
+            series4.ChartArea = "ChartArea1";
+            series4.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Bar;
+            series4.IsValueShownAsLabel = true;
+            series4.Legend = "Legend1";
+            series4.Name = "one";
+            series4.Points.Add(dataPoint4);
+            series4.SmartLabelStyle.AllowOutsidePlotArea = System.Windows.Forms.DataVisualization.Charting.LabelOutsidePlotAreaStyle.Yes;
+            series4.SmartLabelStyle.MinMovingDistance = 10D;
+            series4.YAxisType = System.Windows.Forms.DataVisualization.Charting.AxisType.Secondary;
+            series4.YValuesPerPoint = 2;
+            series5.ChartArea = "ChartArea1";
+            series5.Legend = "Legend1";
+            series5.Name = "Series2";
+            series5.Points.Add(dataPoint5);
+            series5.Points.Add(dataPoint6);
+            series5.SmartLabelStyle.MinMovingDistance = 10D;
+            chartQuarterEarnings.Series.Add(series4);
+            chartQuarterEarnings.Series.Add(series5);
+            chartQuarterEarnings.Size = new Size(597, 269);
+            chartQuarterEarnings.TabIndex = 1;
+            chartQuarterEarnings.Text = "chart2";
+            title2.Name = "Title1";
+            chartQuarterEarnings.Titles.Add(title2);
             // 
             // tableLayoutPanel7
             // 
             tableLayoutPanel7.ColumnCount = 1;
             tableLayoutPanel7.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel7.Controls.Add(label14, 0, 0);
-            tableLayoutPanel7.Controls.Add(chart1, 0, 1);
+            tableLayoutPanel7.Controls.Add(chartCategories, 0, 1);
             tableLayoutPanel7.Dock = DockStyle.Fill;
             tableLayoutPanel7.Location = new Point(854, 10);
             tableLayoutPanel7.Margin = new Padding(20, 10, 20, 10);
@@ -295,22 +332,22 @@
             label14.Text = "Weekly Category Sales\n\n";
             label14.TextAlign = ContentAlignment.TopCenter;
             // 
-            // chart1
+            // chartCategories
             // 
-            chartArea2.Name = "ChartArea1";
-            chart1.ChartAreas.Add(chartArea2);
-            chart1.Dock = DockStyle.Fill;
-            legend2.Name = "Legend1";
-            chart1.Legends.Add(legend2);
-            chart1.Location = new Point(3, 82);
-            chart1.Name = "chart1";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            chart1.Series.Add(series2);
-            chart1.Size = new Size(597, 313);
-            chart1.TabIndex = 1;
-            chart1.Text = "fggh";
+            chartArea4.Name = "ChartArea1";
+            chartCategories.ChartAreas.Add(chartArea4);
+            chartCategories.Dock = DockStyle.Fill;
+            legend4.Name = "Legend1";
+            chartCategories.Legends.Add(legend4);
+            chartCategories.Location = new Point(3, 82);
+            chartCategories.Name = "chartCategories";
+            series6.ChartArea = "ChartArea1";
+            series6.Legend = "Legend1";
+            series6.Name = "Series1";
+            chartCategories.Series.Add(series6);
+            chartCategories.Size = new Size(597, 313);
+            chartCategories.TabIndex = 1;
+            chartCategories.Text = "fggh";
             // 
             // tableLayoutPanel3
             // 
@@ -349,7 +386,7 @@
             // 
             // flowLayoutPanel2
             // 
-            flowLayoutPanel2.Controls.Add(pnlPrevios);
+            flowLayoutPanel2.Controls.Add(pnlTopPrevios);
             flowLayoutPanel2.Dock = DockStyle.Fill;
             flowLayoutPanel2.FlowDirection = FlowDirection.RightToLeft;
             flowLayoutPanel2.Location = new Point(0, 0);
@@ -357,36 +394,36 @@
             flowLayoutPanel2.Size = new Size(375, 47);
             flowLayoutPanel2.TabIndex = 0;
             // 
-            // pnlPrevios
+            // pnlTopPrevios
             // 
-            pnlPrevios.Anchor = AnchorStyles.Right;
-            pnlPrevios.BackgroundImage = (Image)resources.GetObject("pnlPrevios.BackgroundImage");
-            pnlPrevios.BackgroundImageLayout = ImageLayout.Zoom;
-            pnlPrevios.Location = new Point(278, 3);
-            pnlPrevios.Name = "pnlPrevios";
-            pnlPrevios.Size = new Size(94, 43);
-            pnlPrevios.TabIndex = 9;
-            pnlPrevios.Click += HandleTopEquipmentsSwitching;
+            pnlTopPrevios.Anchor = AnchorStyles.Right;
+            pnlTopPrevios.BackgroundImage = (Image)resources.GetObject("pnlTopPrevios.BackgroundImage");
+            pnlTopPrevios.BackgroundImageLayout = ImageLayout.Zoom;
+            pnlTopPrevios.Location = new Point(278, 3);
+            pnlTopPrevios.Name = "pnlTopPrevios";
+            pnlTopPrevios.Size = new Size(94, 43);
+            pnlTopPrevios.TabIndex = 9;
+            pnlTopPrevios.Click += HandleTopEquipmentsSwitching;
             // 
             // flowLayoutPanel3
             // 
-            flowLayoutPanel3.Controls.Add(pnlNext);
+            flowLayoutPanel3.Controls.Add(pnlTopNext);
             flowLayoutPanel3.Dock = DockStyle.Fill;
             flowLayoutPanel3.Location = new Point(0, 0);
             flowLayoutPanel3.Name = "flowLayoutPanel3";
             flowLayoutPanel3.Size = new Size(409, 47);
             flowLayoutPanel3.TabIndex = 1;
             // 
-            // pnlNext
+            // pnlTopNext
             // 
-            pnlNext.Anchor = AnchorStyles.Left;
-            pnlNext.BackgroundImage = (Image)resources.GetObject("pnlNext.BackgroundImage");
-            pnlNext.BackgroundImageLayout = ImageLayout.Zoom;
-            pnlNext.Location = new Point(3, 3);
-            pnlNext.Name = "pnlNext";
-            pnlNext.Size = new Size(94, 43);
-            pnlNext.TabIndex = 10;
-            pnlNext.Click += HandleTopEquipmentsSwitching;
+            pnlTopNext.Anchor = AnchorStyles.Left;
+            pnlTopNext.BackgroundImage = (Image)resources.GetObject("pnlTopNext.BackgroundImage");
+            pnlTopNext.BackgroundImageLayout = ImageLayout.Zoom;
+            pnlTopNext.Location = new Point(3, 3);
+            pnlTopNext.Name = "pnlTopNext";
+            pnlTopNext.Size = new Size(94, 43);
+            pnlTopNext.TabIndex = 10;
+            pnlTopNext.Click += HandleTopEquipmentsSwitching;
             // 
             // label3
             // 
@@ -730,7 +767,7 @@
             flowLayoutPanel6.Anchor = AnchorStyles.Left | AnchorStyles.Right;
             flowLayoutPanel6.AutoSize = true;
             flowLayoutPanel6.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            flowLayoutPanel6.Controls.Add(panel2);
+            flowLayoutPanel6.Controls.Add(pnlRefresh);
             flowLayoutPanel6.FlowDirection = FlowDirection.RightToLeft;
             flowLayoutPanel6.Location = new Point(741, 16);
             flowLayoutPanel6.Margin = new Padding(3, 3, 20, 3);
@@ -738,16 +775,17 @@
             flowLayoutPanel6.Size = new Size(716, 53);
             flowLayoutPanel6.TabIndex = 1;
             // 
-            // panel2
+            // pnlRefresh
             // 
-            panel2.Anchor = AnchorStyles.Left;
-            panel2.BackgroundImage = (Image)resources.GetObject("panel2.BackgroundImage");
-            panel2.BackgroundImageLayout = ImageLayout.Zoom;
-            panel2.Location = new Point(658, 5);
-            panel2.Margin = new Padding(5);
-            panel2.Name = "panel2";
-            panel2.Size = new Size(53, 43);
-            panel2.TabIndex = 11;
+            pnlRefresh.Anchor = AnchorStyles.Left;
+            pnlRefresh.BackgroundImage = (Image)resources.GetObject("pnlRefresh.BackgroundImage");
+            pnlRefresh.BackgroundImageLayout = ImageLayout.Zoom;
+            pnlRefresh.Location = new Point(658, 5);
+            pnlRefresh.Margin = new Padding(5);
+            pnlRefresh.Name = "pnlRefresh";
+            pnlRefresh.Size = new Size(53, 43);
+            pnlRefresh.TabIndex = 11;
+            pnlRefresh.Click += pnlRefresh_Click;
             // 
             // AdminDashboardView
             // 
@@ -769,10 +807,10 @@
             splitContainer5.ResumeLayout(false);
             flowLayoutPanel4.ResumeLayout(false);
             flowLayoutPanel5.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)chart2).EndInit();
+            ((System.ComponentModel.ISupportInitialize)chartQuarterEarnings).EndInit();
             tableLayoutPanel7.ResumeLayout(false);
             tableLayoutPanel7.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)chart1).EndInit();
+            ((System.ComponentModel.ISupportInitialize)chartCategories).EndInit();
             tableLayoutPanel3.ResumeLayout(false);
             tableLayoutPanel3.PerformLayout();
             splitContainer4.Panel1.ResumeLayout(false);
@@ -818,20 +856,20 @@
         private TableLayoutPanel tableLayoutPanel8;
         private SplitContainer splitContainer5;
         private FlowLayoutPanel flowLayoutPanel4;
-        private Panel panel4;
+        private Panel pnlQuarterPrevious;
         private FlowLayoutPanel flowLayoutPanel5;
-        private Panel panel5;
+        private Panel pnlQuarterNext;
         private Label label15;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chart2;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartQuarterEarnings;
         private TableLayoutPanel tableLayoutPanel7;
         private Label label14;
-        private System.Windows.Forms.DataVisualization.Charting.Chart chart1;
+        private System.Windows.Forms.DataVisualization.Charting.Chart chartCategories;
         private TableLayoutPanel tableLayoutPanel3;
         private SplitContainer splitContainer4;
         private FlowLayoutPanel flowLayoutPanel2;
-        private Panel pnlPrevios;
+        private Panel pnlTopPrevios;
         private FlowLayoutPanel flowLayoutPanel3;
-        private Panel pnlNext;
+        private Panel pnlTopNext;
         private Label label3;
         private SplitContainer splitContainer1;
         private SplitContainer splitContainer2;
@@ -855,7 +893,7 @@
         private Button button1;
         private DataGridView dataGridView1;
         private FlowLayoutPanel flowLayoutPanel6;
-        private Panel panel2;
+        private Panel pnlRefresh;
         private Panel pnlTopImage;
     }
 }
