@@ -15,7 +15,7 @@ namespace Database.Persistence.Repositories
         }
         public Dictionary<int, string> GetAllByName()
         {
-            return context.RentalRequestStatuses.ToDictionary(rrs => rrs.Id, rrs => rrs.StatusName);
+            return context.ReturnConditionStatuses.ToDictionary(rrs => rrs.Id, rrs => rrs.ConditionName);
         }
     }
 }

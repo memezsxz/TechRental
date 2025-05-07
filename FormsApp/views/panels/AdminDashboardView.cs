@@ -4,6 +4,7 @@ using Database.Persistence;
 using Image = System.Drawing.Image;
 using Database.ViewModels;
 using Database.Core;
+using Amazon.S3.Model;
 
 namespace FormsApp.views.panels
 {
@@ -212,17 +213,11 @@ namespace FormsApp.views.panels
         {
             try
             {
-                var stream = await S3Uploader.GetFileByGuidAsync(stats.ImageGuid.ToString());
-                if (stream == null) return;
+                if (!stats.ImageGuid.HasValue) return;
+          
+                var image = await Global.GetImage(stats.ImageGuid.Value, stats.ImageFormat);
 
-                stream.Position = 0;
-                var ext = stats.ImageFormat.Split('/').Last();
-                var tempPath = Path.Combine(Path.GetTempPath(), $"temp_image_{stats.ImageGuid}.{ext}");
-
-                await using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
-                    await stream.CopyToAsync(fs);
-
-                var image = Image.FromFile(tempPath);
+                if (image == null) return;
 
                 pnlTopImage.Controls.Clear();
                 pnlTopImage.Controls.Add(new PictureBox
@@ -239,6 +234,8 @@ namespace FormsApp.views.panels
                 Console.WriteLine($"Image loading error: {ex.Message}");
             }
         }
+
+
 
         /// <summary>
         /// Clears the image preview area if no valid image is available.

@@ -11,79 +11,84 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Database.Core.Domain;
 using Database.Persistence;
+using System.Globalization;
+using System.Runtime.CompilerServices;
+using Microsoft.EntityFrameworkCore;
+using System.Xml.Linq;
+using Image = System.Drawing.Image;
+using Helper;
+using System.Drawing.Imaging;
 
 namespace FormsApp.views.dialogs
 {
+    /// <summary>
+    /// Manages equipment data for Add, Edit, and Delete operations in the Equipment Rental Management System.
+    /// </summary>
+    //public partial class ManageEquipment : Form
     public partial class ManageEquipment : BaseViewEditDeleteForm
     {
+        #region Fields
         private Equipment item;
+        private Image uploadedImage;
+        private string imageFormat;
+        private string imageExtention;
+        #endregion
 
-        public ManageEquipment(BaseViewEditDeleteForm.ViewType viewType) : base(viewType)
-        {
-        }
+        #region Constructor
 
-        public ManageEquipment(BaseViewEditDeleteForm.ViewType viewType, int id) : base(viewType)
+        /// <summary>
+        /// Initializes the ManageEquipment form with the specified view type and optional equipment ID.
+        /// </summary>
+        /// <param name="viewType">The mode in which the form is opened (Add, Edit, or View).</param>
+        /// <param name="id">Optional ID of the equipment to load in Edit mode.</param>
+        public ManageEquipment(BaseViewEditDeleteForm.ViewType viewType, int? id = null) : base(viewType, id) { }
+
+        #endregion
+        #region Form Initialization
+
+        /// <summary>
+        /// Initializes the form components, disables validation errors,
+        /// maps action buttons, and loads dropdown lists.
+        /// </summary>
+        protected override void InitializeForm()
         {
             InitializeComponent();
-            this.id = id;
+
+            DisableAllErrors();
+            MapActionButtons();
+            LoadAvailabilityDropDownList();
+            LoadConditionDropDownList();
+            LoadCategoryDropDownList();
         }
 
-
-
-        private void ManageEquipment_Load(object sender, EventArgs e)
+        /// <summary>
+        /// Maps form action buttons (Save, Close, Delete) to corresponding UI labels in the base class to attach listeners on them.
+        /// </summary>
+        private void MapActionButtons()
         {
-            switch (FormViewType)
-            {
-                case ViewType.ADD:
-                    {
-                        InitializeForm();
-                        PrepareForAdd();
-                        break;
-                    }
-                case ViewType.EDIT:
-                    {
-                        if (id == null)
-                        {
-                            Console.WriteLine("Cannot delete id null");
-                            Close();
-                            return;
-                        }
-
-                        InitializeForm();
-                        PrepareForEdit();
-                        break;
-                    }
-                case ViewType.DELETE:
-                    {
-                        if (id == null)
-                        {
-                            Console.WriteLine("Cannot delete id null");
-                            Close();
-                            return;
-                        }
-                        Delete();
-                        break;
-                    }
-            }
+            closeLabel = lblClose;
+            saveLabel = lblSave;
+            deleteLabel = lblDelete;
+            PrepareActionButtons();
         }
+        #endregion
 
+        #region View Preparation
 
-        private void PrepareForAdd()
+        protected override void PrepareForAdd()
         {
             lblSave.Text = "Add";
+            lblDelete.Visible = false;
+            item = new Equipment();
         }
-        private void PrepareForEdit()
+        protected override void PrepareForEdit()
         {
-            if (!FetchItem())
-            {
-                Close();
-                return;
-            }
-
             LoadItemInfo();
-
         }
 
+        /// <summary>
+        /// Loads data from the item into the form controls.
+        /// </summary>
         private void LoadItemInfo()
         {
             lblId.Text = item.Id.ToString();
@@ -94,70 +99,27 @@ namespace FormsApp.views.dialogs
             ddlCategory.SelectedValue = item.CategoryId;
             tbDescription.Text = item.Description;
             cbIsActive.Checked = item.IsActive ?? false;
+            LoadImage();
         }
 
-        public override void Delete()
-        {
-            if (!FetchItem())
-            {
-                Close();
-                return;
-            }
-
-        }
+        #endregion
 
 
-
-
-
-
-
-
-
-
-
-        private bool FetchItem()
-        {
-            item = context.Equipment.Get(id.Value);
-
-            if (item == null)
-            {
-                MessageBox.Show($"Equipment with the id {id} not found");
-                return false;
-            }
-            return true;
-        }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-        private void InitializeForm()
-        {
-            LoadAvailabilityDropDownList();
-            LoadConditionDropDownList();
-            LoadCategoryDropDownList();
-            Console.WriteLine("here");
-        }
+        #region Dropdown Loaders
+        /// <summary>
+        /// Populates the Availability dropdown list with values from the database.
+        /// </summary>
 
         private void LoadAvailabilityDropDownList()
         {
             ddlAvalability.DisplayMember = "Value";
             ddlAvalability.ValueMember = "Key";
 
-            ddlAvalability.DataSource = new BindingSource(context.EquipmentAvailabilityStatuses.GetAllByName() , null) ;
+            ddlAvalability.DataSource = new BindingSource(context.EquipmentAvailabilityStatuses.GetAllByName(), null);
         }
+        /// <summary>
+        /// Populates the Condition dropdown list with values from the database.
+        /// </summary>
 
         private void LoadConditionDropDownList()
         {
@@ -166,6 +128,10 @@ namespace FormsApp.views.dialogs
 
             ddlCondition.DataSource = new BindingSource(context.EquipmentConditionStatuses.GetAllByName(), null);
         }
+        /// <summary>
+        /// Populates the Category dropdown list with values from the database.
+        /// </summary>
+
         private void LoadCategoryDropDownList()
         {
             ddlCategory.DisplayMember = "Value";
@@ -173,5 +139,335 @@ namespace FormsApp.views.dialogs
 
             ddlCategory.DataSource = new BindingSource(context.Categories.GetAllByName(), null);
         }
+
+        #endregion
+
+        #region Data Loaders
+        protected override bool FetchItem()
+        {
+            item = context.Equipment.GetEquipmentWithImage(id.Value);
+
+            if (item != null) return true;
+
+            MessageBox.Show($"Equipment with the id {id.Value} not found");
+            return false;
+        }
+        /// <summary>
+        /// Loads the image associated with the equipment from storage and displays it in the panel.
+        /// </summary>
+        private async Task LoadImage()
+        {
+            try
+            {
+                if (!item.Image.Guid.HasValue)
+                {
+                    lblImage.Text = ("No Image Selected");
+                    return;
+                }
+
+                var image = await Global.GetImage(item.Image.Guid.Value, item.Image.ImageType);
+
+                if (image == null)
+                {
+                    lblImage.Text = ("Unable To Load Image");
+                    return;
+                }
+
+                pnlImage.Controls.Clear();
+                pnlImage.Controls.Add(new PictureBox
+                {
+                    Dock = DockStyle.Fill,
+                    SizeMode = PictureBoxSizeMode.StretchImage,
+                    Image = new Bitmap(image)
+                });
+
+                lblImage.Text = "Upload";
+
+                pnlImage.Invalidate();
+            }
+            catch (Exception ex)
+            {
+                lblImage.Text = ("Image Not Found");
+                Console.WriteLine($"Image loading error: {ex.Message}");
+            }
+
+        }
+
+        #endregion
+
+
+        #region Save/Delete Logic
+        public override void Delete()
+        {
+            if (id == null)
+            {
+                MessageBox.Show("Cannot delete id null");
+                Dispose();
+                return;
+            }
+
+            item = context.Equipment.GetEquipmentWithImage(id.Value);
+
+            if (item == null)
+            {
+                MessageBox.Show($"Equipment with the id {id.Value} not found");
+                Dispose();
+return;
+            }
+
+            if (context.Equipment.IsReferenced(id.Value))
+            {
+                var result = MessageBox.Show($"This equipment is in use. Do you want to mark it as inactive instead?", "Equipment in use", MessageBoxButtons.YesNo);
+
+                if (result == DialogResult.Yes)
+                {
+                    try
+                    {
+                        item.IsActive = false;
+                        context.Equipment.Update(item);
+                        context.SaveChanges();
+                        RaiseSuccessfulComplete();
+
+                    }
+                    catch (Exception e)
+                    {
+                        Global.DisplayReportErrorDialog(e);
+                        RaiseFailedComplete();
+                    }
+                }
+                Dispose();
+                return;
+            }
+
+            try
+            {
+                context.Equipment.Remove(item);
+                context.SaveChanges();
+                RaiseSuccessfulComplete();
+            }
+            catch (Exception e)
+            {
+                Global.DisplayReportErrorDialog(e);
+                RaiseFailedComplete();
+            }
+            Dispose();
+            return;
+
+        }
+        protected override async Task SaveItem()
+        {
+
+            if (!await ValidateInput()) return;
+
+            Console.WriteLine("1");
+            try
+            {
+                if (FormViewType == ViewType.EDIT)
+                {
+                    item.UpdatedAt = DateTime.UtcNow;
+                    context.Equipment.Update(item);
+                    Console.WriteLine("2");
+
+                }
+                else if (FormViewType == ViewType.ADD)
+                {
+                    context.Equipment.Add(item);
+                    Console.WriteLine("3");
+                }
+
+                int rows = await context.SaveChangesAsync();
+
+                if (rows > 0)
+                {
+                    MessageBox.Show($"Equipment {(FormViewType == ViewType.ADD ? "added" : "updated")} successfully");
+                    RaiseSuccessfulComplete();
+                    Close();
+                }
+                else
+                {
+                    Console.WriteLine("5");
+
+                    MessageBox.Show($"Please Try Again");
+                }
+            }
+            catch (Exception e)
+            {
+                Global.DisplayReportErrorDialog(e);
+                RaiseFailedComplete();
+
+            }
+        }
+        #endregion
+
+
+
+        #region Validation and Image Upload
+
+        /// <summary>
+        /// Validates form input and uploads the image if applicable.
+        /// </summary>
+        /// <returns>True if validation passed and image uploaded successfully; false otherwise.</returns>
+        private async Task<bool> ValidateInput()
+        {
+            DisableAllErrors();
+
+            bool isValidInput = true;
+
+            isValidInput &= ValidateTextLength(lblName.Text, lblNameError, "Name", true, 3, 100);
+
+            isValidInput &= ValidateTextLength(tbDescription.Text, lblDescreptionError, "Description", true, 3, 255);
+
+            isValidInput &= ValidateNumericField<decimal>(
+                lblPrice.Text,
+                lblPriceError,
+                "Price",
+                required: true,
+                allowZero: false,
+                allowNegative: false,
+                parser: s => decimal.Parse(s, NumberStyles.Currency, CultureInfo.CurrentCulture),
+                out var price,
+                minValue: 0.01m,
+                maxValue: 9999
+            );
+
+            if (uploadedImage == null && item.Image == null)
+            {
+                isValidInput &= ActivateError(lblImageError, "Please Upload an Image");
+            }
+
+
+            if (uploadedImage != null)
+            {
+                bool didUpload = await UploadImage();
+                if (!didUpload) isValidInput &= ActivateError(lblImageError, "Unable to upload image, try again");
+            }
+
+            Console.WriteLine($"Final validation result: {isValidInput}");
+
+
+            if (!isValidInput) return false;
+
+            item.Name = lblName.Text.Trim();
+
+            item.RentalPricePerDay = price.Value;
+            item.AvailabilityStatusId = (int)ddlAvalability.SelectedValue;
+            item.ConditionStatusId = (int)ddlCondition.SelectedValue;
+            item.CategoryId = (int)ddlCategory.SelectedValue;
+
+            item.Description = tbDescription.Text.Trim();
+            item.IsActive = cbIsActive.Checked;
+
+
+
+            return true;
+
+        }
+
+        /// <summary>
+        /// Uploads the selected image to cloud storage and the database.
+        /// </summary>
+        /// <returns>True if upload succeeded; false otherwise.</returns>
+
+        private async Task<bool> UploadImage()
+        {
+            try
+            {
+                using var uploadStream = new MemoryStream();
+                uploadedImage.Save(uploadStream, System.Drawing.Imaging.ImageFormat.Png);
+
+                string fileExtension = imageExtention;
+                string contentType = imageFormat;
+                Guid imageGuid = Guid.NewGuid();
+
+                // Upload to S3
+                uploadStream.Position = 0;
+                var uploadedImageId = await S3Uploader.UploadFileAsync(uploadStream, imageGuid, fileExtension);
+
+                if (uploadedImageId.HasValue)
+                {
+                    using var dbStream = new MemoryStream();
+                    uploadedImage.Save(dbStream, contentType == "image/jpeg" ? ImageFormat.Jpeg : ImageFormat.Png);
+                    dbStream.Position = 0;
+
+                    var imageRecordId = await ImageManager.UploadImageAndSaveToDatabase(
+                        context,
+                        dbStream,
+                        $"{imageGuid}{fileExtension}",
+                        contentType
+                    );
+
+                    if (imageRecordId.HasValue)
+                    {
+                        if (item.ImageId.HasValue)
+                        {
+                            // await ImageManager.DeleteImageFromDatabaseAndS3(...);
+                        }
+
+                        item.ImageId = imageRecordId.Value;
+                        return true;
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("image error " + e.Message);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Disables all visible validation error labels on the form.
+        /// </summary>
+        private void DisableAllErrors()
+        {
+            lblNameError.Visible = false;
+            lblPriceError.Visible = false;
+            lblDescreptionError.Visible = false;
+            lblImageError.Visible = false;
+        }
+        #endregion
+
+
+
+        #region Event Handlers
+        /// <summary>
+        /// Handles the image label click event to allow the user to select and preview an image.
+        /// </summary>
+        /// <param name="sender">The control that triggered the event.</param>
+        /// <param name="e">Event arguments.</param>
+        private void lblImage_Click(object sender, EventArgs e)
+        {
+            using OpenFileDialog ofd = new OpenFileDialog
+            {
+                Title = "Select an Image",
+                Filter = "Image files (*.jpg, *.jpeg, *.png) |*.jpg; *.jpeg; *.png",
+                Multiselect = false,
+            };
+
+
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+            try
+            {
+                string filePath = ofd.FileName;
+                string fileExtension = Path.GetExtension(filePath).ToLower();
+                string contentType = S3Uploader.GetContentType(fileExtension);
+
+                //Console.WriteLine($"Extension: {fileExtension}");
+                //Console.WriteLine($"Content-Type: {contentType}");
+
+                Image selectedImage = Image.FromFile(filePath);
+                uploadedImage = selectedImage;
+                imageExtention = fileExtension;
+                imageFormat = contentType;
+                pnlImage.BackgroundImage = selectedImage;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Could not load the file, please try again", "Error loading image");
+            }
+        }
+
+        #endregion
     }
 }

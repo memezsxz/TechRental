@@ -11,10 +11,38 @@ namespace Database.Persistence.Repositories
         {
         }
 
+        private IQueryable<RentalRecord> GetWithDetails()
+        {
+            return RentalDBContext.RentalRecords
+                .Include(r => r.RentalRequest)
+                .Include(r => r.Payments)
+                .Include(r => r.ReturnCondition)
+                .AsQueryable();
+        }
+
+        private IQueryable<RentalRecord> GetWithFeedBackDetails()
+        {
+            return GetWithDetails()
+                .Include(r => r.Feedbacks)
+                .AsQueryable();
+        }
+
         public RentalDBContext RentalDBContext
         {
             get { return context as RentalDBContext; }
         }
+
+
+        public RentalRecord GetWithDetails(int id)
+        {
+            return GetWithDetails().FirstOrDefault(r => r.Id == id);
+        }
+
+        public RentalRecord GetWithDetailsByRentalRequest(int id)
+        {
+            return GetWithDetails().FirstOrDefault(r => r.RentalRequestId == id);
+        }
+
         public async Task<List<QuarterEarnings>> GetQuarterEarningsByYearAsync(int year)
         {
             var records = await RentalDBContext.RentalRecords

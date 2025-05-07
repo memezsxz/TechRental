@@ -12,6 +12,8 @@ namespace Database.Core.Repositories
     {
         Task<List<QuarterEarnings>> GetQuarterEarningsByYearAsync(int year);
         Task<Dictionary<string, int>> GetWeeklyCategoryRentalDataAsync(int categoryLimit = 10);
+        public RentalRecord GetWithDetails(int id);
+        public RentalRecord GetWithDetailsByRentalRequest(int id);
 
     }
 }

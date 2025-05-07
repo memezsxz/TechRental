@@ -76,5 +76,97 @@ namespace FormsApp
         {
             Console.WriteLine("From Global: Error: " + e.Message);
         }
+
+        public static void DrawRoundedBorder(Control control, PaintEventArgs e, Color borderColor, int borderRadius = 10, int borderWidth = 1)
+        {
+            if (control == null) return;
+
+            using Pen borderPen = new Pen(borderColor, borderWidth)
+            {
+                Alignment = System.Drawing.Drawing2D.PenAlignment.Inset
+            };
+
+            var path = new System.Drawing.Drawing2D.GraphicsPath();
+            Rectangle rect = new Rectangle(0, 0, control.Width - 1, control.Height - 1);
+            int arcSize = borderRadius * 2;
+
+            path.AddArc(rect.X, rect.Y, arcSize, arcSize, 180, 90); // Top-left
+            path.AddArc(rect.Right - arcSize, rect.Y, arcSize, arcSize, 270, 90); // Top-right
+            path.AddArc(rect.Right - arcSize, rect.Bottom - arcSize, arcSize, arcSize, 0, 90); // Bottom-right
+            path.AddArc(rect.X, rect.Bottom - arcSize, arcSize, arcSize, 90, 90); // Bottom-left
+            path.CloseFigure();
+
+            e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
+            e.Graphics.DrawPath(borderPen, path);
+        }
+
+        public static async Task<Image> GetImage(Guid guid, string format)
+        {
+            try
+            {
+                var stream = await S3Uploader.GetFileByGuidAsync(guid.ToString());
+                if (stream == null) return null;
+
+                stream.Position = 0;
+                var ext = format.Split('/').Last();
+                var tempPath = Path.Combine(Path.GetTempPath(), $"temp_image_{guid}.{ext}");
+
+                await using (var fs = new FileStream(tempPath, FileMode.Create, FileAccess.Write))
+                    await stream.CopyToAsync(fs);
+
+                return Image.FromFile(tempPath);
+
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
+        }
+
+        public static void ApplyRoundedStyle(Panel panel, PaintEventArgs e, Color borderColor, int borderRadius = 10, int borderWidth = 1)
+        {
+            if (panel == null || panel.Controls.Count == 0) return;
+
+            Control child = panel.Controls[0]; // Assume single child (e.g., Label)
+            int arc = borderRadius * 2;
+
+            Rectangle clipRect = new Rectangle(0, 0, panel.Width, panel.Height);
+            Rectangle drawRect = new Rectangle(0, 0, child.Width - 1, child.Height - 1);
+
+            // --- Clipping region for panel ---
+            using (GraphicsPath clipPath = new GraphicsPath())
+            {
+                clipPath.AddArc(clipRect.X, clipRect.Y, arc, arc, 180, 90);
+                clipPath.AddArc(clipRect.Right - arc, clipRect.Y, arc, arc, 270, 90);
+                clipPath.AddArc(clipRect.Right - arc, clipRect.Bottom - arc, arc, arc, 0, 90);
+                clipPath.AddArc(clipRect.X, clipRect.Bottom - arc, arc, arc, 90, 90);
+                clipPath.CloseFigure();
+
+                panel.Region = new Region(clipPath);
+            }
+
+            // --- Border + Fill for child ---
+            using (GraphicsPath borderPath = new GraphicsPath())
+            {
+                borderPath.AddArc(drawRect.X, drawRect.Y, arc, arc, 180, 90);
+                borderPath.AddArc(drawRect.Right - arc, drawRect.Y, arc, arc, 270, 90);
+                borderPath.AddArc(drawRect.Right - arc, drawRect.Bottom - arc, arc, arc, 0, 90);
+                borderPath.AddArc(drawRect.X, drawRect.Bottom - arc, arc, arc, 90, 90);
+                borderPath.CloseFigure();
+
+                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+                using SolidBrush fillBrush = new SolidBrush(child.BackColor);
+                e.Graphics.FillPath(fillBrush, borderPath);
+
+                using Pen pen = new Pen(borderColor, borderWidth)
+                {
+                    Alignment = PenAlignment.Inset
+                };
+                e.Graphics.DrawPath(pen, borderPath);
+            }
+        }
+
+
     }
 }

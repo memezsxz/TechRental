@@ -22,28 +22,36 @@ namespace Database.Persistence.Repositories
         {
             get { return context as RentalDBContext; }
         }
-
+        public bool IsReferenced(int id)
+        {
+            return RentalDBContext.RentalRequests.Any(r => r.EquipmentId == id);
+        }
 
         #region Async
 
-        public async Task<IEnumerable<Equipment>> GetAllWithDetailsAsync()
+
+
+        public async Task<bool> IsReferencedAsync(int id)
         {
-            return await RentalDBContext.Equipment
+            return await RentalDBContext.RentalRequests.AnyAsync(r => r.EquipmentId == id);
+        }
+
+        private IQueryable<Equipment> GetWithDetails()
+        {
+            return RentalDBContext.Equipment
                 .Include(e => e.AvailabilityStatus)
                 .Include(e => e.Category)
                 .Include(e => e.ConditionStatus)
-                .Include(e => e.Image)
-                .ToListAsync();
+                .Include(e => e.Image);
+        }
+        public async Task<IEnumerable<Equipment>> GetAllWithDetailsAsync()
+        {
+            return await GetWithDetails().ToListAsync();
         }
 
         public async Task<Equipment?> GetByIdWithDetailsAsync(int id)
         {
-            return await RentalDBContext.Equipment
-                .Include(e => e.AvailabilityStatus)
-                .Include(e => e.Category)
-                .Include(e => e.ConditionStatus)
-                .Include(e => e.Image)
-                .FirstOrDefaultAsync(e => e.Id == id);
+            return await GetWithDetails().FirstOrDefaultAsync(e => e.Id == id);
         }
 
         public async Task<Equipment?> GetEquipmentWithImageAsync(int id)
@@ -53,6 +61,13 @@ namespace Database.Persistence.Repositories
                 .FirstOrDefaultAsync(e => e.Id == id);
         }
 
+
+        public  Equipment? GetEquipmentWithImage(int id)
+        {
+            return  RentalDBContext.Equipment
+                .Include(e => e.Image)
+                .FirstOrDefault(e => e.Id == id);
+        }
         public async Task<bool> EquipmentExistsAsync(int id)
         {
             return await RentalDBContext.Equipment.AnyAsync(e => e.Id == id);
@@ -165,7 +180,7 @@ namespace Database.Persistence.Repositories
                 Availability = e.AvailabilityStatus != null ? e.AvailabilityStatus.StatusName : "",
                 Condition = e.ConditionStatus != null ? e.ConditionStatus.ConditionName : "",
                 Category = e.Category != null ? e.Category.Name : "",
-                IsActive = e.IsActive != null,
+                IsActive = e.IsActive ?? true,
             });
 
             return query.Cast<object>();
