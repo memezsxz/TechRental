@@ -1,97 +1,178 @@
 ﻿@model Database.Core.Domain.RentalRecord
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Rental Record Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var request = ViewBag.RentalRequest as Database.Core.Domain.RentalRequest;
+    var mode = ViewBag.Mode as string ?? "transaction";
+    var documentId = ViewBag.DocumentId as int?;
+
+    var totalDays = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
 }
 
-<h1>Details</h1>
+<div class="mb-4 mt-3">
+    <a asp-action="Index" class="text-success">&lt; Back</a>
+</div>
 
-<div>
-    <h4>RentalRecord</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EquipmentName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EquipmentName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.PickupDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.PickupDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ActualReturnDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ActualReturnDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Deposit)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Deposit)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.LateReturnFees)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.LateReturnFees)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ExtraCharges)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ExtraCharges)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ExtraChargeDescription)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ExtraChargeDescription)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TotalCost)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TotalCost)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RentalFee)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RentalFee)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.UpdatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.UpdatedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.RentalRequest)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.RentalRequest.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.ReturnCondition)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.ReturnCondition.ConditionName)
-        </dd>
-    </dl>
+<h2 class="text-center mb-5 page-title">
+    @(mode == "return" ? "Return Record Details" : "Transaction Details")
+</h2>
+
+<!-- CUSTOMER INFO -->
+<div class="container mb-5 pb-4 border-bottom">
+    <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>First Name</label>
+            <input class="form-control" value="@request?.Customer?.FirstName" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Last Name</label>
+            <input class="form-control" value="@request?.Customer?.LastName" readonly />
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Phone Number</label>
+            <input class="form-control" value="@request?.Customer?.PhoneNumber" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Email</label>
+            <input class="form-control" value="@request?.Customer?.Email" readonly />
+        </div>
+    </div>
 </div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+
+<!-- TRANSACTION INFO -->
+<div class="container mb-5 pb-4 border-bottom">
+    <h4 class="mb-4 text-success fw-semibold">Transaction Info</h4>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Request ID</label>
+            <input class="form-control" value="@request?.Id" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Rental Record ID</label>
+            <input class="form-control" value="@Model.Id" readonly />
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Equipment Title</label>
+            <input class="form-control" value="@Model.EquipmentName" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Actual Pickup Date</label>
+            <input class="form-control" value="@Model.PickupDate.ToString("g")" readonly />
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label>Start Date</label>
+            <input class="form-control" value="@request?.StartDate.ToString("g")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Return Date</label>
+            <input class="form-control" value="@request?.ReturnDate.ToString("g")" readonly />
+        </div>
+        <div class="col-md-4">
+            @{
+                var days = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
+            }
+            <label>Number of Days</label>
+            <input class="form-control" value="@days" readonly />
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label>Deposit</label>
+            <input class="form-control" value="@Model.Deposit?.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Rental Fee (BD)</label>
+            <input class="form-control" value="@Model.RentalFee?.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Total Cost (BD)</label>
+            <input class="form-control" value="@Model.TotalCost?.ToString("0.00")" readonly />
+        </div>
+    </div>
+
+    @if (documentId != null)
+    {
+        <div class="mb-4">
+            <div class="mb-4 d-flex gap-3">
+                <a href="@Url.Action("GetPdf", "Document", new { id = documentId })"
+                   class="btn btn-outline-success"
+                   target="_blank">
+                    View Agreement
+                </a>
+
+                <a href="@Url.Action("DownloadPdf", "Document", new { id = documentId })"
+                   class="btn btn-outline-success">
+                    Download Agreement
+                </a>
+            </div>
+        </div>
+    }
 </div>
+
+
+<!-- RETURN DETAILS -->
+@if (mode == "return")
+{
+    <div class="container mb-5">
+        <h4 class="mb-4 text-success fw-semibold">Return Info</h4>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label>Actual Return Date</label>
+                <input class="form-control" value="@Model.ActualReturnDate?.ToString("g")" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>Late Return Fees</label>
+                <input class="form-control" value="@Model.LateReturnFees?.ToString("0.00")" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>Extra Charges</label>
+                <input class="form-control" value="@Model.ExtraCharges?.ToString("0.00")" readonly />
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>Return Condition</label>
+                <input class="form-control" value="@Model.ReturnCondition?.ConditionName" readonly />
+            </div>
+            <div class="col-md-6">
+                <label>Extra Charge Description</label>
+                <input class="form-control" value="@Model.ExtraChargeDescription" readonly />
+            </div>
+
+
+        </div>
+
+        @{
+            var adjustedTotal = (Model.TotalCost ?? 0) + (Model.LateReturnFees ?? 0) + (Model.ExtraCharges ?? 0);
+        }
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label class="fw-bold text-success">Adjusted Total Cost (BD)</label>
+                <input class="form-control fw-bold" value="@adjustedTotal.ToString("0.00")" readonly />
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-center mt-5">
+        <a asp-action="CompleteReturn" asp-route-id="@Model.Id" class="btn btn-outline-success px-4">
+            Complete Return Record
+        </a>
+    </div>
+}

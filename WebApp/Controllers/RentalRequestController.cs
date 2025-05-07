@@ -101,6 +101,13 @@ namespace WebApp.Controllers
                 return NotFound();
             }
 
+            var rentalRecord = await _context.RentalRecords
+                .FirstOrDefaultAsync(r => r.RentalRequestId == id);
+
+            ViewBag.HasTransaction = rentalRecord != null;
+            ViewBag.TransactionId = rentalRecord?.Id;
+
+
             return View(rentalRequest);
         }
 
