@@ -413,14 +413,12 @@ namespace FormsApp.views.dialogs
 
             bool isValidInput = true;
 
-            Console.WriteLine(record == null ? "record is null" : $"record.Id = {record.Id}");
 
             if (record != null && record.Id == 0)
             {
                 isValidInput &= ValidateExtraCharge();
             }
 
-            Console.WriteLine(record == null ? "record is null" : $"record.Id = {record.Id}");
 
 
             Console.WriteLine($"Final validation result: {isValidInput}");
@@ -429,19 +427,25 @@ namespace FormsApp.views.dialogs
             if (!isValidInput) return false;
 
             request.StatusId = (int)ddlReqStatus.SelectedValue;
-            Console.WriteLine(record == null ? "record is null" : $"record.Id = {record.Id}");
-            Console.WriteLine(record.TotalCost.Value);
 
 
-            if (record != null && record.Id == 0)
+            if (record != null )
             {
+                if (record.Id == 0)
+                {
                 record.ExtraCharges = decimal.Parse(tbRecExtraCharge.Text.Trim(), NumberStyles.Currency, CultureInfo.CurrentCulture);
                 record.ExtraChargeDescription = tbRecExtraChargeDescreption.Text.Trim();
-                Console.WriteLine(record == null ? "record is null" : $"record.Id = {record.Id}");
 
                 payment.Amount = record.TotalCost.Value;
-                Console.WriteLine("here");
+
+                }
+
+                if (record.ActualReturnDate != null)
+                {
+                    record.ReturnConditionId = (int)ddlRetCondetion.SelectedValue;
+                }
             }
+
 
             return true;
 
