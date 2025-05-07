@@ -208,39 +208,94 @@ namespace WebApp.Controllers
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.RentalRequests == null)
-            {
                 return NotFound();
-            }
 
-            var rentalRequest = await _context.RentalRequests.FindAsync(id);
+            var rentalRequest = await _context.RentalRequests
+                .Include(r => r.Customer)
+                .Include(r => r.Equipment)
+                .Include(r => r.Status)
+                .FirstOrDefaultAsync(m => m.Id == id);
+
             if (rentalRequest == null)
-            {
                 return NotFound();
-            }
+
+            // Load dropdowns
             ViewData["CustomerId"] = new SelectList(_context.Users, "Id", "Email", rentalRequest.CustomerId);
             ViewData["EquipmentId"] = new SelectList(_context.Equipment, "Id", "Name", rentalRequest.EquipmentId);
             ViewData["StatusId"] = new SelectList(_context.RentalRequestStatuses, "Id", "StatusName", rentalRequest.StatusId);
+
+            // Build unavailable dates (exclude this rental request's range)
+            var reservedRanges = await _context.RentalRequests
+                .Include(r => r.Status)
+                .Where(r =>
+                    r.EquipmentId == rentalRequest.EquipmentId &&
+                    r.Status.StatusName == "Approved" &&
+                    r.Id != rentalRequest.Id) // Exclude current request
+                .Select(r => new { r.StartDate, r.ReturnDate })
+                .ToListAsync();
+
+            var unavailableDates = new List<string>();
+            foreach (var range in reservedRanges)
+            {
+                for (DateTime date = range.StartDate.Date; date <= range.ReturnDate.Date; date = date.AddDays(1))
+                {
+                    if (date >= DateTime.Today)
+                        unavailableDates.Add(date.ToString("yyyy-MM-dd"));
+                }
+            }
+
+            ViewBag.UnavailableDates = unavailableDates;
+
             return View(rentalRequest);
         }
 
+
         // POST: RentalRequest/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,EquipmentId,CustomerId,StartDate,ReturnDate,RentalPerDay,StatusId,Notes,CreatedAt,UpdatedAt")] RentalRequest rentalRequest)
+        public async Task<IActionResult> Edit(int id, RentalRequest rentalRequest)
         {
             if (id != rentalRequest.Id)
             {
                 return NotFound();
             }
 
+            if (rentalRequest.StartDate == default)
+            {
+                TempData["MessageText"] = "Please select a start date.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction(nameof(Edit), new { id = rentalRequest.Id });
+            }
+
+            if (rentalRequest.ReturnDate == default)
+            {
+                TempData["MessageText"] = "Please select a return date.";
+                TempData["MessageType"] = "error";
+                return RedirectToAction(nameof(Edit), new { id = rentalRequest.Id });
+            }
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(rentalRequest);
+                    var existing = await _context.RentalRequests.FindAsync(id);
+                    if (existing == null)
+                        return NotFound();
+
+                    // Update only editable fields
+                    existing.StartDate = rentalRequest.StartDate;
+                    existing.ReturnDate = rentalRequest.ReturnDate;
+                    existing.StatusId = rentalRequest.StatusId;
+                    existing.Notes = rentalRequest.Notes;
+                    existing.UpdatedAt = DateTime.Now;
+
                     await _context.SaveChangesAsync();
+
+                    TempData["MessageText"] = "Rental edited successfully.";
+                    TempData["MessageType"] = "success";
+
+                    return RedirectToAction("Details", new { id = rentalRequest.Id });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -253,52 +308,13 @@ namespace WebApp.Controllers
                         throw;
                     }
                 }
-                return RedirectToAction(nameof(Index));
             }
+
             ViewData["CustomerId"] = new SelectList(_context.Users, "Id", "Email", rentalRequest.CustomerId);
             ViewData["EquipmentId"] = new SelectList(_context.Equipment, "Id", "Name", rentalRequest.EquipmentId);
             ViewData["StatusId"] = new SelectList(_context.RentalRequestStatuses, "Id", "StatusName", rentalRequest.StatusId);
-            return View(rentalRequest);
-        }
-
-        // GET: RentalRequest/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.RentalRequests == null)
-            {
-                return NotFound();
-            }
-
-            var rentalRequest = await _context.RentalRequests
-                .Include(r => r.Customer)
-                .Include(r => r.Equipment)
-                .Include(r => r.Status)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (rentalRequest == null)
-            {
-                return NotFound();
-            }
 
             return View(rentalRequest);
-        }
-
-        // POST: RentalRequest/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.RentalRequests == null)
-            {
-                return Problem("Entity set 'RentalDBContext.RentalRequests'  is null.");
-            }
-            var rentalRequest = await _context.RentalRequests.FindAsync(id);
-            if (rentalRequest != null)
-            {
-                _context.RentalRequests.Remove(rentalRequest);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
         private bool RentalRequestExists(int id)

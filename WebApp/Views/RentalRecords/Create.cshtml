@@ -1,0 +1,121 @@
+﻿@model Database.Core.Domain.RentalRecord
+
+@{
+    ViewData["Title"] = "Create Rental Record";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var request = ViewBag.RentalRequest as Database.Core.Domain.RentalRequest;
+}
+
+<div class="mb-4 mt-3">
+    <a asp-action="Index" class="text-success">&lt; Back</a>
+</div>
+
+<h2 class="text-center mb-5 page-title">Create Rental Record</h2>
+
+<div class="container mb-5 pb-4 border-bottom">
+    <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>First Name</label>
+            <input class="form-control" value="@request?.Customer?.FirstName" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Last Name</label>
+            <input class="form-control" value="@request?.Customer?.LastName" readonly />
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Phone Number</label>
+            <input class="form-control" value="@request?.Customer?.PhoneNumber" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Email</label>
+            <input class="form-control" value="@request?.Customer?.Email" readonly />
+        </div>
+    </div>
+</div>
+
+<!-- RENTAL REQUEST INFO -->
+<div class="container mb-5 pb-4 border-bottom">
+    <h4 class="mb-4 text-success fw-semibold">Request Info</h4>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Equipment Title</label>
+            <input class="form-control" value="@request?.Equipment?.Name" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Status</label>
+            <input class="form-control" value="@request?.Status?.StatusName" readonly />
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Pick up Date</label>
+            <input class="form-control" value="@request?.StartDate.ToString("g")" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Return Date</label>
+            <input class="form-control" value="@request?.ReturnDate.ToString("g")" readonly />
+        </div>
+    </div>
+    @{
+        var totalDays = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
+        var totalCost = totalDays * request.RentalPerDay;
+    }
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label>Number of Days</label>
+            <input class="form-control" value="@totalDays" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Rental Fee (BD/Day)</label>
+            <input class="form-control" value="@request.RentalPerDay?.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Total Cost (BD)</label>
+            <input class="form-control" value="@totalCost?.ToString("0.00")" readonly />
+        </div>
+    </div>
+</div>
+
+<!-- TRANSACTION INFO -->
+<div class="container mb-5">
+    <h4 class="mb-4 text-success fw-semibold">Rental Transaction</h4>
+    <form asp-action="Create" enctype="multipart/form-data" onsubmit="return validateAgreement()">
+        <input type="hidden" asp-for="RentalRequestId" value="@request?.Id" />
+
+        <!-- Agreement Download & Upload -->
+        <div class="form-group mb-4">
+            <label>Rental Agreement</label>
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="@Url.Action("DownloadAgreement", "Document", new { rentalRequestId = request.Id })" class="btn btn-outline-primary" target="_blank">
+                    Download Agreement PDF
+                </a>
+                <input type="file" id="agreementUpload" name="Agreement" class="form-control w-50" accept="application/pdf" />
+            </div>
+            <small class="text-danger d-none" id="fileError">Please upload the signed agreement PDF.</small>
+        </div>
+
+        <div class="form-group">
+            <input type="submit" value="Create" class="btn btn-success px-4" />
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function validateAgreement() {
+            const fileInput = document.getElementById('agreementUpload');
+            const errorMsg = document.getElementById('fileError');
+
+            if (!fileInput.files.length) {
+                errorMsg.classList.remove('d-none');
+                return false;
+            }
+
+            errorMsg.classList.add('d-none');
+            return true;
+        }
+    </script>
+}
