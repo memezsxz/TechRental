@@ -33,13 +33,19 @@
 
             <div class="register-form-group">
                 <label asp-for="Input.Password" class="form-label"></label>
-                <input asp-for="Input.Password" class="form-control" autocomplete="new-password" />
+                <div class="position-relative">
+                    <input asp-for="Input.Password" type="password" class="form-control pe-5" id="passwordInput" autocomplete="new-password" />
+                    <i class="bi bi-eye-slash position-absolute top-50 end-0 translate-middle-y me-3" id="togglePassword" style="cursor: pointer;"></i>
+                </div>
                 <span asp-validation-for="Input.Password" class="text-danger"></span>
             </div>
 
             <div class="register-form-group">
                 <label asp-for="Input.ConfirmPassword" class="form-label"></label>
-                <input asp-for="Input.ConfirmPassword" class="form-control" autocomplete="new-password" />
+                <div class="position-relative">
+                    <input asp-for="Input.ConfirmPassword" type="password" class="form-control pe-5" id="confirmPasswordInput" autocomplete="new-password" />
+                    <i class="bi bi-eye-slash position-absolute top-50 end-0 translate-middle-y me-3" id="toggleConfirmPassword" style="cursor: pointer;"></i>
+                </div>
                 <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
             </div>
 
@@ -57,4 +63,21 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+       <script>
+        function setupPasswordToggle(inputId, iconId) {
+            const input = document.getElementById(inputId);
+            const icon = document.getElementById(iconId);
+
+            icon.addEventListener("click", function () {
+                const isPassword = input.type === "password";
+                input.type = isPassword ? "text" : "password";
+                icon.classList.toggle("bi-eye");
+                icon.classList.toggle("bi-eye-slash");
+            });
+        }
+
+        setupPasswordToggle("passwordInput", "togglePassword");
+        setupPasswordToggle("confirmPasswordInput", "toggleConfirmPassword");
+    </script>
 }
