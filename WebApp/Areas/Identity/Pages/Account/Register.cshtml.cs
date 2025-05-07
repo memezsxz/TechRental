@@ -119,6 +119,9 @@ namespace WebApp.Areas.Identity.Pages.Account
             [Required]
             public string LastName { get; set; }
 
+            [Required]
+            public string PhoneNumber { get; set; }
+
         }
 
 
@@ -218,6 +221,7 @@ namespace WebApp.Areas.Identity.Pages.Account
                     Email = Input.Email,
                     RoleId = customerRole.Id, //asign the customer role id with customer 
                     IsActive = true,
+                    PhoneNumber = Input.PhoneNumber
 
                 };
 
@@ -229,7 +233,8 @@ namespace WebApp.Areas.Identity.Pages.Account
                 {
                     FirstName = Input.FirstName,
                     LastName = Input.LastName,
-                    UserID = newCustomer.Id
+                    UserID = newCustomer.Id,
+                    PhoneNumber = Input.PhoneNumber
                 };
 
 

@@ -74,6 +74,8 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
             public string LastName { get; set; }
 
             public string role { get; set; }
+
+            public Image image { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -83,7 +85,7 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
 
             Username = userName;
 
-            User mainDBUser = _context.Users.Include(u => u.Role).FirstOrDefault(u => u.Id == user.UserID);
+            User mainDBUser = _context.Users.Include(u => u.Role).Include(u => u.Image).FirstOrDefault(u => u.Id == user.UserID);
 
 
             Input = new InputModel
@@ -91,7 +93,8 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
                 PhoneNumber = phoneNumber,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                role = mainDBUser.Role.RoleName
+                role = mainDBUser.Role.RoleName,
+                image = mainDBUser.Image
                 
             };
         }

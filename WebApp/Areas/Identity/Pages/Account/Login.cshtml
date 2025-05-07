@@ -38,7 +38,7 @@
             <button id="login-submit" type="submit" class="btn login-btn w-100">Login</button>
 
             <div class="login-footer">
-                <p><a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a></p>
+                @* <p><a id="forgot-password" asp-page="./ForgotPassword">Forgot your password?</a></p> *@
                 <p>Don’t have an account? <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl">Register</a></p>
             </div>
         </form>
