@@ -14,6 +14,7 @@ namespace Database.Core.Repositories
         #region Main
 
         Task<bool> ExistsAsync(int id);
+        public bool IsReferenced(int id);
 
 
         #endregion

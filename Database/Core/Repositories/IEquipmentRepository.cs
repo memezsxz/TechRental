@@ -5,6 +5,7 @@ using System.Linq.Expressions;
 using System.Text;
 using System.Threading.Tasks;
 using Database.Core.Domain;
+using Database.ViewModels;
 
 namespace Database.Core.Repositories
 {
@@ -14,6 +15,11 @@ namespace Database.Core.Repositories
         Task<Equipment?> GetByIdWithDetailsAsync(int id);
         Task<Equipment?> GetEquipmentWithImageAsync(int id);
         Task<bool> EquipmentExistsAsync(int id);
+
+        Task<List<TopRentedEquipmentStats>> GetTop5RentedEquipmentStatsAsync();
+        public Equipment? GetEquipmentWithImage(int id);
+        public bool IsReferenced(int id);
+        public Task<bool> IsReferencedAsync(int id);
 
     }
 }

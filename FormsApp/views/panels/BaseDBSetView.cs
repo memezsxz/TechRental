@@ -105,33 +105,7 @@ public partial class BaseDBSetView : UserControl
         // Ensure the sender is a Button
         if (sender is not Button btn) return;
 
-        int borderRadius = 10; // Radius for rounded corners
-        int borderWidth = 1; // Width of the red border
-
-        // Create a red pen for drawing the border
-        using Pen redPen = new Pen(Color.Red, borderWidth)
-        {
-            Alignment = System.Drawing.Drawing2D.PenAlignment.Inset // Ensure border is inside control bounds
-        };
-
-        // Create a path for the rounded rectangle
-        System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
-        Rectangle rect = new Rectangle(0, 0, btn.Width - 1, btn.Height - 1);
-        int arcSize = borderRadius * 2;
-
-        // Add arcs for each corner of the rectangle
-        path.AddArc(rect.X, rect.Y, arcSize, arcSize, 180, 90); // Top-left
-        path.AddArc(rect.Right - arcSize, rect.Y, arcSize, arcSize, 270, 90); // Top-right
-        path.AddArc(rect.Right - arcSize, rect.Bottom - arcSize, arcSize, arcSize, 0, 90); // Bottom-right
-        path.AddArc(rect.X, rect.Bottom - arcSize, arcSize, arcSize, 90, 90); // Bottom-left
-
-        path.CloseFigure(); // Close the figure to complete the rounded rectangle
-
-        // Enable smooth drawing for better quality
-        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-        // Draw the border
-        e.Graphics.DrawPath(redPen, path);
+        Global.DrawRoundedBorder(btn, e, Color.Red);
     }
 
     /// <summary>
@@ -181,23 +155,76 @@ public partial class BaseDBSetView : UserControl
         cbColumn.SelectedIndex = 0;
     }
 
-    private void dgvEquipment_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-    {
-        //new view_edit_inventory().ShowDialog();
-    }
-
     private void btnAdd_Click(object sender, EventArgs e)
     {
+        OpenManageForm(BaseViewEditDeleteForm.ViewType.ADD);
     }
 
     private void btnEdit_Click(object sender, EventArgs e)
     {
-        new ManageEquipment(BaseViewEditDeleteForm.ViewType.EDIT, 2).ShowDialog();
-
+        OpenManageForm(BaseViewEditDeleteForm.ViewType.EDIT);
     }
 
     private void btnDelete_Click(object sender, EventArgs e)
     {
+        OpenManageForm(BaseViewEditDeleteForm.ViewType.DELETE);
+    }
+
+
+    private void OpenManageForm(BaseViewEditDeleteForm.ViewType type)
+    {
+        int? id = null;
+
+        if (type != BaseViewEditDeleteForm.ViewType.ADD)
+        {
+            id = GetSelectedRowId();
+            if (id == null)
+            {
+                MessageBox.Show("Please select an item to preform this action.");
+                return;
+            }
+        }
+
+        BaseViewEditDeleteForm form = null;
+
+        try
+        {
+            if (currentType == typeof(Equipment))
+            {
+                form = new ManageEquipment(type, id);
+
+            }
+            else if (currentType == typeof(RentalRequest))
+            {
+                form = new ManageRental(ManageRental.ItemType.Request, type, id);
+
+            }
+            else if (currentType == typeof(RentalRecord))
+            {
+                form = new ManageRental(ManageRental.ItemType.Record, type, id);
+            }
+
+            else if (currentType == typeof(Category))
+            {
+                form = new ManageCategory(type, id);
+            }
+            else if (currentType == typeof(User))
+            {
+                form = new ManageUser(type, id);
+            }
+
+            if (form != null)
+            {
+                form.OnSuccessfulComplete += () => currentControl.Apply();
+
+                if (type == BaseViewEditDeleteForm.ViewType.DELETE) form.Delete();
+                else form.ShowDialog();
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Do nothing");
+        }
     }
 
     #endregion
@@ -307,7 +334,7 @@ public partial class BaseDBSetView : UserControl
         totalPages = val.TotalPages;
         lblTotal.Text = $"Total Records: {val.TotalRecords}";
         lblPagPage.Text = $"Page {currentControl.PageNumber} of {totalPages}";
-        dgvEquipment.DataSource = val.Data;
+        dvgItems.DataSource = val.Data;
     }
 
     /// <summary>
@@ -457,6 +484,29 @@ public partial class BaseDBSetView : UserControl
 
         return newColumns;
     }
+
+    #endregion
+
+
+
+    #region New
+
+    private int? GetSelectedRowId()
+    {
+        if (dvgItems.CurrentRow == null || dvgItems.CurrentRow.Index < 0)
+            return null;
+
+        try
+        {
+            var value = dvgItems.CurrentRow.Cells[0].Value;
+            return value != null ? Convert.ToInt32(value) : null;
+        }
+        catch
+        {
+            return null;
+        }
+    }
+
 
     #endregion
 }

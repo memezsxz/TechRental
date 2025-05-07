@@ -1,5 +1,6 @@
 using Database.Core.Domain;
 using Database.Core.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace Database.Persistence.Repositories
 {
@@ -29,6 +30,27 @@ namespace Database.Persistence.Repositories
             });
 
             return query.Cast<object>();
+        }
+
+        private IQueryable<RentalRequest> GetWithDetails()
+        {
+            return RentalDBContext.RentalRequests
+                .Include(r => r.Customer)
+                .Include(r => r.Equipment)
+                .Include(r => r.Status)
+                .AsQueryable();
+        }
+
+        private IQueryable<RentalRequest> GetWithRecordDetails()
+        {
+            return GetWithDetails()
+                .Include(r => r.RentalRecords)
+                .AsQueryable();
+        }
+
+        public RentalRequest GetWithRecordDetails(int id)
+        {
+            return GetWithRecordDetails().Where(r => r.Id == id).FirstOrDefault();
         }
     }
 }

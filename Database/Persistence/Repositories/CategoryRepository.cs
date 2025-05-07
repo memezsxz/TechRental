@@ -22,6 +22,10 @@ namespace Database.Persistence.Repositories
 
 
         #region Async
+        public bool IsReferenced(int id)
+        {
+            return RentalDBContext.Equipment.Any(e => e.CategoryId == id);
+        }
 
         public async Task<bool> ExistsAsync(int id)
         {
@@ -39,6 +43,17 @@ namespace Database.Persistence.Repositories
                 .ToDictionary(c => c.Id, c => c.Name);
         }
 
+        public override IQueryable<object> SelectViewColumns(IQueryable query)
+        {
+            query = query.Cast<Category>().Select(c => new 
+            {
+                Id = c.Id,
+                Name = c.Name,
+                IsActive = c.IsActive ?? false
+            });
+
+            return query.Cast<object>();
+        }
 
         #endregion
     }
