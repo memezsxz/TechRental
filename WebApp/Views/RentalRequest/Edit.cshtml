@@ -32,40 +32,21 @@
     </div>
 </div>
 
-<!-- EDITABLE REQUEST INFO -->
+<!-- REQUEST INFO -->
 <div class="container mb-5">
     <h4 class="mb-4 text-success fw-semibold">Request Info</h4>
 
     <form asp-action="Edit">
         <input type="hidden" asp-for="Id" />
-
-        <div class="form-group mb-4">
-            <label>Equipment Title</label>
-            <input class="form-control" value="@Model.Equipment?.Name" readonly />
-            <input type="hidden" asp-for="EquipmentId" />
-        </div>
-
-        <div class="row mb-4">
-            <!-- Start Date -->
-            <div class="mb-3">
-                <label asp-for="StartDate" class="form-label">Pick up Date</label>
-                <input asp-for="StartDate" class="form-control" id="startDate" />
-                <span asp-validation-for="StartDate" class="text-danger"></span>
-            </div>
-
-            <!-- Return Date -->
-            <div class="mb-3">
-                <label asp-for="ReturnDate" class="form-label">Return Date</label>
-                <input asp-for="ReturnDate" class="form-control" id="returnDate" />
-                <span asp-validation-for="ReturnDate" class="text-danger"></span>
-            </div>
-        </div>
+        <input type="hidden" asp-for="EquipmentId" />
+        <input type="hidden" asp-for="CustomerId" />
+        <input type="hidden" asp-for="CreatedAt" />
+        <input type="hidden" asp-for="UpdatedAt" />
 
         <div class="row mb-4">
             <div class="col-md-6">
-                <label asp-for="RentalPerDay">Total Cost (BD)</label>
-                <input asp-for="RentalPerDay" id="RentalPerDay" class="form-control" />
-                <span asp-validation-for="RentalPerDay" class="text-danger"></span>
+                <label>Equipment Title</label>
+                <input class="form-control" value="@Model.Equipment?.Name" readonly />
             </div>
             <div class="col-md-6">
                 <label asp-for="StatusId">Status</label>
@@ -74,15 +55,39 @@
             </div>
         </div>
 
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label asp-for="StartDate">Pick up Date</label>
+                <input asp-for="StartDate" class="form-control" id="startDate" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="ReturnDate">Return Date</label>
+                <input asp-for="ReturnDate" class="form-control" id="returnDate" />
+                <span asp-validation-for="ReturnDate" class="text-danger"></span>
+            </div>
+        </div>
+
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label>Number of Days</label>
+                <input id="numberOfDays" class="form-control" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>Rental Fee (BD/Day)</label>
+                <input class="form-control" value="@Model.RentalPerDay.GetValueOrDefault(0).ToString("0.00")" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>Total Cost (BD)</label>
+                <input id="totalCost" class="form-control" readonly />
+            </div>
+        </div>
+
         <div class="form-group mb-4">
             <label asp-for="Notes">Notes</label>
             <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
             <span asp-validation-for="Notes" class="text-danger"></span>
         </div>
-
-        <input type="hidden" asp-for="CustomerId" />
-        <input type="hidden" asp-for="CreatedAt" />
-        <input type="hidden" asp-for="UpdatedAt" />
 
         <div class="d-flex justify-content-center gap-3 mt-5">
             <input type="submit" value="Save Changes" class="btn btn-success px-4" />
@@ -101,7 +106,6 @@
     </style>
 
     <script>
-        // Reserved dates passed from controller as a list of strings ["2025-05-10", ...]
         const reservedDates = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((List<string>)ViewBag.UnavailableDates));
 
         function isReservedDate(date) {
@@ -109,70 +113,61 @@
             return reservedDates.includes(iso);
         }
 
-        // Flatpickr instance for Return Date
         const returnPicker = flatpickr("#returnDate", {
             dateFormat: "Y-m-d",
             minDate: "today",
             defaultDate: "@Model.ReturnDate.ToString("yyyy-MM-dd")",
             disable: reservedDates,
             onDayCreate: function (dObj, dStr, fp, dayElem) {
-                const date = dayElem.dateObj;
-                if (isReservedDate(date)) {
+                if (isReservedDate(dayElem.dateObj)) {
                     dayElem.classList.add("reserved-day");
                 }
             }
         });
 
-        // Flatpickr instance for Start Date
         const startPicker = flatpickr("#startDate", {
             dateFormat: "Y-m-d",
             minDate: "today",
             defaultDate: "@Model.StartDate.ToString("yyyy-MM-dd")",
             disable: reservedDates,
             onChange: function (selectedDates, dateStr) {
-                if (dateStr) {
-                    const startDate = new Date(dateStr);
-                    let maxDate = null;
-
-                    for (let i = 1; i < 30; i++) {
-                        const checkDate = new Date(startDate);
-                        checkDate.setDate(startDate.getDate() + i);
-                        const iso = checkDate.toISOString().split('T')[0];
-                        if (reservedDates.includes(iso)) {
-                            maxDate = new Date(checkDate);
-                            maxDate.setDate(maxDate.getDate() - 1);
-                            break;
-                        }
+                const startDate = new Date(dateStr);
+                let maxDate = null;
+                for (let i = 1; i < 30; i++) {
+                    const checkDate = new Date(startDate);
+                    checkDate.setDate(startDate.getDate() + i);
+                    if (reservedDates.includes(checkDate.toISOString().split('T')[0])) {
+                        maxDate = new Date(checkDate);
+                        maxDate.setDate(maxDate.getDate() - 1);
+                        break;
                     }
-
-                    returnPicker.set('minDate', dateStr);
-                    returnPicker.set('maxDate', maxDate);
                 }
+                returnPicker.set('minDate', dateStr);
+                returnPicker.set('maxDate', maxDate);
             },
             onDayCreate: function (dObj, dStr, fp, dayElem) {
-                const date = dayElem.dateObj;
-                if (isReservedDate(date)) {
+                if (isReservedDate(dayElem.dateObj)) {
                     dayElem.classList.add("reserved-day");
                 }
             }
         });
 
-        // Auto-calculate rental price and duration
         function calculateDaysAndTotal() {
             const start = new Date(document.getElementById('startDate').value);
             const end = new Date(document.getElementById('returnDate').value);
-            const perDay = parseFloat('@Model.RentalPerDay');
+            const perDay = parseFloat('@Model.RentalPerDay.GetValueOrDefault(0)');
 
-            if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end >= start) {
+            if (!isNaN(start) && !isNaN(end) && end >= start) {
                 const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
                 const total = perDay * days;
-                document.getElementById('RentalPerDay').value = total.toFixed(2);
+                document.getElementById('numberOfDays').value = days;
+                document.getElementById('totalCost').value = total.toFixed(2);
             } else {
-                document.getElementById('RentalPerDay').value = "0.00";
+                document.getElementById('numberOfDays').value = "";
+                document.getElementById('totalCost').value = "0.00";
             }
         }
 
-        // Trigger calculation on load and on change
         document.addEventListener('DOMContentLoaded', calculateDaysAndTotal);
         document.getElementById('startDate').addEventListener('change', calculateDaysAndTotal);
         document.getElementById('returnDate').addEventListener('change', calculateDaysAndTotal);

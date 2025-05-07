@@ -3,12 +3,15 @@
 @{
     ViewData["Title"] = "Rental Request Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var totalDays = (Model.ReturnDate.Date - Model.StartDate.Date).Days + 1;
+    var rentalFee = Model.RentalPerDay.GetValueOrDefault();
+    var totalCost = totalDays * rentalFee;
 }
 
 <div class="mb-4 mt-3">
     <a asp-action="Index" class="text-success">&lt; Back</a>
 </div>
-
 
 <h2 class="text-center mb-5 page-title">RENTAL REQUEST #@Model.Id</h2>
 
@@ -41,9 +44,15 @@
 <div class="container mb-5">
     <h4 class="mb-4 text-success fw-semibold">Request Info</h4>
 
-    <div class="form-group mb-4">
-        <label>Equipment Title</label>
-        <input class="form-control" value="@Model.Equipment?.Name" readonly />
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Equipment Title</label>
+            <input class="form-control" value="@Model.Equipment?.Name" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Status</label>
+            <input class="form-control" value="@Model.Status?.StatusName" readonly />
+        </div>
     </div>
 
     <div class="row mb-4">
@@ -58,13 +67,17 @@
     </div>
 
     <div class="row mb-4">
-        <div class="col-md-6">
-            <label>Total Cost (BD)</label>
-            <input class="form-control" value="@Model.RentalPerDay" readonly />
+        <div class="col-md-4">
+            <label>Number of Days</label>
+            <input class="form-control" value="@totalDays" readonly />
         </div>
-        <div class="col-md-6">
-            <label>Status</label>
-            <input class="form-control" value="@Model.Status?.StatusName" readonly />
+        <div class="col-md-4">
+            <label>Rental Fee (BD/Day)</label>
+            <input class="form-control" value="@rentalFee.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Total Cost (BD)</label>
+            <input class="form-control" value="@totalCost.ToString("0.00")" readonly />
         </div>
     </div>
 
@@ -77,5 +90,4 @@
         <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">Edit</a>
         <a asp-controller="RentalRecords" asp-action="Create" asp-route-rentalRequestId="@Model.Id" class="btn btn-success px-4">Create Transaction</a>
     </div>
-
 </div>

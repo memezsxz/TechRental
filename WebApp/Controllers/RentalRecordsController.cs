@@ -20,10 +20,68 @@ namespace WebApp.Controllers
         }
 
         // GET: RentalRecords
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string search, string sortBy, string status, string conditionFilter, int page = 1, int pageSize = 10)
         {
-            var rentalDBContext = _context.RentalRecords.Include(r => r.RentalRequest).Include(r => r.ReturnCondition);
-            return View(await rentalDBContext.ToListAsync());
+            var query = _context.RentalRecords
+                .Include(r => r.RentalRequest)
+                .Include(r => r.ReturnCondition)
+                .AsQueryable();
+
+            // Search
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(r =>
+                    r.EquipmentName.Contains(search) ||
+                    r.RentalRequest.Id.ToString().Contains(search));
+            }
+
+            // Transaction/Return Toggle
+            if (!string.IsNullOrWhiteSpace(status))
+            {
+                if (status.ToLower() == "transaction")
+                    query = query.Where(r => r.ActualReturnDate == null);
+                else if (status.ToLower() == "return")
+                    query = query.Where(r => r.ActualReturnDate != null);
+            }
+
+            // Return Condition Filter
+            if (!string.IsNullOrWhiteSpace(conditionFilter))
+            {
+                query = query.Where(r => r.ReturnCondition.ConditionName == conditionFilter);
+            }
+
+            // Sort
+            if (!string.IsNullOrWhiteSpace(sortBy))
+            {
+                query = sortBy switch
+                {
+                    "date_asc" => query.OrderBy(r => r.PickupDate),
+                    "date_desc" => query.OrderByDescending(r => r.PickupDate),
+                    _ => query.OrderByDescending(r => r.CreatedAt),
+                };
+            }
+            else
+            {
+                query = query.OrderByDescending(r => r.CreatedAt);
+            }
+
+            // Pagination
+            var total = await query.CountAsync();
+            var records = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
+
+            // ViewBag for dropdown & pagination
+            ViewBag.Search = search;
+            ViewBag.SortBy = sortBy;
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
+            ViewBag.RecordStatus = status;
+            ViewBag.ConditionFilter = conditionFilter;
+            ViewBag.Conditions = await _context.ReturnConditionStatuses
+                .Select(c => c.ConditionName)
+                .Distinct()
+                .ToListAsync();
+
+            return View(records);
         }
 
         // GET: RentalRecords/Details/5
@@ -49,10 +107,37 @@ namespace WebApp.Controllers
         // GET: RentalRecords/Create
         public IActionResult Create(int rentalRequestId)
         {
-            ViewData["RentalRequestId"] = new SelectList(_context.RentalRequests, "Id", "Id");
-            ViewData["ReturnConditionId"] = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName");
-            return View();
+            var request = _context.RentalRequests
+                .Include(r => r.Customer)
+                .Include(r => r.Equipment)
+                .Include(r => r.Status)
+                .FirstOrDefault(r => r.Id == rentalRequestId);
+
+            if (request == null) return NotFound();
+
+            var days = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
+            var dailyRate = request.RentalPerDay;
+            var rentalFee = dailyRate * days;
+            var deposit = Math.Round(request.RentalPerDay.Value * 0.7M, 2);
+            var total = rentalFee + deposit;
+
+            ViewBag.RentalRequest = request;
+            ViewBag.ReturnConditionId = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName");
+
+            var record = new RentalRecord
+            {
+                RentalRequestId = rentalRequestId,
+                EquipmentName = request.Equipment?.Name,
+                PickupDate = DateTime.Now,
+                RentalFee = rentalFee,
+                Deposit = deposit,
+                TotalCost = total
+            };
+
+            return View(record);
         }
+
+
 
         // POST: RentalRecords/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.

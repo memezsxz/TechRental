@@ -256,29 +256,46 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, RentalRequest rentalRequest)
         {
+            if (id != rentalRequest.Id)
+            {
+                return NotFound();
+            }
+
             if (rentalRequest.StartDate == default)
             {
                 TempData["MessageText"] = "Please select a start date.";
                 TempData["MessageType"] = "error";
+                return RedirectToAction(nameof(Edit), new { id = rentalRequest.Id });
             }
 
             if (rentalRequest.ReturnDate == default)
             {
                 TempData["MessageText"] = "Please select a return date.";
                 TempData["MessageType"] = "error";
-            }
-
-            if (id != rentalRequest.Id)
-            {
-                return NotFound();
+                return RedirectToAction(nameof(Edit), new { id = rentalRequest.Id });
             }
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(rentalRequest);
+                    var existing = await _context.RentalRequests.FindAsync(id);
+                    if (existing == null)
+                        return NotFound();
+
+                    // Update only editable fields
+                    existing.StartDate = rentalRequest.StartDate;
+                    existing.ReturnDate = rentalRequest.ReturnDate;
+                    existing.StatusId = rentalRequest.StatusId;
+                    existing.Notes = rentalRequest.Notes;
+                    existing.UpdatedAt = DateTime.Now;
+
                     await _context.SaveChangesAsync();
+
+                    TempData["MessageText"] = "Rental edited successfully.";
+                    TempData["MessageType"] = "success";
+
+                    return RedirectToAction("Details", new { id = rentalRequest.Id });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -291,15 +308,11 @@ namespace WebApp.Controllers
                         throw;
                     }
                 }
-                TempData["MessageText"] = "Rental Edited successfully.";
-                TempData["MessageType"] = "success";
-                return RedirectToAction(nameof(Index));
             }
+
             ViewData["CustomerId"] = new SelectList(_context.Users, "Id", "Email", rentalRequest.CustomerId);
             ViewData["EquipmentId"] = new SelectList(_context.Equipment, "Id", "Name", rentalRequest.EquipmentId);
             ViewData["StatusId"] = new SelectList(_context.RentalRequestStatuses, "Id", "StatusName", rentalRequest.StatusId);
-
-
 
             return View(rentalRequest);
         }
