@@ -25,8 +25,11 @@ namespace Database.Persistence.Repositories
 
             if (!string.IsNullOrEmpty(searchString))
             {
-                query = query.Where(x => x.FirstName.ToLower().Contains(searchString.ToLower()) ||
-                                         x.LastName.ToLower().Contains(searchString.ToLower()));
+                var lowerSearch = searchString.ToLower().Trim();
+                query = query.Where(x =>
+                    x.FirstName.ToLower().Contains(lowerSearch) ||
+                    x.LastName.ToLower().Contains(lowerSearch) ||
+                    (x.FirstName + " " + x.LastName).ToLower().Contains(lowerSearch));
             }
 
             if (!string.IsNullOrEmpty(roleFilter))

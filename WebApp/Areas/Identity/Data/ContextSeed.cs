@@ -93,5 +93,69 @@ namespace WebApp.Areas.Identity.Data
 
         }
 
+
+        public static async Task SeedManagerAsync(UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, RentalDBContext _context)
+        {
+
+            try
+            {
+                // 1. Get Role from main DB
+                var ManagerRole = _context.UserRoles.FirstOrDefault(r => r.RoleName == RoleConstants.Manager);
+                if (ManagerRole == null)
+                    Console.WriteLine("Role 'Manager' not found.");
+
+                // 2. Check if Identity user already exists
+                var existingUser = await userManager.FindByEmailAsync("Manager1@gmail.com");
+                if (existingUser != null)
+                {
+                    Console.WriteLine("Manager user already exists");
+                    return;
+                }
+
+                // 3. Insert into main app DB first
+                var newManager = new User
+                {
+                    FirstName = "Default",
+                    LastName = "Manager",
+                    Email = "Manager1@gmail.com",
+                    RoleId = ManagerRole.Id,
+                    IsActive = true
+                };
+
+                _context.Users.Add(newManager);
+                _context.SaveChanges();
+
+                // 4. Create Identity user and link UserID to main DB
+                var defaultUser = new ApplicationUser
+                {
+                    UserName = "Manager1@gmail.com",
+                    Email = "Manager1@gmail.com",
+                    FirstName = "Default",
+                    LastName = "Manager",
+                    EmailConfirmed = true,
+                    PhoneNumberConfirmed = true,
+                    UserID = newManager.Id
+                };
+
+                var result = await userManager.CreateAsync(defaultUser, "Pa$$word123");
+                if (result.Succeeded)
+                {
+                    await userManager.AddToRoleAsync(defaultUser, RoleConstants.Manager);
+                    Console.WriteLine("Manager user created and linked successfully");
+                }
+                else
+                {
+                    Console.WriteLine("Failed to create Identity user:");
+                    foreach (var error in result.Errors)
+                        Console.WriteLine($"- {error.Description}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error during admin seeding: " + ex.Message);
+            }
+
+        }
+
     }
 }
