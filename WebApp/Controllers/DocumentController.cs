@@ -28,5 +28,32 @@ namespace WebApp.Controllers
             var fileName = $"Transaction_Record#{rentalRequestId}_{request.CustomerId}.pdf";
             return File(stream.ToArray(), "application/pdf", fileName);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> GetPdf(int id)
+        {
+            var doc = await _context.Documents.FindAsync(id);
+            if (doc == null || !doc.Guid.HasValue)
+                return NotFound();
+
+            var stream = await S3Uploader.GetFileByGuidAsync(doc.Guid.ToString());
+            if (stream == null) return NotFound();
+
+            return File(stream, "application/pdf"); // View in browser
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> DownloadPdf(int id)
+        {
+            var doc = await _context.Documents.FindAsync(id);
+            if (doc == null || !doc.Guid.HasValue)
+                return NotFound();
+
+            var stream = await S3Uploader.GetFileByGuidAsync(doc.Guid.ToString());
+            if (stream == null) return NotFound();
+
+            return File(stream, "application/pdf", "Agreement.pdf"); // Forces download
+        }
+
     }
 }

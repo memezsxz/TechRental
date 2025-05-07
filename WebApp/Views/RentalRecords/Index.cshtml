@@ -111,11 +111,8 @@
         {
             if (ViewBag.RecordStatus == "transaction")
             {
-
-                var isOverdue = item.RentalRequest.ReturnDate != null && DateTime.Now.Date > item.RentalRequest.ReturnDate.Date;
+                var isOverdue = DateTime.Now.Date > item.RentalRequest?.ReturnDate.Date;
                 var returnDateStyle = isOverdue ? "color:red; font-weight:bold;" : "";
-
-                <td style="@returnDateStyle">@item.RentalRequest.ReturnDate.ToString("d/M/yyyy")</td>
 
                 <tr class="clickable-row"
                     data-bs-toggle="tooltip"
@@ -128,7 +125,7 @@
                     <td>@item.EquipmentName</td>
                     <td>@item.PickupDate.ToString("d/M/yyyy")</td>
                     <td style="@returnDateStyle">@item.RentalRequest.ReturnDate.ToString("d/M/yyyy")</td>
-                    <td>@item.TotalCost.Value.ToString("0.00")</td>
+                    <td>@item.TotalCost?.ToString("0.00")</td>
                 </tr>
             }
             else

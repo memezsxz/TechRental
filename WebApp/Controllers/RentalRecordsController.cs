@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
+using Helper;
 
 namespace WebApp.Controllers
 {
@@ -94,18 +91,29 @@ namespace WebApp.Controllers
 
             var rentalRecord = await _context.RentalRecords
                 .Include(r => r.RentalRequest)
+                .ThenInclude(r => r.Customer)
                 .Include(r => r.ReturnCondition)
                 .FirstOrDefaultAsync(m => m.Id == id);
+
             if (rentalRecord == null)
             {
                 return NotFound();
             }
 
+            // Retrieve the uploaded agreement file from Document table (if available)
+            var document = await _context.Documents
+                .FirstOrDefaultAsync(d => d.RentalId == rentalRecord.RentalRequestId);
+
+            ViewBag.DocumentId = document?.Id;
+            ViewBag.Mode = rentalRecord.ActualReturnDate == null ? "transaction" : "return";
+            ViewBag.RentalRequest = rentalRecord.RentalRequest;
+
             return View(rentalRecord);
         }
 
-        // GET: RentalRecords/Create
-        public IActionResult Create(int rentalRequestId)
+
+        // GET: RentalRecords/CreateTransaction
+        public IActionResult CreateTransaction(int rentalRequestId)
         {
             var request = _context.RentalRequests
                 .Include(r => r.Customer)
@@ -116,13 +124,13 @@ namespace WebApp.Controllers
             if (request == null) return NotFound();
 
             var days = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
-            var dailyRate = request.RentalPerDay;
+            var dailyRate = request.RentalPerDay ?? 0;
             var rentalFee = dailyRate * days;
-            var deposit = Math.Round(request.RentalPerDay.Value * 0.7M, 2);
+            var deposit = Math.Round(dailyRate * 0.7M, 2);
             var total = rentalFee + deposit;
 
+            ViewBag.Mode = "transaction";
             ViewBag.RentalRequest = request;
-            ViewBag.ReturnConditionId = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName");
 
             var record = new RentalRecord
             {
@@ -134,28 +142,117 @@ namespace WebApp.Controllers
                 TotalCost = total
             };
 
-            return View(record);
+            return View("Create", record);
         }
 
 
-
-        // POST: RentalRecords/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
+        // POST: RentalRecords/CreateTransaction
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(RentalRecord rentalRecord)
+        public async Task<IActionResult> CreateTransaction(RentalRecord rentalRecord)
         {
+            var request = await _context.RentalRequests
+                .Include(r => r.Customer)
+                .Include(r => r.Equipment)
+                .FirstOrDefaultAsync(r => r.Id == rentalRecord.RentalRequestId);
+
+            if (request == null) return NotFound();
+
             if (ModelState.IsValid)
             {
-                _context.Add(rentalRecord);
+                // Step 1: Calculate fees
+                var days = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
+                var dailyRate = request.RentalPerDay ?? 0;
+                var rentalFee = dailyRate * days;
+                var deposit = Math.Round(dailyRate * 0.7M, 2);
+                var total = rentalFee + deposit;
+
+                rentalRecord.EquipmentName = request.Equipment?.Name;
+                rentalRecord.PickupDate = DateTime.Now;
+                rentalRecord.RentalFee = rentalFee;
+                rentalRecord.Deposit = deposit;
+                rentalRecord.TotalCost = total;
+                rentalRecord.CreatedAt = DateTime.Now;
+
+                // Step 2: Save rental record first to get its ID
+                _context.RentalRecords.Add(rentalRecord);
                 await _context.SaveChangesAsync();
+
+                var Agreement = Request.Form.Files["Agreement"];
+
+                // Step 3: Upload PDF agreement and store metadata
+                if (Agreement != null && Agreement.Length > 0)
+                {
+                    using var memoryStream = new MemoryStream();
+                    await Agreement.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+
+                    var uploadSuccess = await PdfManager.UploadPdfAndSaveToDatabase(
+                        _context,
+                        memoryStream,
+                        Agreement.FileName,
+                        Agreement.ContentType,
+                        rentalRecord.RentalRequestId.Value
+                    );
+
+                    if (!uploadSuccess)
+                    {
+                        TempData["MessageText"] = "Rental created, but PDF upload failed.";
+                        TempData["MessageType"] = "warning";
+                    }
+                }
+
+                TempData["MessageText"] = "Rental transaction created successfully.";
+                TempData["MessageType"] = "success";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["RentalRequestId"] = new SelectList(_context.RentalRequests, "Id", "Id", rentalRecord.RentalRequestId);
-            ViewData["ReturnConditionId"] = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName", rentalRecord.ReturnConditionId);
-            return View(rentalRecord);
+
+            // Repopulate form
+            ViewBag.RentalRequest = request;
+            ViewBag.ReturnConditionId = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName", rentalRecord.ReturnConditionId);
+            return View("Create", rentalRecord);
         }
+
+        // GET: RentalRecords/CompleteReturn/5
+        public async Task<IActionResult> CompleteReturn(int id)
+        {
+            var record = await _context.RentalRecords
+                 .Include(r => r.RentalRequest)
+                    .ThenInclude(r => r.Customer)
+                 .Include(r => r.RentalRequest)
+                    .ThenInclude(r => r.Equipment)
+                .FirstOrDefaultAsync(r => r.Id == id);
+
+            if (record == null) return NotFound();
+
+            ViewBag.Mode = "return"; // Important for conditional rendering in the shared view
+            ViewBag.RentalRequest = record.RentalRequest;
+            ViewBag.ReturnConditionId = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName");
+
+            return View("Create", record); // Use the same Create view
+        }
+
+
+        // POST: RentalRecords/CompleteReturn/5
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CompleteReturn(int id, RentalRecord updated)
+        {
+            var record = await _context.RentalRecords.FindAsync(id);
+            if (record == null) return NotFound();
+
+            // Only update return-related fields
+            record.ActualReturnDate = updated.ActualReturnDate;
+            record.ReturnConditionId = updated.ReturnConditionId;
+            record.LateReturnFees = updated.LateReturnFees;
+            record.ExtraCharges = updated.ExtraCharges;
+            record.ExtraChargeDescription = updated.ExtraChargeDescription;
+            record.UpdatedAt = DateTime.Now;
+
+            await _context.SaveChangesAsync();
+            return RedirectToAction(nameof(Index));
+        }
+
 
         // GET: RentalRecords/Edit/5
         public async Task<IActionResult> Edit(int? id)
@@ -177,10 +274,9 @@ namespace WebApp.Controllers
 
         // POST: RentalRecords/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,RentalRequestId,EquipmentName,PickupDate,ActualReturnDate,ReturnConditionId,Deposit,LateReturnFees,ExtraCharges,ExtraChargeDescription,TotalCost,RentalFee,CreatedAt,UpdatedAt")] RentalRecord rentalRecord)
+        public async Task<IActionResult> Edit(int id, RentalRecord rentalRecord)
         {
             if (id != rentalRecord.Id)
             {
@@ -212,48 +308,9 @@ namespace WebApp.Controllers
             return View(rentalRecord);
         }
 
-        // GET: RentalRecords/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null || _context.RentalRecords == null)
-            {
-                return NotFound();
-            }
-
-            var rentalRecord = await _context.RentalRecords
-                .Include(r => r.RentalRequest)
-                .Include(r => r.ReturnCondition)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (rentalRecord == null)
-            {
-                return NotFound();
-            }
-
-            return View(rentalRecord);
-        }
-
-        // POST: RentalRecords/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-            if (_context.RentalRecords == null)
-            {
-                return Problem("Entity set 'RentalDBContext.RentalRecords'  is null.");
-            }
-            var rentalRecord = await _context.RentalRecords.FindAsync(id);
-            if (rentalRecord != null)
-            {
-                _context.RentalRecords.Remove(rentalRecord);
-            }
-            
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
-        }
-
         private bool RentalRecordExists(int id)
         {
-          return (_context.RentalRecords?.Any(e => e.Id == id)).GetValueOrDefault();
+            return (_context.RentalRecords?.Any(e => e.Id == id)).GetValueOrDefault();
         }
     }
 }
