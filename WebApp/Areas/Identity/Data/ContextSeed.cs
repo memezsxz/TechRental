@@ -140,7 +140,7 @@ namespace WebApp.Areas.Identity.Data
                 var result = await userManager.CreateAsync(defaultUser, "Pa$$word123");
                 if (result.Succeeded)
                 {
-                    await userManager.AddToRoleAsync(defaultUser, RoleConstants.Admin);
+                    await userManager.AddToRoleAsync(defaultUser, RoleConstants.Manager);
                     Console.WriteLine("Manager user created and linked successfully");
                 }
                 else
