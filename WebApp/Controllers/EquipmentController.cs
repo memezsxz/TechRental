@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
 using Helper;
+using Microsoft.AspNetCore.Authorization;
+using WebApp.Helpers;
 
 namespace WebApp.Controllers
 {
@@ -103,21 +105,35 @@ namespace WebApp.Controllers
         }
 
         // GET: Equipment/Create
+        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public IActionResult Create()
         {
-            ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName");
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
-            ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName");
-            ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName");
-            return View();
+            if (!User.IsInRole(RoleConstants.Manager) && !User.IsInRole(RoleConstants.Admin))
+            {
+                return Forbid();
+            }
+
+                ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName");
+                ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
+                ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName");
+                ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName");
+                return View();
+            
         }
 
         // POST: Equipment/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> Create(Equipment equipment)
         {
+            if (!User.IsInRole(RoleConstants.Manager) && !User.IsInRole(RoleConstants.Admin))
+            {
+                return Forbid();
+            }
+
+
             var uploadedFile = Request.Form.Files["ImageFile"];
             int? uploadedImageId = null;
 
@@ -179,8 +195,14 @@ namespace WebApp.Controllers
         }
 
         // GET: Equipment/Edit/5
+        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> Edit(int? id)
         {
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return Forbid();
+            }
+
             if (id == null || _context.Equipment == null)
             {
                 return NotFound();
@@ -202,8 +224,15 @@ namespace WebApp.Controllers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> Edit(int id, Equipment equipment)
         {
+
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return Forbid();
+            }
+
             if (id != equipment.Id)
             {
                 return NotFound();
@@ -280,9 +309,15 @@ namespace WebApp.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteCheck(int id)
         {
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return Forbid();
+            }
+
             var equipment = await _context.Equipment.FindAsync(id);
             if (equipment == null)
                 return Json(new { success = false, message = "Not found" });
@@ -318,9 +353,15 @@ namespace WebApp.Controllers
 
 
         [HttpPost]
+        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> SetInactive(int id)
         {
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return Forbid();
+            }
+
             var equipment = await _context.Equipment.FindAsync(id);
             if (equipment == null)
             {
