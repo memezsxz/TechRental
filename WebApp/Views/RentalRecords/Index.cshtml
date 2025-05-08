@@ -28,12 +28,12 @@
 
         <!-- Toggle Buttons -->
         <div class="btn-group mb-3" role="group">
-            <a href="@Url.Action("Index", new { status = "transaction", search = ViewBag.Search, sortBy = ViewBag.SortBy })"
+            <a href="@Url.Action("Index", new { status = "transaction", search = ViewBag.Search, sortBy = ViewBag.SortBy ,userEmail= User.Identity.Name})"
                class="btn btn-outline-success px-4 @(ViewBag.RecordStatus == "transaction" ? "active" : "")"
                style="border-radius: 8px 0 0 8px;">
                 TRANSACTIONS
             </a>
-            <a href="@Url.Action("Index", new { status = "return", search = ViewBag.Search, sortBy = ViewBag.SortBy })"
+            <a href="@Url.Action("Index", new { status = "return", search = ViewBag.Search, sortBy = ViewBag.SortBy ,userEmail= User.Identity.Name})"
                class="btn btn-outline-success px-4 @(ViewBag.RecordStatus == "return" ? "active" : "")"
                style="border-radius: 0 8px 8px 0;">
                 RETURNS

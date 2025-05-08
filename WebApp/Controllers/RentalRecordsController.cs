@@ -4,9 +4,13 @@ using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
 using Helper;
+using Microsoft.AspNetCore.Authorization;
+using WebApp.Helpers;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApp.Controllers
 {
+    [Authorize]
     public class RentalRecordsController : Controller
     {
         private readonly RentalDBContext _context;
@@ -17,12 +21,37 @@ namespace WebApp.Controllers
         }
 
         // GET: RentalRecords
-        public async Task<IActionResult> Index(string search, string sortBy, string status, string conditionFilter, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(string? userEmail, string search, string sortBy, string status, string conditionFilter, int page = 1, int pageSize = 10)
         {
+
+            //do not allow the Unuthenticated users to enter this
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+
+
             var query = _context.RentalRecords
-                .Include(r => r.RentalRequest)
+                .Include(r => r.RentalRequest).ThenInclude(r => r.Customer)
                 .Include(r => r.ReturnCondition)
                 .AsQueryable();
+
+            if (User.IsInRole(RoleConstants.Customer))
+            {
+                var loggedInEmail = User.Identity.Name;
+
+                // If the passed email doesn't match the logged-in user's email, deny access
+                if (!string.Equals(userEmail, loggedInEmail, StringComparison.OrdinalIgnoreCase))
+                {
+                    return Forbid(); //Authenticated but not allowed
+                }
+
+                // Filter the data to only show this user's records
+                query = query.Where(u => u.RentalRequest.Customer.Email == loggedInEmail);
+
+            }
+
 
             // Search
             if (!string.IsNullOrWhiteSpace(search))
@@ -84,6 +113,12 @@ namespace WebApp.Controllers
         // GET: RentalRecords/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+            //do not allow the Unuthenticated users to enter this
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
             if (id == null || _context.RentalRecords == null)
             {
                 return NotFound();
@@ -98,6 +133,20 @@ namespace WebApp.Controllers
             if (rentalRecord == null)
             {
                 return NotFound();
+            }
+
+
+            if (User.IsInRole(RoleConstants.Customer))
+            {
+
+                var loggedInEmail = User.Identity.Name;
+                if (rentalRecord.RentalRequest.Customer.Email != loggedInEmail)
+                {
+                    return Forbid(); //Authenticated but not allowed
+
+                }
+
+
             }
 
             // Retrieve the uploaded agreement file from Document table (if available)
@@ -115,6 +164,13 @@ namespace WebApp.Controllers
         // GET: RentalRecords/CreateTransaction
         public IActionResult CreateTransaction(int rentalRequestId)
         {
+
+            //do not allow the Unuthenticated users to enter this
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
             var request = _context.RentalRequests
                 .Include(r => r.Customer)
                 .Include(r => r.Equipment)
@@ -151,6 +207,14 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CreateTransaction(RentalRecord rentalRecord)
         {
+
+            //do not allow the Unuthenticated users to enter this
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+
             var request = await _context.RentalRequests
                 .Include(r => r.Customer)
                 .Include(r => r.Equipment)
@@ -216,6 +280,13 @@ namespace WebApp.Controllers
         // GET: RentalRecords/CompleteReturn/5
         public async Task<IActionResult> CompleteReturn(int id)
         {
+
+            //do not allow the Unuthenticated users to enter this
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
             var record = await _context.RentalRecords
                  .Include(r => r.RentalRequest)
                     .ThenInclude(r => r.Customer)
@@ -238,6 +309,13 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteReturn(int id, RentalRecord updated)
         {
+
+            //do not allow the Unuthenticated users to enter this
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
             var record = await _context.RentalRecords.FindAsync(id);
             if (record == null) return NotFound();
 
@@ -257,6 +335,15 @@ namespace WebApp.Controllers
         // GET: RentalRecords/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
+
+
+            //do not allow the Unuthenticated users to enter this
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+
             if (id == null || _context.RentalRecords == null)
             {
                 return NotFound();
@@ -278,6 +365,14 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, RentalRecord rentalRecord)
         {
+
+
+            //do not allow the Unuthenticated users to enter this
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
             if (id != rentalRecord.Id)
             {
                 return NotFound();
