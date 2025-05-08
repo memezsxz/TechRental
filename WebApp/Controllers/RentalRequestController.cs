@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Authorization;
 namespace WebApp.Controllers
 {
     [Authorize]
+    [Route("RentalRequest")]
     public class RentalRequestController : Controller
     {
         private readonly RentalDBContext _context;
@@ -24,7 +25,7 @@ namespace WebApp.Controllers
         }
 
         // GET: RentalRequest
-        [HttpGet("RentalRequest/Index")]
+        [HttpGet("")]
         public async Task<IActionResult> Index(string? userEmail, string search, string statusFilter, string sortBy, int page = 1, int pageSize = 10)
         {
             var query = _context.RentalRequests
@@ -156,6 +157,16 @@ namespace WebApp.Controllers
         // GET: RentalRequest/Create
         public IActionResult Create(int equipmentId)
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin)) {
+                return Forbid();
+            }
+
+
             var equipment = _context.Equipment
                     .Include(e => e.Feedbacks)
                     .Include(e => e.ConditionStatus)
