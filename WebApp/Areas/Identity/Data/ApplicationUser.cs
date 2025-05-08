@@ -15,5 +15,6 @@ namespace WebApp.Areas.Identity.Data
 
         public int? UserID { get; set; }
 
+
     }
 }
