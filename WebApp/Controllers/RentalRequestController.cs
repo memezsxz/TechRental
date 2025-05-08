@@ -8,9 +8,13 @@ using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
 using System.Security.Claims;
+using WebApp.Helpers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApp.Controllers
 {
+    [Authorize]
+    [Route("RentalRequest")]
     public class RentalRequestController : Controller
     {
         private readonly RentalDBContext _context;
@@ -21,13 +25,32 @@ namespace WebApp.Controllers
         }
 
         // GET: RentalRequest
-        public async Task<IActionResult> Index(string search, string statusFilter, string sortBy, int page = 1, int pageSize = 10)
+        [HttpGet("")]
+        public async Task<IActionResult> Index(string? userEmail, string search, string statusFilter, string sortBy, int page = 1, int pageSize = 10)
         {
             var query = _context.RentalRequests
                 .Include(r => r.Customer)
                 .Include(r => r.Equipment)
                 .Include(r => r.Status)
                 .AsQueryable();
+
+            //implement the filtering for the records for only customers 
+            if (User.IsInRole(RoleConstants.Customer))
+            {
+                var loggedInEmail = User.Identity.Name;
+
+                // If the passed email doesn't match the logged-in user's email, deny access
+                if (!string.Equals(userEmail, loggedInEmail, StringComparison.OrdinalIgnoreCase))
+                {
+                    return Forbid(); //Authenticated but not allowed
+                }
+
+
+                query = query.Where(u => u.Customer.Email == loggedInEmail);
+                
+            }
+
+
 
             if (!string.IsNullOrWhiteSpace(search))
             {
@@ -86,6 +109,13 @@ namespace WebApp.Controllers
         // GET: RentalRequest/Details/5
         public async Task<IActionResult> Details(int? id)
         {
+
+            //do not allow the Unuthenticated users to enter this
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
             if (id == null || _context.RentalRequests == null)
             {
                 return NotFound();
@@ -101,6 +131,19 @@ namespace WebApp.Controllers
                 return NotFound();
             }
 
+            if (User.IsInRole(RoleConstants.Customer))
+            {
+
+                var loggedInEmail = User.Identity.Name;
+                if (rentalRequest.Customer.Email != loggedInEmail)
+                {
+                    return Forbid(); //Authenticated but not allowed
+
+                }
+
+
+            }
+
             var rentalRecord = await _context.RentalRecords
                 .FirstOrDefaultAsync(r => r.RentalRequestId == id);
 
@@ -114,6 +157,16 @@ namespace WebApp.Controllers
         // GET: RentalRequest/Create
         public IActionResult Create(int equipmentId)
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return Unauthorized();
+            }
+
+            if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin)) {
+                return Forbid();
+            }
+
+
             var equipment = _context.Equipment
                     .Include(e => e.Feedbacks)
                     .Include(e => e.ConditionStatus)

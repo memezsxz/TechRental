@@ -1,5 +1,13 @@
 ﻿@model IEnumerable<Database.Core.Domain.RentalRequest>
+@using Microsoft.AspNetCore.Identity
+@using WebApp.Areas.Identity.Data
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
 
+@{
+    var isCustomer = User.IsInRole("Customer");
+    var userEmail = isCustomer ? User.Identity?.Name : null;
+}
 @{
     ViewData["Title"] = "Rental Requests";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -118,14 +126,29 @@
         @if (ViewBag.CurrentPage > 1)
         {
             <li class="page-item">
-                <a class="page-link text-success"
-                   asp-action="Index"
-                   asp-route-page="@(ViewBag.CurrentPage - 1)"
-                   asp-route-search="@currentSearch"
-                   asp-route-statusFilter="@currentStatus"
-                   asp-route-sortBy="@currentSort">
-                    <i class="bi bi-chevron-left"></i> Previous
-                </a>
+                @if (isCustomer)
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-statusFilter="@currentStatus"
+                       asp-route-sortBy="@currentSort"
+                       asp-route-userEmail="@userEmail">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                }
+                else
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-statusFilter="@currentStatus"
+                       asp-route-sortBy="@currentSort">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                }
             </li>
         }
 
@@ -135,29 +158,60 @@
             var linkClass = (int)ViewBag.CurrentPage == i ? "bg-success text-white border-success" : "text-success";
 
             <li class="page-item @isActive">
-                <a class="page-link @linkClass"
-                   asp-action="Index"
-                   asp-route-page="@i"
-                   asp-route-search="@currentSearch"
-                   asp-route-statusFilter="@currentStatus"
-                   asp-route-sortBy="@currentSort"
-                   style="border-radius: 8px; margin: 0 4px;">
-                    @i
-                </a>
+                @if (isCustomer)
+                {
+                    <a class="page-link @linkClass"
+                       asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-search="@currentSearch"
+                       asp-route-statusFilter="@currentStatus"
+                       asp-route-sortBy="@currentSort"
+                       asp-route-userEmail="@userEmail"
+                       style="border-radius: 8px; margin: 0 4px;">
+                        @i
+                    </a>
+                }
+                else
+                {
+                    <a class="page-link @linkClass"
+                       asp-action="Index"
+                       asp-route-page="@i"
+                       asp-route-search="@currentSearch"
+                       asp-route-statusFilter="@currentStatus"
+                       asp-route-sortBy="@currentSort"
+                       style="border-radius: 8px; margin: 0 4px;">
+                        @i
+                    </a>
+                }
             </li>
         }
 
         @if (ViewBag.CurrentPage < ViewBag.TotalPages)
         {
             <li class="page-item">
-                <a class="page-link text-success"
-                   asp-action="Index"
-                   asp-route-page="@(ViewBag.CurrentPage + 1)"
-                   asp-route-search="@currentSearch"
-                   asp-route-statusFilter="@currentStatus"
-                   asp-route-sortBy="@currentSort">
-                    Next <i class="bi bi-chevron-right"></i>
-                </a>
+                @if (isCustomer)
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-statusFilter="@currentStatus"
+                       asp-route-sortBy="@currentSort"
+                       asp-route-userEmail="@userEmail">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-statusFilter="@currentStatus"
+                       asp-route-sortBy="@currentSort">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
             </li>
         }
 

@@ -1,5 +1,8 @@
 ﻿@model IEnumerable<Database.Core.Domain.RentalRecord>
-
+@{
+    var isCustomer = User.IsInRole("Customer");
+    var userEmail = isCustomer ? User.Identity?.Name : null;
+}
 @{
     ViewData["Title"] = "Rental Records";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -28,12 +31,12 @@
 
         <!-- Toggle Buttons -->
         <div class="btn-group mb-3" role="group">
-            <a href="@Url.Action("Index", new { status = "transaction", search = ViewBag.Search, sortBy = ViewBag.SortBy })"
+            <a href="@Url.Action("Index", new { status = "transaction", search = ViewBag.Search, sortBy = ViewBag.SortBy ,userEmail= User.Identity.Name})"
                class="btn btn-outline-success px-4 @(ViewBag.RecordStatus == "transaction" ? "active" : "")"
                style="border-radius: 8px 0 0 8px;">
                 TRANSACTIONS
             </a>
-            <a href="@Url.Action("Index", new { status = "return", search = ViewBag.Search, sortBy = ViewBag.SortBy })"
+            <a href="@Url.Action("Index", new { status = "return", search = ViewBag.Search, sortBy = ViewBag.SortBy ,userEmail= User.Identity.Name})"
                class="btn btn-outline-success px-4 @(ViewBag.RecordStatus == "return" ? "active" : "")"
                style="border-radius: 0 8px 8px 0;">
                 RETURNS
@@ -171,16 +174,33 @@
 <!-- Pagination -->
 <nav aria-label="Pagination" class="mt-4">
     <ul class="pagination justify-content-center">
+
         @if (ViewBag.CurrentPage > 1)
         {
             <li class="page-item">
-                <a class="page-link text-success"
-                   asp-action="Index"
-                   asp-route-page="@(ViewBag.CurrentPage - 1)"
-                   asp-route-search="@currentSearch"
-                   asp-route-sortBy="@currentSort">
-                    <i class="bi bi-chevron-left"></i> Previous
-                </a>
+                @if (isCustomer)
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort"
+                       asp-route-userEmail="@userEmail">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                }
+                else
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                }
             </li>
         }
 
@@ -190,29 +210,63 @@
             var linkClass = isActive == "active" ? "bg-success text-white border-success" : "text-success";
 
             <li class="page-item @isActive">
-                <a class="page-link @linkClass"
-                   asp-action="Index"
-                   asp-route-page="@i"
-                   asp-route-search="@currentSearch"
-                   asp-route-sortBy="@currentSort"
-                   style="border-radius: 8px; margin: 0 4px;">
-                    @i
-                </a>
+                @if (isCustomer)
+                {
+                    <a class="page-link @linkClass"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@i"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort"
+                       asp-route-userEmail="@userEmail"
+                       style="border-radius: 8px; margin: 0 4px;">
+                        @i
+                    </a>
+                }
+                else
+                {
+                    <a class="page-link @linkClass"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@i"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort"
+                       style="border-radius: 8px; margin: 0 4px;">
+                        @i
+                    </a>
+                }
             </li>
         }
 
         @if (ViewBag.CurrentPage < ViewBag.TotalPages)
         {
             <li class="page-item">
-                <a class="page-link text-success"
-                   asp-action="Index"
-                   asp-route-page="@(ViewBag.CurrentPage + 1)"
-                   asp-route-search="@currentSearch"
-                   asp-route-sortBy="@currentSort">
-                    Next <i class="bi bi-chevron-right"></i>
-                </a>
+                @if (isCustomer)
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort"
+                       asp-route-userEmail="@userEmail">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
             </li>
         }
+
     </ul>
 </nav>
 
