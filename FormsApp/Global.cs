@@ -6,8 +6,10 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence;
+using Image = System.Drawing.Image;
 
 namespace FormsApp
 {
@@ -25,6 +27,42 @@ namespace FormsApp
         public static Color DarkGreen = Color.FromArgb(49, 129, 80);
         public static Color NeonGreen = Color.FromArgb(120, 226, 161);
         #endregion
+
+        /// <summary>
+        /// Maps labels to the associated entity type and permission flags (Add, Edit, Delete).
+        /// Used to determine which entity is shown and what operations are allowed.
+        /// </summary>
+
+        public static Dictionary<Type, (bool allowAdd, bool allowEdit, bool allowDelete)>? TabTypeMap
+        {
+            get
+            {
+                if (userType == 1) return new()
+                { 
+                    { typeof(AuditLog), (false, false, false) }, 
+                    { typeof(SystemErrorLog), (false, false, false) }, 
+                    { typeof(User), (false, false, false) }, 
+                    { typeof(Category), (true, true, true) },
+                    { typeof(Equipment), (true, true, true) }, 
+                    { typeof(RentalRequest), (false, true, true) },
+                    { typeof(RentalRecord), (false, true, true) },
+                };
+
+                if (userType == 2) return new()
+                {
+                    { typeof(Category), (false, false, false) },
+                    { typeof(RentalRequest), (false, true, true) },
+                    { typeof(Equipment), (false, false, false) },
+                    { typeof(RentalRecord), (false, true, true) }
+                };
+
+                return null;
+            }
+        }
+
+
+
+
         public static void Panel_Paint(object sender, PaintEventArgs e)
         {
             Panel panel = sender as Panel;

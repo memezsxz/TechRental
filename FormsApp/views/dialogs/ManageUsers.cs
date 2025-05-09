@@ -11,6 +11,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using static FormsApp.views.dialogs.BaseViewEditDeleteForm;
+using Image = Database.Core.Domain.Image;
 
 namespace FormsApp.views.dialogs
 {
@@ -31,6 +32,7 @@ namespace FormsApp.views.dialogs
         public ManageUser(BaseViewEditDeleteForm.ViewType viewType, int? id = null) : base(viewType, id) { }
 
         #endregion
+
         #region Form Initialization
 
         /// <summary>
@@ -60,15 +62,28 @@ namespace FormsApp.views.dialogs
 
         #region View Preparation
 
+        protected override void PrepareForView()
+        {
+            saveLabel.Visible = false;
+            closeLabel.Location = saveLabel.Location;
+            lblDelete.Visible = false;
+            LoadItemInfo();
+        }
+
         protected override void PrepareForAdd()
         {
+            MessageBox.Show("Cannot add a user");
+            return;
+
             lblSave.Text = "Add";
             lblDelete.Visible = false;
-            cbIsActive.Checked = false;
+            cbIsActive.Checked = true;
             item = new User();
         }
         protected override void PrepareForEdit()
         {
+            saveLabel.Visible = false;
+            closeLabel.Location = saveLabel.Location;
             LoadItemInfo();
         }
 
@@ -84,6 +99,8 @@ namespace FormsApp.views.dialogs
             tbPhoneNumber.Text = item.PhoneNumber;
             ddlRole.SelectedValue = item.RoleId;
             cbIsActive.Checked = item.IsActive ?? false;
+            if (item.Image != null) LoadImage(item.Image.Guid, item.Image.ImageType, pnlImage, lblImage);
+            else lblImage.Text = "No Image";
         }
 
         #endregion
@@ -93,11 +110,11 @@ namespace FormsApp.views.dialogs
         #region Data Loaders
         protected override bool FetchItem()
         {
-            item = context.Users.Get(id.Value);
+            item = context.Users.GetUserWithProfile(id.Value);
 
             if (item != null) return true;
 
-            MessageBox.Show($"Equipment with the id {id.Value} not found");
+            MessageBox.Show($"User with the id {id.Value} not found");
             return false;
         }
         /// <summary>
@@ -116,103 +133,67 @@ namespace FormsApp.views.dialogs
         #region Save/Delete Logic
         public override void Delete()
         {
-            if (id == null)
-            {
-                MessageBox.Show("Cannot delete id null");
-                Dispose();
-                return;
-            }
+            MessageBox.Show("Cannot Delete user.");
+            Dispose();
 
-            item = context.Users.Get(id.Value);
+            //if (id == null)
+            //{
+            //    MessageBox.Show("Cannot delete id null");
+            //    Dispose();
+            //    return;
+            //}
 
-            if (item == null)
-            {
-                MessageBox.Show($"User with the id {id.Value} not found");
-                Dispose();
-                //Close();
-            }
+            //item = context.Users.Get(id.Value);
 
-            if (context.Categories.IsReferenced(id.Value))
-            {
-                var result = MessageBox.Show($"This user refrenced elsewhare. Do you want to mark it as inactive instead?", "User in use", MessageBoxButtons.YesNo);
+            //if (item == null)
+            //{
+            //    MessageBox.Show($"User with the id {id.Value} not found");
+            //    Dispose();
+            //}
 
-                if (result == DialogResult.Yes)
-                {
-                    try
-                    {
-                        item.IsActive = false;
-                        context.Users.Update(item);
-                        context.SaveChanges();
-                        RaiseSuccessfulComplete();
-                    }
-                    catch (Exception e)
-                    {
-                        Global.DisplayReportErrorDialog(e);
-                        RaiseFailedComplete();
-                    }
-                }
-                Dispose();
+            //if (context.Categories.IsReferenced(id.Value))
+            //{
+            //    var result = MessageBox.Show($"This user refrenced elsewhare. Do you want to mark it as inactive instead?", "User in use", MessageBoxButtons.YesNo);
 
-                return;
-            }
+            //    if (result == DialogResult.Yes)
+            //    {
+            //        try
+            //        {
+            //            item.IsActive = false;
+            //            context.Users.Update(item);
+            //            context.SaveChanges();
+            //            RaiseSuccessfulComplete();
+            //        }
+            //        catch (Exception e)
+            //        {
+            //            Global.DisplayReportErrorDialog(e);
+            //            RaiseFailedComplete();
+            //        }
+            //    }
+            //    Dispose();
 
-            try
-            {
-                context.Users.Remove(item);
-                context.SaveChanges();
-                RaiseSuccessfulComplete();
-                Dispose();
+            //    return;
+            //}
 
-            }
-            catch (Exception e)
-            {
-                Global.DisplayReportErrorDialog(e);
-                RaiseFailedComplete();
-                Dispose();
-            }
-        }
-        protected override async Task SaveItem()
-        {
-
-            if (!await ValidateInput()) return;
-
-            //Console.WriteLine("1");
             //try
             //{
-            //    if (FormViewType == ViewType.EDIT)
-            //    {
-            //        item.UpdatedAt = DateTime.UtcNow;
-            //        context.Users.Update(item);
-            //        Console.WriteLine("2");
+            //    context.Users.Remove(item);
+            //    context.SaveChanges();
+            //    RaiseSuccessfulComplete();
+            //    Dispose();
 
-            //    }
-            //    else if (FormViewType == ViewType.ADD)
-            //    {
-            //        context.Users.Add(item);
-            //        Console.WriteLine("3");
-            //    }
-
-            //    int rows = await context.SaveChangesAsync();
-
-            //    if (rows > 0)
-            //    {
-            //        MessageBox.Show($"Category {(FormViewType == ViewType.ADD ? "added" : "updated")} successfully");
-            //        RaiseSuccessfulComplete();
-            //        Close();
-            //    }
-            //    else
-            //    {
-            //        Console.WriteLine("5");
-
-            //        MessageBox.Show($"Please Try Again");
-            //    }
             //}
             //catch (Exception e)
             //{
             //    Global.DisplayReportErrorDialog(e);
             //    RaiseFailedComplete();
-
+            //    Dispose();
             //}
+        }
+        protected override async Task SaveItem()
+        {
+            MessageBox.Show("Cannot edit user.");
+            //if (!await ValidateInput()) return;
         }
         #endregion
 
@@ -228,46 +209,50 @@ namespace FormsApp.views.dialogs
         {
             DisableAllErrors();
 
-            bool isValidInput = true;
+            //bool isValidInput = true;
 
-            isValidInput &= ValidateTextLength(tbFirstName.Text, lblFirstNameError, "First name", true, 3, 50);
-            isValidInput &= ValidateTextLength(tbLastName.Text, lblLastNameError, "Last name", true, 3, 50);
-            bool isLengthValid = ValidateTextLength(tbEmail.Text, lblEmailError, "Email", true, 3, 100);
+            //isValidInput &= ValidateTextLength(tbFirstName.Text, lblFirstNameError, "First name", true, 3, 50);
+            //isValidInput &= ValidateTextLength(tbLastName.Text, lblLastNameError, "Last name", true, 3, 50);
+            //bool isLengthValid = ValidateTextLength(tbEmail.Text, lblEmailError, "Email", true, 3, 100);
 
-            if (isLengthValid)
-            {
-                bool isFormatValid = IsValidEmail(tbEmail.Text);
-                if (!isFormatValid)
-                {
-                    isValidInput &= ActivateError(lblEmailError, "Please enter a valid email");
-                }
-            }
-            else
-            {
-                isValidInput = false;
-            }
-            bool isPhoneLengthValid = ValidateTextLength(tbPhoneNumber.Text, lblPhoneNumberError, "Phone", true, 7, 15);
+            //if (isLengthValid)
+            //{
+            //    bool isFormatValid = IsValidEmail(tbEmail.Text);
+            //    if (!isFormatValid)
+            //    {
+            //        isValidInput &= ActivateError(lblEmailError, "Please enter a valid email");
+            //    }
+            //}
+            //else
+            //{
+            //    isValidInput = false;
+            //}
+            //bool isPhoneLengthValid = ValidateTextLength(tbPhoneNumber.Text, lblPhoneNumberError, "Phone", true, 7, 15);
 
-            if (isPhoneLengthValid)
-            {
-                bool isPhoneFormatValid = IsValidPhone(tbPhoneNumber.Text);
-                if (!isPhoneFormatValid)
-                {
-                    isValidInput &= ActivateError(lblPhoneNumberError, "Please enter a valid phone number");
-                }
-            }
-            else
-            {
-                isValidInput = false;
-            }
+            //if (isPhoneLengthValid)
+            //{
+            //    bool isPhoneFormatValid = IsValidPhone(tbPhoneNumber.Text);
+            //    if (!isPhoneFormatValid)
+            //    {
+            //        isValidInput &= ActivateError(lblPhoneNumberError, "Please enter a valid phone number");
+            //    }
+            //}
+            //else
+            //{
+            //    isValidInput = false;
+            //}
 
-            if (!isValidInput) return false;
 
-            item.FirstName = tbFirstName.Text.Trim();
-            item.LastName = tbLastName.Text.Trim();
-            item.Email = tbEmail.Text.Trim();
-            item.PhoneNumber = tbPhoneNumber.Text.Trim();
-            item.RoleId = (int)ddlRole.SelectedValue;
+            // // validate image 
+
+
+            //if (!isValidInput) return false;
+
+            //item.FirstName = tbFirstName.Text.Trim();
+            //item.LastName = tbLastName.Text.Trim();
+            //item.Email = tbEmail.Text.Trim();
+            //item.PhoneNumber = tbPhoneNumber.Text.Trim();
+            //item.RoleId = (int)ddlRole.SelectedValue;
 
             return true;
         }
@@ -283,6 +268,8 @@ namespace FormsApp.views.dialogs
             lblPhoneNumberError.Visible = false;
             lblImageError.Visible = false;
         }
+
+
         #endregion
     }
 }

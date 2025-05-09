@@ -59,7 +59,13 @@ namespace FormsApp.views.dialogs
         #endregion
 
         #region View Preparation
-
+        protected override void PrepareForView()
+        {
+            saveLabel.Visible = false;
+            closeLabel.Location = saveLabel.Location;
+            lblDelete.Visible = false;
+            LoadItemInfo();
+        }
         protected override void PrepareForAdd()
         {
             lblSave.Text = "Add";

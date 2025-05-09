@@ -16,7 +16,7 @@ public abstract class BaseViewEditDeleteForm : Form
     protected Label saveLabel;
     public enum ViewType
     {
-        ADD, EDIT, DELETE
+        ADD, EDIT, DELETE, VIEW
     }
 
     public ViewType FormViewType { get; private set; }
@@ -58,10 +58,31 @@ public abstract class BaseViewEditDeleteForm : Form
                     PrepareForEdit();
                     break;
                 }
+
+            case ViewType.VIEW:
+            {
+                if (id == null)
+                {
+                    MessageBox.Show("Cannot view id null");
+                    Close();
+                    return;
+                }
+
+                if (!FetchItem())
+                {
+                    Close();
+                    return;
+                }
+
+                InitializeForm();
+                PrepareForView();
+                break;
+            }
             case ViewType.DELETE:
                 {
                     break;
                 }
+           
         }
     }
 
@@ -71,6 +92,11 @@ public abstract class BaseViewEditDeleteForm : Form
     /// </summary>
 
     protected abstract void PrepareForEdit();
+    /// <summary>
+    /// Prepares the form UI for only viewing an existing item entry by loading its data.
+    /// </summary>
+
+    protected abstract void PrepareForView();
     /// <summary>
     /// Prepares the form UI for adding a new item entry.
     /// </summary>
@@ -243,4 +269,41 @@ public abstract class BaseViewEditDeleteForm : Form
     protected void RaiseFailedComplete() => OnFailedComplete?.Invoke();
     protected void RaiseCancel() => OnCancel?.Invoke();
 
+    protected async Task LoadImage(Guid? guid, string imageType, Panel displayPanel, Label imageLabel)
+    {
+        try
+        {
+            if (!guid.HasValue)
+            {
+                imageLabel.Text = ("No Image Selected");
+                return;
+            }
+
+            var image = await Global.GetImage(guid.Value, imageType);
+
+            if (image == null)
+            {
+                imageLabel.Text = ("Unable To Load Image");
+                return;
+            }
+
+            displayPanel.Controls.Clear();
+            displayPanel.Controls.Add(new PictureBox
+            {
+                Dock = DockStyle.Fill,
+                SizeMode = PictureBoxSizeMode.StretchImage,
+                Image = new Bitmap(image)
+            });
+
+            imageLabel.Text = "Upload";
+
+            displayPanel.Invalidate();
+        }
+        catch (Exception ex)
+        {
+            imageLabel.Text = ("Image Not Found");
+            Console.WriteLine($"Image loading error: {ex.Message}");
+        }
+
+    }
 }

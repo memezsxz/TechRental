@@ -25,6 +25,7 @@ namespace FormsApp.views.panels
         /// </summary>
         private Dictionary<Label, (Type entity, bool allowAdd, bool allowEdit, bool allowDelete)> _tabTypeMap;
 
+
         /// <summary>
         /// The container panel where selected views will be loaded.
         /// </summary>
@@ -62,17 +63,32 @@ namespace FormsApp.views.panels
         /// </summary>
         private void InitializeTabMap()
         {
-            _tabTypeMap = new()
+            Dictionary<Label, Type> LabelToEntityMap = new()
             {
-                { lblCategories, (typeof(Category), true, true, true) },
-                { lblRentalRequests, (typeof(RentalRequest), true, true, true) },
-                { lblEquipment, (typeof(Equipment), true, true, true) },
-                { lblRentalRecords, (typeof(RentalRecord), true, true, true) },
-                { lblAuditTrails, (typeof(AuditLog), false, false, false) },
-                { lblErrorLogs, (typeof(SystemErrorLog), false, false, false) },
-                { lblUsers, (typeof(User), true, true, true) }
+                { lblCategories, typeof(Category) },
+                { lblRentalRequests, typeof(RentalRequest) },
+                { lblEquipment, typeof(Equipment) },
+                { lblRentalRecords, typeof(RentalRecord) },
+                { lblAuditTrails, typeof(AuditLog) },
+                { lblErrorLogs, typeof(SystemErrorLog) },
+                { lblUsers, typeof(User) }
             };
+
+
+            _tabTypeMap = new Dictionary<Label, (Type entity, bool allowAdd, bool allowEdit, bool allowDelete)>();
+
+            foreach (var kvp in LabelToEntityMap)
+            {
+                var label = kvp.Key;
+                var entityType = kvp.Value;
+
+                if (Global.TabTypeMap.TryGetValue(entityType, out var perms))
+                {
+                    _tabTypeMap[label] = (entityType, perms.allowAdd, perms.allowEdit, perms.allowDelete);
+                }
+            }
         }
+
 
         /// <summary>
         /// Subscribes all mapped labels to the click event that will load their respective views.
@@ -104,7 +120,6 @@ namespace FormsApp.views.panels
                 LoadEntityPanel(targetInfo);
             }
         }
-
         private void lblDashboard_Click(object sender, EventArgs e)
         {
             DisplayDashboard();
@@ -162,7 +177,7 @@ namespace FormsApp.views.panels
                 config.allowDelete
             );
 
-                FillView(userControl);
+            FillView(userControl);
         }
 
         /// <summary>

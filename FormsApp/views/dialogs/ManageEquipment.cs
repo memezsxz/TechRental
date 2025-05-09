@@ -18,6 +18,7 @@ using System.Xml.Linq;
 using Image = System.Drawing.Image;
 using Helper;
 using System.Drawing.Imaging;
+using System.Windows.Forms.DataVisualization.Charting;
 
 namespace FormsApp.views.dialogs
 {
@@ -74,7 +75,13 @@ namespace FormsApp.views.dialogs
         #endregion
 
         #region View Preparation
-
+        protected override void PrepareForView()
+        {
+            saveLabel.Visible = false;
+            closeLabel.Location = saveLabel.Location;
+            lblDelete.Visible = false;
+            LoadItemInfo();
+        }
         protected override void PrepareForAdd()
         {
             lblSave.Text = "Add";
@@ -99,7 +106,8 @@ namespace FormsApp.views.dialogs
             ddlCategory.SelectedValue = item.CategoryId;
             tbDescription.Text = item.Description;
             cbIsActive.Checked = item.IsActive ?? false;
-            LoadImage();
+            if (item.Image != null) LoadImage(item.Image.Guid, item.Image.ImageType, pnlImage, lblImage);
+            else lblImage.Text = "No Image";
         }
 
         #endregion
@@ -155,43 +163,6 @@ namespace FormsApp.views.dialogs
         /// <summary>
         /// Loads the image associated with the equipment from storage and displays it in the panel.
         /// </summary>
-        private async Task LoadImage()
-        {
-            try
-            {
-                if (!item.Image.Guid.HasValue)
-                {
-                    lblImage.Text = ("No Image Selected");
-                    return;
-                }
-
-                var image = await Global.GetImage(item.Image.Guid.Value, item.Image.ImageType);
-
-                if (image == null)
-                {
-                    lblImage.Text = ("Unable To Load Image");
-                    return;
-                }
-
-                pnlImage.Controls.Clear();
-                pnlImage.Controls.Add(new PictureBox
-                {
-                    Dock = DockStyle.Fill,
-                    SizeMode = PictureBoxSizeMode.StretchImage,
-                    Image = new Bitmap(image)
-                });
-
-                lblImage.Text = "Upload";
-
-                pnlImage.Invalidate();
-            }
-            catch (Exception ex)
-            {
-                lblImage.Text = ("Image Not Found");
-                Console.WriteLine($"Image loading error: {ex.Message}");
-            }
-
-        }
 
         #endregion
 

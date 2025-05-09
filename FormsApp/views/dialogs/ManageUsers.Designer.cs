@@ -173,6 +173,7 @@
             // 
             ddlRole.BackColor = Color.FromArgb(247, 247, 249);
             ddlRole.DropDownStyle = ComboBoxStyle.DropDownList;
+            ddlRole.Enabled = false;
             ddlRole.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             ddlRole.FormattingEnabled = true;
             ddlRole.Location = new Point(189, 388);
@@ -184,6 +185,7 @@
             // tbLastName
             // 
             tbLastName.BackColor = Color.FromArgb(247, 247, 249);
+            tbLastName.Enabled = false;
             tbLastName.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbLastName.Location = new Point(189, 157);
             tbLastName.Margin = new Padding(2);
@@ -194,6 +196,7 @@
             // tbFirstName
             // 
             tbFirstName.BackColor = Color.FromArgb(247, 247, 249);
+            tbFirstName.Enabled = false;
             tbFirstName.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbFirstName.Location = new Point(189, 76);
             tbFirstName.Margin = new Padding(2);
@@ -215,6 +218,7 @@
             // cbIsActive
             // 
             cbIsActive.AutoSize = true;
+            cbIsActive.Enabled = false;
             cbIsActive.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             cbIsActive.Location = new Point(605, 22);
             cbIsActive.Margin = new Padding(2);
@@ -282,6 +286,7 @@
             // tbEmail
             // 
             tbEmail.BackColor = Color.FromArgb(247, 247, 249);
+            tbEmail.Enabled = false;
             tbEmail.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbEmail.Location = new Point(188, 236);
             tbEmail.Margin = new Padding(2);
@@ -314,6 +319,7 @@
             // tbPhoneNumber
             // 
             tbPhoneNumber.BackColor = Color.FromArgb(247, 247, 249);
+            tbPhoneNumber.Enabled = false;
             tbPhoneNumber.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbPhoneNumber.Location = new Point(189, 313);
             tbPhoneNumber.Margin = new Padding(2);

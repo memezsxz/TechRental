@@ -84,6 +84,14 @@ namespace FormsApp.views.dialogs
 
         #region View Preparation
 
+        protected override void PrepareForView()
+        {
+            saveLabel.Visible = false;
+            closeLabel.Location = saveLabel.Location;
+            lblDelete.Visible = false;
+            LoadItemInfo();
+        }
+
         protected override void PrepareForAdd()
         {
             MessageBox.Show($"You cannot create a rental {(itemType == ItemType.Record ? "request" : "record")}  ");

@@ -27,7 +27,7 @@ namespace Database.Core.Repositories
         Task<User?> GetUserWithRoleAsync(int id);
         Task<User?> GetUserWithProfileAsync(int id);
         Task<bool> UserExistsAsync(int id);
-
+        public User? GetUserWithProfile(int id);
         int GetUserByEmail(string email);
     }
 
@@ -42,5 +42,4 @@ namespace Database.Core.Repositories
                    ?? enumValue.ToString();
         }
     }
-
 }

@@ -162,7 +162,7 @@ public partial class BaseDBSetView : UserControl
 
     private void btnEdit_Click(object sender, EventArgs e)
     {
-        OpenManageForm(BaseViewEditDeleteForm.ViewType.EDIT);
+        OpenManageForm(allowEdit ? BaseViewEditDeleteForm.ViewType.EDIT : BaseViewEditDeleteForm.ViewType.VIEW);
     }
 
     private void btnDelete_Click(object sender, EventArgs e)

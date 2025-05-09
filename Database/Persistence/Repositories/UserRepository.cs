@@ -17,6 +17,11 @@ namespace Database.Persistence.Repositories
             get { return context as RentalDBContext; }
         }
 
+        public bool IsReferenced(int id)
+        {
+            return RentalDBContext.RentalRequests.Any(r => r.EquipmentId == id);
+        }
+
         #region Async
 
         public async Task<IEnumerable<User>> GetUsersAsync(string? searchString, string? roleFilter, IUserRepository.SortOption? sortBy)
@@ -101,6 +106,14 @@ namespace Database.Persistence.Repositories
 
 
         #endregion
+        public  User? GetUserWithProfile(int id)
+        {
+            return  RentalDBContext.Users
+                .Include(u => u.Role)
+                .Include(u => u.Image)
+                .FirstOrDefault(u => u.Id == id);
+        }
+
 
 
         #region IStatus
