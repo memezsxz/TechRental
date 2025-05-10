@@ -33,27 +33,41 @@ document.addEventListener("DOMContentLoaded", function () {
         showFlash(flashMessage, flashType);
     }
 
-    // GLOBAL delete trigger
+    // GLOBAL delete trigger — Secure with AntiForgeryToken
     document.querySelectorAll("[data-delete-url]").forEach(btn => {
         btn.addEventListener("click", function (e) {
             e.preventDefault();
+
             const deleteUrl = this.dataset.deleteUrl;
             const confirmText = this.dataset.confirmMessage || "Are you sure you want to delete this item?";
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
             showConfirmation(confirmText, () => {
-                // Step 1: Ask backend if FK exists
-                fetch(deleteUrl, { method: "POST" })
+                // Step 1: POST to DeleteCheck
+                fetch(deleteUrl, {
+                    method: "POST",
+                    headers: {
+                        "RequestVerificationToken": token
+                    }
+                })
                     .then(r => r.json())
                     .then(res => {
                         if (res.requiresInactive) {
-                            // Step 2: Ask user if they want to set inactive
+                            // Step 2: Ask to set inactive
                             showConfirmation(res.message, () => {
-                                // Step 3: Proceed to inactivate
-                                fetch(res.setInactiveUrl, { method: "POST" })
+                                fetch(res.setInactiveUrl, {
+                                    method: "POST",
+                                    headers: {
+                                        "RequestVerificationToken": token
+                                    }
+                                })
                                     .then(r => r.json())
                                     .then(result => {
                                         if (result.success) {
                                             showFlash(result.message, result.type);
                                             setTimeout(() => location.reload(), 2000);
+                                        } else {
+                                            showFlash(result.message || "An error occurred.", result.type || "error");
                                         }
                                     });
                             });
@@ -66,6 +80,41 @@ document.addEventListener("DOMContentLoaded", function () {
                         } else {
                             showFlash(res.message || "An error occurred.", res.type || "error");
                         }
+                    })
+                    .catch(() => {
+                        showFlash("Request failed. Please try again.", "error");
+                    });
+            });
+        });
+    });
+
+    // GLOBAL Set Active trigger
+    document.querySelectorAll("[data-set-active-url]").forEach(btn => {
+        btn.addEventListener("click", function (e) {
+            e.preventDefault();
+
+            const url = this.dataset.setActiveUrl;
+            const confirmText = this.dataset.confirmMessage || "Are you sure you want to activate this item?";
+            const token = document.querySelector('input[name="__RequestVerificationToken"]')?.value;
+
+            showConfirmation(confirmText, () => {
+                fetch(url, {
+                    method: "POST",
+                    headers: {
+                        "RequestVerificationToken": token
+                    }
+                })
+                    .then(r => r.json())
+                    .then(res => {
+                        if (res.success) {
+                            showFlash(res.message || "Item activated.", res.type || "success");
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            showFlash(res.message || "Failed to activate item.", res.type || "error");
+                        }
+                    })
+                    .catch(() => {
+                        showFlash("Activation request failed.", "error");
                     });
             });
         });

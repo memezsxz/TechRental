@@ -1,34 +1,61 @@
 ﻿@using WebApp.Helpers
 @model Database.Core.Domain.Equipment
 
+@* -------------------------------------------------------------------------------------
+    Page: Details.cshtml
+    Purpose:
+        This page displays full details of a specific equipment item. It shows the image,
+        description, condition, rental price, and user feedback (ratings and comments).
+
+    Features:
+        - Shows equipment image if uploaded, or fallback placeholder
+        - Displays name, multiline description, condition status, and rental price
+        - "Edit" and "Delete" buttons for Admins/Managers
+        - "Rent Now" button for regular users
+        - Displays all customer comments with rating stars
+        - Average rating is calculated and shown at the top of the feedback section
+
+    JS Integration:
+        - Delete button uses data attributes for confirmation and dynamic deletion
+          (Requires shared JS to handle modal confirmation and AJAX redirect)
+---------------------------------------------------------------------------------------- *@
+
 @{
     ViewData["Title"] = "Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
+
 <div class="container my-5">
 
-    <!-- Back to List Button -->
+    <!-- Back to list -->
     <div class="mb-4 text-start">
         <a asp-action="Index" class="back-link">&lt; Back to List</a>
     </div>
 
     <div class="row">
-        <!-- Left Column: Image -->
+        <!-- LEFT COLUMN: Equipment Image -->
         <div class="col-md-6 d-flex justify-content-center align-items-center">
             @if (Model.Image != null)
             {
-                <img src="@Url.Action("GetImage", "Image", new { id = Model.Image.ImageId })" alt="Equipment Image" class="img-fluid rounded" style="max-height: 350px;" />
+                <!-- Show image if available -->
+                <img src="@Url.Action("GetImage", "Image", new { id = Model.Image.ImageId })"
+                     alt="Equipment Image" class="img-fluid rounded" style="max-height: 350px;" />
             }
             else
             {
-                <div class="border p-5 text-muted text-center" style="width:100%; height:300px;">No Image Available</div>
+                <!-- Placeholder for missing image -->
+                <div class="border p-5 text-muted text-center" style="width:100%; height:300px;">
+                    No Image Available
+                </div>
             }
         </div>
 
-        <!-- Right Column: Details -->
+        <!-- RIGHT COLUMN: Equipment Info -->
         <div class="col-md-6">
+            <!-- Equipment name -->
             <h2 class="equipment-title word-break">@Model.Name</h2>
 
+            <!-- Description section -->
             <div class="equipment-section">
                 <h5 class="section-header">Description</h5>
                 <ul class="description-list word-break">
@@ -42,53 +69,70 @@
                 </ul>
             </div>
 
+            <!-- Condition section -->
             <div class="equipment-section">
                 <h5 class="section-header">Condition</h5>
                 <p class="condition-text">@Model.ConditionStatus?.ConditionName</p>
             </div>
 
+            <!-- Rental price -->
             <div class="rental-price mt-4">
                 <h3 class="price-text">
                     @Model.RentalPricePerDay <span class="currency">BHD</span> <span class="per-day">/ Day</span>
                 </h3>
             </div>
 
-
+            <!-- Action buttons: Edit/Delete for Admins/Managers or Rent Now for users -->
             <div class="mt-4">
+                @if (User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager))
+                {
+                    <!-- Edit button -->
+                    <a asp-action="Edit" asp-route-id="@Model?.Id"
+                       class="btn btn-outline-success custom-action-btn w-100 mb-3">Edit</a>
 
-                @{
-                    @if (User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager))
+                    @if (Model?.IsActive == true)
                     {
-                        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-outline-success custom-action-btn w-100 mb-3">Edit</a>
-
-                        <!-- Custom delete button -->
+                        <!-- Delete button -->
                         <button type="button"
-                        class="btn btn-danger w-100"
-                        data-delete-url="@Url.Action("DeleteCheck", "Equipment", new { id = Model.Id })"
-                        data-confirm-message="Are you sure you want to delete this equipment?">
+                                class="btn btn-danger w-100"
+                                data-delete-url="@Url.Action("DeleteCheck", "Equipment", new { id = Model.Id })"
+                                data-confirm-message="Are you sure you want to delete this equipment?">
                             Delete
                         </button>
                     }
                     else
                     {
-                    <a href="@Url.Action("Create", "RentalRequest", new { equipmentId = Model.Id })" class="btn btn-success custom-action-btn w-100 mb-3">Rent Now</a>
+                        <!-- Set Active button -->
+                        <button type="button"
+                                class="btn btn-success w-100"
+                                data-set-active-url="@Url.Action("SetActive", "Equipment", new { id = Model.Id })"
+                                data-confirm-message="This equipment is inactive. Do you want to set it active again?">
+                            Set Active
+                        </button>
                     }
                 }
-
-
-
+                else
+                {
+                    <!-- Rent button for customers -->
+                    <a href="@Url.Action("Create", "RentalRequest", new { equipmentId = Model.Id })"
+                       class="btn btn-success custom-action-btn w-100 mb-3">Rent Now</a>
+                }
             </div>
-
+        </div>
     </div>
 
-    <!-- Ratings and Comments Section -->
+    <!-- RATINGS & COMMENTS SECTION -->
     <div class="row mt-5">
         <div class="col-md-12">
             @{
+                // Calculate average rating
                 var averageRating = Model.Feedbacks.Any() ? Model.Feedbacks.Average(f => f.Rate) : 0;
             }
+
+            <!-- Average rating -->
             <h5 class="mb-3">Overall Rating: <strong>@Math.Round(averageRating, 1)</strong></h5>
 
+            <!-- Comments -->
             <h5 class="mb-3">Comments</h5>
             <div class="list-group">
                 @foreach (var comment in Model.Feedbacks)
@@ -97,12 +141,14 @@
                         <div class="d-flex align-items-center mb-2">
                             @if (comment.User.ImageId != null)
                             {
+                                <!-- User avatar -->
                                 <img src="@Url.Action("GetImage", "Image", new { id = comment.User.ImageId })"
                                      class="user-avatar me-3"
                                      alt="User Avatar" />
                             }
                             else
                             {
+                                <!-- Fallback user icon -->
                                 <div class="rounded-circle bg-light text-muted d-flex justify-content-center align-items-center me-3"
                                      style="width: 50px; height: 50px;">
                                     <i class="fas fa-user"></i>
@@ -110,23 +156,24 @@
                             }
 
                             <div>
+                                <!-- User name -->
                                 <strong>@comment.User.FirstName @comment.User.LastName</strong>
+                                <!-- Star rating -->
                                 <div class="text-warning">
-                                    <div>
-                                        @for (int i = 1; i <= 5; i++)
-                                        {
-                                            <i class="fa fa-star @(i <= comment.Rate ? "star-green" : "star-gray")"></i>
-                                        }
-                                    </div>
-
+                                    @for (int i = 1; i <= 5; i++)
+                                    {
+                                        <i class="fa fa-star @(i <= comment.Rate ? "star-green" : "star-gray")"></i>
+                                    }
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Comment note -->
                         <p class="text-dark mb-0">@comment.Note</p>
                     </div>
                 }
-
             </div>
         </div>
     </div>
+    @Html.AntiForgeryToken()
 </div>

@@ -65,7 +65,7 @@ namespace WebApp.Controllers
                 query = query.Where(r => r.Status.StatusName == statusFilter);
             }
 
-            // ↕ Apply sorting logic
+            // Apply sorting logic
             query = sortBy switch
             {
                 "date_asc" => query.OrderBy(r => r.StartDate),

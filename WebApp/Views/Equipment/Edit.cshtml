@@ -1,54 +1,87 @@
 ﻿@model Database.Core.Domain.Equipment
 
+@* -------------------------------------------------------------------------------------
+    Page: Edit.cshtml
+    Purpose:
+        This page allows an admin/manager to edit the details of an existing
+        equipment item. It pre-fills the form with existing data and allows modification
+        of all key fields, including name, description, rental price, category, condition,
+        availability, and image.
+
+    Features:
+        - Displays current equipment information in editable fields
+        - Shows a thumbnail preview of the current image if available
+        - Allows image replacement via file upload and real-time preview
+        - Dropdowns for category, condition, and availability (populated from ViewBag)
+        - Button to view all unhidden feedbacks for the equipment
+        - Hidden input to retain the Equipment ID
+        - Displays field-level and model-level validation errors
+        - Submits to POST /Equipment/Edit
+
+    JS Integration:
+        - File input is hidden and triggered by clicking the preview box
+        - previewImage(event) JS function is used for updating the image preview box
+
+---------------------------------------------------------------------------------------- *@
+
 @{
     ViewData["Title"] = "Edit Equipment";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<!-- Page Title -->
 <div class="text-center my-4">
-    <h1 class="page-title">Edit Equipment</h1>
+    <h1 class="text-center mb-5 page-title">Edit Equipment #@Model.Id</h1>
 </div>
 
 <div class="container my-4">
-    @* <div asp-validation-summary="All" class="text-danger mb-3"></div> *@
-
+    <!-- Equipment editing form -->
     <form asp-action="Edit" enctype="multipart/form-data" method="post">
+        <!-- Hidden field to retain Equipment ID -->
         <input type="hidden" asp-for="Id" />
 
         <div class="row">
-            <!-- Left Side: Form -->
+            <!-- LEFT COLUMN: Form fields -->
             <div class="col-md-8">
+                <!-- Model-level validation summary -->
                 <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+                <!-- Name input -->
                 <div class="form-group mb-3">
                     <label asp-for="Name" class="form-label">Name</label>
                     <input asp-for="Name" class="form-control" maxlength="50" />
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
+                <!-- Description input -->
                 <div class="form-group mb-3">
                     <label asp-for="Description" class="form-label">Description</label>
                     <textarea asp-for="Description" class="form-control" rows="4" maxlength="255"></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
 
+                <!-- Rental Price input -->
                 <div class="form-group mb-3">
                     <label asp-for="RentalPricePerDay" class="form-label">Rental Price (BHD / Day)</label>
-                    <input asp-for="RentalPricePerDay" class="form-control" inputmode="decimal" pattern="\d+(\.\d{1,2})?" title="Enter a valid price (e.g., 12 or 12.50)" />
+                    <input asp-for="RentalPricePerDay" class="form-control"
+                           inputmode="decimal"
+                           pattern="\d+(\.\d{1,2})?"
+                           title="Enter a valid price (e.g., 12 or 12.50)" />
                     <span asp-validation-for="RentalPricePerDay" class="text-danger"></span>
                 </div>
 
+                <!-- Category dropdown -->
                 <div class="form-group mb-3">
                     <label asp-for="CategoryId" class="form-label">Category</label>
                     <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId"></select>
                 </div>
 
+                <!-- Condition and Availability dropdowns -->
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <label asp-for="ConditionStatusId" class="form-label">Equipment Condition</label>
                         <select asp-for="ConditionStatusId" class="form-select" asp-items="ViewBag.ConditionStatusId"></select>
                     </div>
-
                     <div class="col-md-6 mb-3">
                         <label asp-for="AvailabilityStatusId" class="form-label">Equipment Availability</label>
                         <select asp-for="AvailabilityStatusId" class="form-select" asp-items="ViewBag.AvailabilityStatusId"></select>
@@ -56,29 +89,36 @@
                 </div>
             </div>
 
-            <!-- Right Side: Image Upload Box -->
+            <!-- RIGHT COLUMN: Image upload and preview -->
             <div class="col-md-4 d-flex flex-column align-items-center">
+                <!-- Upload box with preview -->
                 <div class="upload-box" onclick="document.getElementById('fileInput').click();" id="uploadBox">
                     @if (Model.ImageId.HasValue)
                     {
-                        <img src="@Url.Action("GetImage", "Image", new { id = Model.ImageId })" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
+                        <!-- Show current image -->
+                        <img src="@Url.Action("GetImage", "Image", new { id = Model.ImageId })"
+                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;" />
                     }
                     else
                     {
+                        <!-- Show upload prompt -->
                         <span id="upload-text" class="upload-text">Add</span>
                     }
-                    <input type="file" id="fileInput" name="ImageFile" style="display: none;" accept="image/*" onchange="previewImage(event)" />
+                    <!-- Hidden file input -->
+                    <input type="file" id="fileInput" name="ImageFile"
+                           style="display: none;" accept="image/*"
+                           onchange="previewImage(event)" />
                 </div>
 
-                <!-- View Feedbacks button below image -->
-                <a href="@Url.Action("Index", "Feedback", new { id = Model.Id, status = "Unhidden" })" class="btn custom-btn-outline w-100" style="margin-top: 10px;">
+                <!-- Button to view related feedbacks -->
+                <a href="@Url.Action("Index", "Feedback", new { id = Model.Id, status = "Unhidden" })"
+                   class="btn custom-btn-outline w-100" style="margin-top: 10px;">
                     View Feedbacks
                 </a>
-
             </div>
         </div>
 
-        <!-- Centered Buttons -->
+        <!-- Submit and Cancel buttons -->
         <div class="d-flex justify-content-center gap-3 mt-4">
             <input type="submit" value="Save" class="btn custom-btn" />
             <a asp-action="Index" class="btn custom-btn-outline">Cancel</a>
