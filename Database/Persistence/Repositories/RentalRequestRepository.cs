@@ -15,22 +15,6 @@ namespace Database.Persistence.Repositories
             get { return context as RentalDBContext; }
         }
 
-        public override IQueryable<object> SelectViewColumns(IQueryable query)
-        {
-            query = query.Cast<RentalRequest>().Select(rr => new
-            {
-                Id = rr.Id,
-                Equipment = rr.Equipment != null ? rr.Equipment.Id + " - " + rr.Equipment.Name : "",
-                Customer = rr.Customer != null
-                    ? rr.Customer.Id + " - " + rr.Customer.FirstName + " " + rr.Customer.LastName
-                    : "",
-                StartDate = rr.StartDate,
-                EndDate = rr.ReturnDate,
-                Status = rr.Status != null ? rr.Status.StatusName : ""
-            });
-
-            return query.Cast<object>();
-        }
 
         private IQueryable<RentalRequest> GetWithDetails()
         {
@@ -52,5 +36,35 @@ namespace Database.Persistence.Repositories
         {
             return GetWithRecordDetails().Where(r => r.Id == id).FirstOrDefault();
         }
+
+        #region Search
+
+        public override Dictionary<string, string> GetEntityColumnsWithTypes()
+        {
+            var d = base.GetEntityColumnsWithTypes();
+            if (d.ContainsKey("EquipmentId")) d["EquipmentId"] = "Int32";
+            if (d.ContainsKey("CustomerId")) d["CustomerId"] = "Int32";
+            return d;
+        }
+
+        public override IQueryable<object> SelectViewColumns(IQueryable query)
+        {
+            query = query.Cast<RentalRequest>().Select(rr => new
+            {
+                Id = rr.Id,
+                Equipment = rr.Equipment != null ? rr.Equipment.Id + " - " + rr.Equipment.Name : "",
+                Customer = rr.Customer != null
+                    ? rr.Customer.Id + " - " + rr.Customer.FirstName + " " + rr.Customer.LastName
+                    : "",
+                StartDate = rr.StartDate,
+                EndDate = rr.ReturnDate,
+                Status = rr.Status != null ? rr.Status.StatusName : ""
+            });
+
+            return query.Cast<object>();
+        }
+
+        #endregion
+
     }
 }

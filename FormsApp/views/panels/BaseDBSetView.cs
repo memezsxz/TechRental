@@ -197,13 +197,11 @@ public partial class BaseDBSetView : UserControl
             else if (currentType == typeof(RentalRequest))
             {
                 form = new ManageRental(ManageRental.ItemType.Request, type, id);
-
             }
             else if (currentType == typeof(RentalRecord))
             {
                 form = new ManageRental(ManageRental.ItemType.Record, type, id);
             }
-
             else if (currentType == typeof(Category))
             {
                 form = new ManageCategory(type, id);
@@ -211,6 +209,14 @@ public partial class BaseDBSetView : UserControl
             else if (currentType == typeof(User))
             {
                 form = new ManageUser(type, id);
+            }
+            else if (currentType == typeof(AuditLog))
+            {
+                form = new ManageAuditTrails(type, id);
+            }
+            else if (currentType == typeof(SystemErrorLog))
+            {
+                form = new ManageErrors(type, id);
             }
 
             if (form != null)
@@ -461,6 +467,7 @@ public partial class BaseDBSetView : UserControl
     {
         // New dictionary to hold the formatted column names
         Dictionary<string, string> newColumns = new Dictionary<string, string>();
+        var numericTypes = new HashSet<string> { "Byte", "SByte", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64" };
 
         foreach (var column in columns)
         {
@@ -473,7 +480,7 @@ public partial class BaseDBSetView : UserControl
                 formattedKey = "Id";
             }
             // If the column ends with "Id" (likely a foreign key), remove the " Id" part after splitting
-            else if (column.Key.EndsWith("Id"))
+            else if (column.Key.EndsWith("Id") && !numericTypes.Contains(column.Value))
             {
                 formattedKey = formattedKey.Replace(" Id", "");
             }

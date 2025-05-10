@@ -44,8 +44,8 @@ namespace FormsApp
                     { typeof(User), (false, false, false) }, 
                     { typeof(Category), (true, true, true) },
                     { typeof(Equipment), (true, true, true) }, 
-                    { typeof(RentalRequest), (false, true, true) },
-                    { typeof(RentalRecord), (false, true, true) },
+                    { typeof(RentalRequest), (false, true, false) },
+                    { typeof(RentalRecord), (false, true, false) },
                 };
 
                 if (userType == 2) return new()
@@ -205,6 +205,48 @@ namespace FormsApp
             }
         }
 
+        public static async Task<bool> LoadImage(Guid? guid, string imageType, Panel displayPanel, Label imageLabel)
+        {
+            try
+            {
+                if (!guid.HasValue)
+                {
+                    imageLabel.Text = ("No Image Selected");
+                    return false;
+                }
 
+                var image = await Global.GetImage(guid.Value, imageType);
+
+                if (image == null)
+                {
+                    imageLabel.Text = ("Unable To Load Image");
+                    return false;
+                }
+
+                displayPanel.Controls.Clear();
+                displayPanel.Controls.Add(new PictureBox
+                {
+                    Dock = DockStyle.Fill,
+                    SizeMode = PictureBoxSizeMode.StretchImage,
+                    Image = new Bitmap(image)
+                });
+
+                imageLabel.Text = "Upload";
+
+                displayPanel.Invalidate();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                imageLabel.Text = ("Image Not Found");
+                Console.WriteLine($"Image loading error: {ex.Message}");
+                return false;
+            }
+
+        }
+     public   static void SetBorderColor(Label sender, PaintEventArgs e, Color color)
+        {
+            ControlPaint.DrawBorder(e.Graphics, sender.DisplayRectangle, color, ButtonBorderStyle.Solid);
+        }
     }
 }

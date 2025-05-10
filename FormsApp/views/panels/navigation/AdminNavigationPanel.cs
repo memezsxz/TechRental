@@ -206,9 +206,7 @@ namespace FormsApp.views.panels
         private void DisplayProfile()
         {
             ResetAllLabelsToRegularFont();
-
-            // TODO: Implement loading of profile view
-            // FillView(new AdminProfileView());
+            FillView(new ProfileView());
         }
 
         /// <summary>
@@ -218,8 +216,7 @@ namespace FormsApp.views.panels
         {
             ResetAllLabelsToRegularFont();
 
-            // TODO: Implement loading of notification view
-            // FillView(new AdminNotificationView());
+             FillView(new NotificationsView());
         }
         #endregion
 

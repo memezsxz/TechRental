@@ -1,18 +1,4 @@
 ﻿using Database.Core.Domain;
-using Helper;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static FormsApp.views.dialogs.BaseViewEditDeleteForm;
-using Image = Database.Core.Domain.Image;
-
 namespace FormsApp.views.dialogs
 {
     //public partial class ManageUser : Form
@@ -44,29 +30,19 @@ namespace FormsApp.views.dialogs
             InitializeComponent();
 
             DisableAllErrors();
-            MapActionButtons();
+            MapActionButtons(lblClose, lblSave, lblDelete);
             LoadRoleDropDownList();
         }
 
-        /// <summary>
-        /// Maps form action buttons (Save, Close, Delete) to corresponding UI labels in the base class to attach listeners on them.
-        /// </summary>
-        private void MapActionButtons()
-        {
-            closeLabel = lblClose;
-            saveLabel = lblSave;
-            deleteLabel = lblDelete;
-            PrepareActionButtons();
-        }
+        
+     
         #endregion
 
         #region View Preparation
 
         protected override void PrepareForView()
         {
-            saveLabel.Visible = false;
-            closeLabel.Location = saveLabel.Location;
-            lblDelete.Visible = false;
+            base.PrepareForView();
             LoadItemInfo();
         }
 
@@ -104,9 +80,7 @@ namespace FormsApp.views.dialogs
         }
 
         #endregion
-
-
-
+        
         #region Data Loaders
         protected override bool FetchItem()
         {
@@ -136,69 +110,35 @@ namespace FormsApp.views.dialogs
             MessageBox.Show("Cannot Delete user.");
             Dispose();
 
-            //if (id == null)
-            //{
-            //    MessageBox.Show("Cannot delete id null");
-            //    Dispose();
-            //    return;
-            //}
+        //public override void Delete()
+        //{
+        //    StandardDelete<User>(
+        //        context.Users.Get,
+        //        context.Users.IsReferenced,
+        //        item => item.IsActive = false,
+        //        context.Users.Remove,
+        //        "User"
+        //    );
+        //}
 
-            //item = context.Users.Get(id.Value);
-
-            //if (item == null)
-            //{
-            //    MessageBox.Show($"User with the id {id.Value} not found");
-            //    Dispose();
-            //}
-
-            //if (context.Categories.IsReferenced(id.Value))
-            //{
-            //    var result = MessageBox.Show($"This user refrenced elsewhare. Do you want to mark it as inactive instead?", "User in use", MessageBoxButtons.YesNo);
-
-            //    if (result == DialogResult.Yes)
-            //    {
-            //        try
-            //        {
-            //            item.IsActive = false;
-            //            context.Users.Update(item);
-            //            context.SaveChanges();
-            //            RaiseSuccessfulComplete();
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            Global.DisplayReportErrorDialog(e);
-            //            RaiseFailedComplete();
-            //        }
-            //    }
-            //    Dispose();
-
-            //    return;
-            //}
-
-            //try
-            //{
-            //    context.Users.Remove(item);
-            //    context.SaveChanges();
-            //    RaiseSuccessfulComplete();
-            //    Dispose();
-
-            //}
-            //catch (Exception e)
-            //{
-            //    Global.DisplayReportErrorDialog(e);
-            //    RaiseFailedComplete();
-            //    Dispose();
-            //}
         }
+  
         protected override async Task SaveItem()
         {
             MessageBox.Show("Cannot edit user.");
-            //if (!await ValidateInput()) return;
+            Dispose();
         }
+
+        protected override void MapFormToEntity()
+        {
+            item.FirstName = tbFirstName.Text.Trim();
+            item.LastName = tbLastName.Text.Trim();
+            item.Email = tbEmail.Text.Trim();
+            item.PhoneNumber = tbPhoneNumber.Text.Trim();
+            item.RoleId = (int)ddlRole.SelectedValue;
+        }
+
         #endregion
-
-
-
         #region Validation and Image Upload
 
         /// <summary>
@@ -254,7 +194,7 @@ namespace FormsApp.views.dialogs
             //item.PhoneNumber = tbPhoneNumber.Text.Trim();
             //item.RoleId = (int)ddlRole.SelectedValue;
 
-            return true;
+            return false;
         }
 
         /// <summary>
@@ -268,8 +208,6 @@ namespace FormsApp.views.dialogs
             lblPhoneNumberError.Visible = false;
             lblImageError.Visible = false;
         }
-
-
         #endregion
     }
 }

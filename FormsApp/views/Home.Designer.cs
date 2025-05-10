@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Home));
             pnlMainView = new Panel();
             pnlNavigation = new Panel();
             SuspendLayout();
@@ -36,9 +37,9 @@
             // 
             pnlMainView.Dock = DockStyle.Fill;
             pnlMainView.Location = new Point(330, 0);
-            pnlMainView.Margin = new Padding(20, 20, 20, 20);
+            pnlMainView.Margin = new Padding(20);
             pnlMainView.Name = "pnlMainView";
-            pnlMainView.Padding = new Padding(20, 20, 20, 20);
+            pnlMainView.Padding = new Padding(20);
             pnlMainView.Size = new Size(1103, 927);
             pnlMainView.TabIndex = 1;
             // 
@@ -58,6 +59,8 @@
             ClientSize = new Size(1433, 927);
             Controls.Add(pnlMainView);
             Controls.Add(pnlNavigation);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Icon = (Icon)resources.GetObject("$this.Icon");
             Name = "Home";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "TechRental";

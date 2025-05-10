@@ -14,50 +14,57 @@ public abstract class BaseViewEditDeleteForm : Form
     protected Label deleteLabel;
     protected Label closeLabel;
     protected Label saveLabel;
+    protected bool canDelete;
     public enum ViewType
     {
         ADD, EDIT, DELETE, VIEW
     }
 
-    public ViewType FormViewType { get; private set; }
+    public ViewType FormViewType { get; protected set; }
 
     public event Action OnSuccessfulComplete;
     public event Action OnFailedComplete;
     public event Action OnCancel;
     public bool ShouldAutoClose { get; private set; } = false;
 
-
-    protected BaseViewEditDeleteForm(ViewType viewType, int? id)
+    // constructur to be overriden 
+    protected BaseViewEditDeleteForm(ViewType viewType, int? id, bool canDelete = false, bool switchType = true)
     {
         this.FormViewType = viewType;
         this.id = id;
+        this.canDelete = canDelete;
+        if (switchType) SwitchType();
+    }
+
+    protected void SwitchType()
+    {
         switch (FormViewType)
         {
             case ViewType.ADD:
-                {
-                    InitializeForm();
-                    PrepareForAdd();
-                    break;
-                }
+            {
+                InitializeForm();
+                PrepareForAdd();
+                break;
+            }
             case ViewType.EDIT:
+            {
+                if (id == null)
                 {
-                    if (id == null)
-                    {
-                        MessageBox.Show("Cannot edit id null");
-                        Close();
-                        return;
-                    }
-
-                    if (!FetchItem())
-                    {
-                        Close();
-                        return;
-                    }
-
-                    InitializeForm();
-                    PrepareForEdit();
-                    break;
+                    MessageBox.Show("Cannot edit id null");
+                    Close();
+                    return;
                 }
+
+                if (!FetchItem())
+                {
+                    Close();
+                    return;
+                }
+
+                InitializeForm();
+                PrepareForEdit();
+                break;
+            }
 
             case ViewType.VIEW:
             {
@@ -79,14 +86,15 @@ public abstract class BaseViewEditDeleteForm : Form
                 break;
             }
             case ViewType.DELETE:
-                {
-                    break;
-                }
-           
+            {
+                break;
+            }
+
         }
-    }
+    } 
 
     protected abstract void InitializeForm();
+
     /// <summary>
     /// Prepares the form UI for editing an existing item entry by loading its data.
     /// </summary>
@@ -96,7 +104,12 @@ public abstract class BaseViewEditDeleteForm : Form
     /// Prepares the form UI for only viewing an existing item entry by loading its data.
     /// </summary>
 
-    protected abstract void PrepareForView();
+    protected virtual void PrepareForView()
+    {
+        saveLabel.Visible = false;
+        deleteLabel.Visible = canDelete;
+        closeLabel.Location = saveLabel.Location;
+    }
     /// <summary>
     /// Prepares the form UI for adding a new item entry.
     /// </summary>
@@ -130,6 +143,7 @@ public abstract class BaseViewEditDeleteForm : Form
 
         if (deleteLabel != null)
         {
+            deleteLabel.Visible = canDelete;
             deleteLabel.Click += lblDelete_Click;
         }
     }
@@ -306,4 +320,176 @@ public abstract class BaseViewEditDeleteForm : Form
         }
 
     }
+    /// <summary>
+    /// Maps form action buttons (Save, Close, Delete) to corresponding UI labels in the base class to attach listeners on them.
+    /// </summary>
+    protected virtual void MapActionButtons(Label close, Label save, Label delete)
+    {
+        closeLabel = close;
+        saveLabel = save;
+        deleteLabel = delete;
+        PrepareActionButtons();
+    }
+    protected virtual void LoadDropdowns() { }
+    protected bool StandardDelete<T>(
+        Func<int, T?> fetchFunc,
+        Func<int, bool> isReferencedFunc,
+        Action<T> markInactive,
+        Action<T> removeFunc,
+        string entityLabel = "Item")
+    {
+        if (id == null)
+        {
+            MessageBox.Show("Cannot delete id null");
+            Dispose();
+            return false;
+        }
+
+        var entity = fetchFunc(id.Value);
+        if (entity == null)
+        {
+            MessageBox.Show($"{entityLabel} with id {id} not found");
+            Dispose();
+            return false;
+        }
+
+        var confirmResult = MessageBox.Show(
+            $"Are you sure you want to delete this {entityLabel}?",
+            "Confirm Delete",
+            MessageBoxButtons.YesNo,
+            MessageBoxIcon.Warning
+        );
+
+        if (confirmResult != DialogResult.Yes)
+            return false;
+
+        if (isReferencedFunc(id.Value))
+        {
+            var result = MessageBox.Show(
+                $"{entityLabel} is in use. Mark as inactive instead?",
+                $"{entityLabel} in use",
+                MessageBoxButtons.YesNo
+            );
+
+            if (result == DialogResult.Yes)
+            {
+                try
+                {
+                    markInactive(entity);
+                    context.SaveChanges();
+                    RaiseSuccessfulComplete();
+                }
+                catch (Exception ex)
+                {
+                    Global.DisplayReportErrorDialog(ex);
+                    RaiseFailedComplete();
+                }
+            }
+
+            Dispose();
+            return false;
+        }
+
+        try
+        {
+            removeFunc(entity);
+            context.SaveChanges();
+            RaiseSuccessfulComplete();
+        }
+        catch (Exception ex)
+        {
+            Global.DisplayReportErrorDialog(ex);
+            RaiseFailedComplete();
+        }
+
+        Dispose();
+        return true;
+    }
+    protected async Task<bool> StandardSave<T>(
+        Func<bool> validateFunc,
+        Action mapFormToEntity,
+        Action<T> addFunc,
+        Action<T> updateFunc,
+        T entity,
+        string entityLabel)
+    {
+        if (!validateFunc()) return false;
+
+        try
+        {
+            mapFormToEntity();
+
+            if (FormViewType == ViewType.ADD)
+                addFunc(entity);
+            else
+                updateFunc(entity);
+
+
+            var rows = await context.SaveChangesAsync();
+
+            if (rows > 0)
+            {
+                MessageBox.Show($"{entityLabel} {(FormViewType == ViewType.ADD ? "added" : "updated")} successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RaiseSuccessfulComplete();
+                Close();
+            }
+            else
+            {
+                MessageBox.Show("Please try again.", "No Changes Saved", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Global.DisplayReportErrorDialog(ex);
+            RaiseFailedComplete();
+            return false;
+        }
+    }
+
+    protected abstract void MapFormToEntity();
+
+    protected async Task<bool> StandardSaveAsync<T>(
+        Func<Task<bool>> validateFuncAsync,
+        Action mapFormToEntity,
+        Action<T> addFunc,
+        Action<T> updateFunc,
+        T entity,
+        string entityLabel)
+    {
+        if (!await validateFuncAsync()) return false;
+
+        try
+        {
+            mapFormToEntity();
+
+            if (FormViewType == ViewType.ADD)
+                addFunc(entity);
+            else
+                updateFunc(entity);
+
+            var rows = await context.SaveChangesAsync();
+
+            if (rows > 0)
+            {
+                MessageBox.Show($"{entityLabel} {(FormViewType == ViewType.ADD ? "added" : "updated")} successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                RaiseSuccessfulComplete();
+                Close();
+            }
+            else
+            {
+                MessageBox.Show("Please try again.", "No Changes Saved", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Global.DisplayReportErrorDialog(ex);
+            RaiseFailedComplete();
+            return false;
+        }
+    }
+
+
 }

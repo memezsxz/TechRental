@@ -126,6 +126,18 @@ namespace Database.Persistence.Repositories
         #endregion
 
         #region Search
+        public override Dictionary<string, string> GetEntityColumnsWithTypes()
+        {
+            var d = base.GetEntityColumnsWithTypes();
+
+            d.Remove("Image");
+
+            foreach (var kv in d)
+            {
+                Console.WriteLine(kv);
+            }
+            return d;
+        }
 
         public override IQueryable<object> SelectViewColumns(IQueryable query)
         {
@@ -135,6 +147,7 @@ namespace Database.Persistence.Repositories
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
                 Role = u.Role != null ? u.Role.RoleName : "",
             });
 

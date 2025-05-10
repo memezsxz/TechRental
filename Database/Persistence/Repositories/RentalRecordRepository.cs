@@ -38,6 +38,9 @@ namespace Database.Persistence.Repositories
             return GetWithDetails().FirstOrDefault(r => r.Id == id);
         }
 
+
+
+
         public RentalRecord GetWithDetailsByRentalRequest(int id)
         {
             return GetWithDetails().FirstOrDefault(r => r.RentalRequestId == id);
@@ -99,5 +102,37 @@ namespace Database.Persistence.Repositories
 
             return top.ToDictionary(x => x.Label, x => x.Value);
         }
+
+
+        #region Search
+
+        public override Dictionary<string, string> GetEntityColumnsWithTypes()
+        {
+            var d = base.GetEntityColumnsWithTypes();
+            d.Remove("ExtraChargeDescription");
+            d["RentalRequestId"] = "Int32";
+            return d;
+        }
+
+        public override IQueryable<object> SelectViewColumns(IQueryable query)
+        {
+            query = query.Cast<RentalRecord>().Select(r => new
+            {
+                Id = r.Id,
+                RequestId = r.RentalRequestId, 
+                EquipmentName =  r.EquipmentName,
+                PickupDate = r.PickupDate.Date,
+                ActualReturnDate = r.ActualReturnDate,
+                ReturnCondition = r.ReturnCondition != null ? r.ReturnCondition.ConditionName : "",
+                TotalCost = r.TotalCost,
+                CreatedAt = r.CreatedAt,
+                UpdatedAt = r.UpdatedAt,
+            });
+
+            return query.Cast<object>();
+        }
+
+        #endregion
+
     }
 }
