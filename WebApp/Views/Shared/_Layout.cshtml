@@ -11,12 +11,8 @@
     <title>@ViewData["Title"] - Tech Rental</title>
     <link rel="stylesheet" href="~/css/Lux.css" asp-append-version="true" />
 
-    @if (controller == "Equipment")
-    {
-        <link rel="stylesheet" href="~/css/equipmentStyle.css" asp-append-version="true" />
-    }
-
     <link rel="stylesheet" href="~/css/equipmentStyle.css" asp-append-version="true" /> 
+    <link rel="stylesheet" href="~/css/FlatpickrStyleSheet.css" asp-append-version="true" /> 
     <link rel="stylesheet" href="~/css/authenticationStyle.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/WebApp.styles.css" asp-append-version="true" />
@@ -285,10 +281,9 @@
         <input type="hidden" id="tempDataMessageType" value="@(TempData["MessageType"] ?? "")" />
     </div>
 
-
-
     <!-- shared JS file -->
     <script src="~/js/site-scripts.js" asp-append-version="true"></script>
+    <script src="~/js/ToolBarJavaScript.js" asp-append-version="true"></script>
 
 
     <footer class="border-top footer text-muted">

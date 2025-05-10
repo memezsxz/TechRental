@@ -110,7 +110,7 @@ namespace WebApp.Controllers
         {
             if (!User.IsInRole(RoleConstants.Manager) && !User.IsInRole(RoleConstants.Admin))
             {
-                return Forbid();
+                return View("Forbidden");
             }
 
                 ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName");
@@ -130,7 +130,7 @@ namespace WebApp.Controllers
         {
             if (!User.IsInRole(RoleConstants.Manager) && !User.IsInRole(RoleConstants.Admin))
             {
-                return Forbid();
+                return View("Forbidden");
             }
 
 

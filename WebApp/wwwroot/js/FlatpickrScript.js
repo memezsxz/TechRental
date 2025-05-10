@@ -3,7 +3,8 @@
 * Reserved dates are passed from the controller using ViewBag and serialized into a JS array.
 * These are the dates when the equipment is already booked (status = approved).
 */
-const reservedDates = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((List < string >)ViewBag.UnavailableDates));
+const reservedDates = window.reservedDates || [];
+const perDay = window.perDayRate || 0; 
 
 // Helper: Checks if a specific date is reserved
 function isReservedDate(date) {

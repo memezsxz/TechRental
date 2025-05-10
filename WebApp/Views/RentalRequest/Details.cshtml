@@ -1,49 +1,75 @@
 ﻿@model Database.Core.Domain.RentalRequest
 
+@* ---------------------------------------------------------------------------------------------------
+    Page: RentalRequest/Details.cshtml
+
+    Purpose:
+    - Display detailed view of a specific rental request in read-only format.
+
+    Permissions:
+    - All users can view details.
+    - Only Admins, Managers, or Customers (if status = Pending) can access the Edit page.
+    - If rental is Approved (StatusId == 2) and not yet converted to a Rental Transaction,
+      Admins/Managers can create a new Rental Transaction.
+    - If the transaction exists (ViewBag.HasTransaction), display a link to its details.
+
+    Features:
+    - Shows customer, equipment, and request info
+    - Displays rental period, rate, total cost, and notes
+    - Provides action buttons based on roles and rental status
+---------------------------------------------------------------------------------------------------- *@
+
 @{
     ViewData["Title"] = "Rental Request Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
+    // Pre-calculate total rental period and cost for display
     var totalDays = (Model.ReturnDate.Date - Model.StartDate.Date).Days + 1;
     var rentalFee = Model.RentalPerDay.GetValueOrDefault();
     var totalCost = totalDays * rentalFee;
 }
 
+<!--  Back link -->
 <div class="mb-4 mt-3">
     <a asp-action="Index" asp-route-userEmail="@User.Identity.Name" class="text-success">&lt; Back</a>
 </div>
 
+<!--  Page Title -->
 <h2 class="text-center mb-5 page-title">RENTAL REQUEST #@Model.Id</h2>
 
-<!-- CUSTOMER INFO -->
-<div class="container mb-5 pb-4 border-bottom">
-    <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label>First Name</label>
-            <input class="form-control" value="@Model.Customer?.FirstName" readonly />
+@if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+{
+    <!--  CUSTOMER INFO -->
+    <div class="container mb-5 pb-4 border-bottom">
+        <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>First Name</label>
+                <input class="form-control" value="@Model.Customer?.FirstName" readonly />
+            </div>
+            <div class="col-md-6">
+                <label>Last Name</label>
+                <input class="form-control" value="@Model.Customer?.LastName" readonly />
+            </div>
         </div>
-        <div class="col-md-6">
-            <label>Last Name</label>
-            <input class="form-control" value="@Model.Customer?.LastName" readonly />
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>Phone Number</label>
+                <input class="form-control" value="@Model.Customer?.PhoneNumber" readonly />
+            </div>
+            <div class="col-md-6">
+                <label>Email</label>
+                <input class="form-control" value="@Model.Customer?.Email" readonly />
+            </div>
         </div>
     </div>
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label>Phone Number</label>
-            <input class="form-control" value="@Model.Customer?.PhoneNumber" readonly />
-        </div>
-        <div class="col-md-6">
-            <label>Email</label>
-            <input class="form-control" value="@Model.Customer?.Email" readonly />
-        </div>
-    </div>
-</div>
+}
 
-<!-- RENTAL REQUEST INFO -->
+<!--  RENTAL REQUEST INFO -->
 <div class="container mb-5">
     <h4 class="mb-4 text-success fw-semibold">Request Info</h4>
 
+    <!-- Equipment and Status -->
     <div class="row mb-4">
         <div class="col-md-6">
             <label>Equipment Title</label>
@@ -55,6 +81,7 @@
         </div>
     </div>
 
+    <!-- Rental Dates -->
     <div class="row mb-4">
         <div class="col-md-6">
             <label>Pick up Date</label>
@@ -66,6 +93,7 @@
         </div>
     </div>
 
+    <!-- Calculated Values -->
     <div class="row mb-4">
         <div class="col-md-4">
             <label>Number of Days</label>
@@ -81,15 +109,23 @@
         </div>
     </div>
 
+    <!-- Notes -->
     <div class="form-group mb-4">
         <label>Notes</label>
         <textarea class="form-control" rows="3" readonly>@Model.Notes</textarea>
     </div>
 
+    <!--  ACTION BUTTONS (shown conditionally by role and rental status) -->
     <div class="d-flex justify-content-center gap-3 mt-5">
-        <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">Edit</a>
 
-        @if (Model.StatusId == 2 && !(ViewBag.HasTransaction ?? false))
+        <!--  Edit button: Allowed for Admins, Managers, or Customers (if Pending) -->
+        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || (Model.StatusId == 1))
+        {
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">Edit</a>
+        }
+
+        <!--  Create Transaction button: Visible only if rental is approved and no transaction yet -->
+        @if (Model.StatusId == 2 && !(ViewBag.HasTransaction ?? false) && (User.IsInRole("Admin") || User.IsInRole("Manager")))
         {
             <a asp-controller="RentalRecords"
                asp-action="CreateTransaction"
@@ -99,6 +135,7 @@
             </a>
         }
 
+        <!--  View Rental Record button: Shown only if transaction exists -->
         @if (ViewBag.HasTransaction == true)
         {
             <a asp-controller="RentalRecords"
@@ -109,5 +146,4 @@
             </a>
         }
     </div>
-
 </div>

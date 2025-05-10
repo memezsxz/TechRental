@@ -2,7 +2,7 @@
     color: #3CAD68;
     font-weight: bold;
     font-size: 2rem;
-    padding-top: 20px; /* Top padding for the title */
+    padding-top: 20px;  Top padding for the title 
 }
 
 .back-link {
@@ -199,9 +199,16 @@
         text-decoration: underline;
     }
 
-/* Style reserved days in green */
-.flatpickr-day.reserved-day {
-    background-color: #c8f7c5 !important; /* green highlight */
-    border-radius: 50%;
-    color: #000 !important;
+
+
+/*<!-- Styling for row hover --> */
+table.table tbody tr.clickable-row {
+    background-color: #ffffff !important;
+    transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
 }
+
+    table.table tbody tr.clickable-row:hover {
+        background-color: #54d18b !important;
+        transform: translateY(-4px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    }
