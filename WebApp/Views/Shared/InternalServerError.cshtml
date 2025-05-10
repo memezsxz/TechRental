@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Server Error";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-center mt-5 pt-5">
+    <img src="https://cdn-icons-png.flaticon.com/512/595/595067.png" width="100" class="mb-4" />
+    <h1 class="display-4 text-danger fw-bold">500</h1>
+    <h4 class="mb-3">Internal Server Error</h4>
+    <p>Something went wrong on our end. Please try again later.</p>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-danger mt-3 px-4">Return Home</a>
+</div>

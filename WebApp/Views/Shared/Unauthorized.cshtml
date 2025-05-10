@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Unauthorized";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-center mt-5 pt-5">
+    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828843.png" width="100" class="mb-4" />
+    <h1 class="display-4 text-primary fw-bold">401</h1>
+    <h4 class="mb-3">Unauthorized Access</h4>
+    <p>You must be logged in to access this page.</p>
+    <a href="@Url.Action("Login", "Account")" class="btn btn-outline-primary mt-3 px-4">Login</a>
+</div>

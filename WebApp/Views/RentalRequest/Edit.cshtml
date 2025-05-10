@@ -1,48 +1,75 @@
 ﻿@model Database.Core.Domain.RentalRequest
 
+@* -------------------------------------------------------------------------------------
+    Page: Edit.cshtml
+    Purpose:
+        This page allows editing an existing rental request.
+
+    Permissions:
+        - Customers can only update the Notes field *if* status is still Pending (StatusId == 1).
+        - Admins and Managers can edit: StartDate, ReturnDate, StatusId, and Notes.
+
+    Features:
+        - Displays customer information as read-only fields
+        - Uses Flatpickr for start and return date selection
+        - Prevents selecting already reserved dates (from ViewBag)
+        - Dynamically calculates number of rental days and total cost
+        - Uses shared JS logic via rental-request.js
+        - Pre-fills start and return dates with current Model values
+   -------------------------------------------------------------------------------------- *@
+
 @{
     ViewData["Title"] = "Edit Rental Request";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var totalDays = (Model.ReturnDate.Date - Model.StartDate.Date).Days + 1;
+    var rentalFee = Model.RentalPerDay.GetValueOrDefault();
+    var totalCost = totalDays * rentalFee;
 }
 
 <h2 class="text-center mb-5 page-title">EDIT RENTAL REQUEST #@Model.Id</h2>
 
-<!-- CUSTOMER INFO -->
-<div class="container mb-5 pb-4 border-bottom">
-    <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label>First Name</label>
-            <input class="form-control" value="@Model.Customer?.FirstName" readonly />
+@if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+{
+    <!-- CUSTOMER INFO (Read-Only) -->
+    <div class="container mb-5 pb-4 border-bottom">
+        <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>First Name</label>
+                <input class="form-control" value="@Model.Customer?.FirstName" readonly />
+            </div>
+            <div class="col-md-6">
+                <label>Last Name</label>
+                <input class="form-control" value="@Model.Customer?.LastName" readonly />
+            </div>
         </div>
-        <div class="col-md-6">
-            <label>Last Name</label>
-            <input class="form-control" value="@Model.Customer?.LastName" readonly />
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>Phone Number</label>
+                <input class="form-control" value="@Model.Customer?.PhoneNumber" readonly />
+            </div>
+            <div class="col-md-6">
+                <label>Email</label>
+                <input class="form-control" value="@Model.Customer?.Email" readonly />
+            </div>
         </div>
     </div>
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label>Phone Number</label>
-            <input class="form-control" value="@Model.Customer?.PhoneNumber" readonly />
-        </div>
-        <div class="col-md-6">
-            <label>Email</label>
-            <input class="form-control" value="@Model.Customer?.Email" readonly />
-        </div>
-    </div>
-</div>
+}
 
 <!-- REQUEST INFO -->
 <div class="container mb-5">
     <h4 class="mb-4 text-success fw-semibold">Request Info</h4>
 
     <form asp-action="Edit">
+        <!-- Hidden Fields -->
         <input type="hidden" asp-for="Id" />
         <input type="hidden" asp-for="EquipmentId" />
         <input type="hidden" asp-for="CustomerId" />
         <input type="hidden" asp-for="CreatedAt" />
         <input type="hidden" asp-for="UpdatedAt" />
 
+        <!-- Equipment Info & Status -->
         <div class="row mb-4">
             <div class="col-md-6">
                 <label>Equipment Title</label>
@@ -50,28 +77,55 @@
             </div>
             <div class="col-md-6">
                 <label asp-for="StatusId">Status</label>
-                <select asp-for="StatusId" class="form-control" asp-items="ViewBag.StatusId"></select>
-                <span asp-validation-for="StatusId" class="text-danger"></span>
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <select asp-for="StatusId" class="form-control" asp-items="ViewBag.StatusId"></select>
+                    <span asp-validation-for="StatusId" class="text-danger"></span>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.Status?.StatusName" readonly />
+                }
             </div>
         </div>
 
+        <!-- Start & Return Date -->
         <div class="row mb-4">
             <div class="col-md-6">
                 <label asp-for="StartDate">Pick up Date</label>
-                <input asp-for="StartDate" class="form-control" id="startDate" />
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <input asp-for="StartDate" class="form-control" id="startDate" />
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.StartDate.ToString("yyyy-MM-dd")" readonly />
+                    <input type="hidden" class="d-none"  id="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+
+                }
                 <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
             <div class="col-md-6">
                 <label asp-for="ReturnDate">Return Date</label>
-                <input asp-for="ReturnDate" class="form-control" id="returnDate" />
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <input asp-for="ReturnDate" class="form-control" id="returnDate" />
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.ReturnDate.ToString("yyyy-MM-dd")" readonly />
+                    <input type="hidden" class="d-none" id="returnDate" value="@Model.ReturnDate.ToString("yyyy-MM-dd")" />
+
+                }
                 <span asp-validation-for="ReturnDate" class="text-danger"></span>
             </div>
         </div>
 
+        <!-- Calculated Rental Duration & Cost -->
         <div class="row mb-4">
             <div class="col-md-4">
                 <label>Number of Days</label>
-                <input id="numberOfDays" class="form-control" readonly />
+                <input id="numberOfDays" class="form-control" value="@totalDays" readonly />
             </div>
             <div class="col-md-4">
                 <label>Rental Fee (BD/Day)</label>
@@ -79,16 +133,25 @@
             </div>
             <div class="col-md-4">
                 <label>Total Cost (BD)</label>
-                <input id="totalCost" class="form-control" readonly />
+                <input id="totalCost" class="form-control" value="@totalCost" readonly />
             </div>
         </div>
 
+        <!-- Optional Notes -->
         <div class="form-group mb-4">
             <label asp-for="Notes">Notes</label>
-            <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+            @if ((User.IsInRole("Customer") && Model.StatusId == 1) || User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+            }
+            else
+            {
+                <textarea class="form-control" readonly>@Model.Notes</textarea>
+            }
             <span asp-validation-for="Notes" class="text-danger"></span>
         </div>
 
+        <!-- Buttons -->
         <div class="d-flex justify-content-center gap-3 mt-5">
             <input type="submit" value="Save Changes" class="btn btn-success px-4" />
             <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">Cancel</a>
@@ -96,80 +159,15 @@
     </form>
 </div>
 
+<!-- Reserved Dates passed to JS -->
+<script id="reservedDatesData" type="application/json">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize((List<string>)ViewBag.UnavailableDates))
+</script>
+
+<!-- Pass daily rental rate to JS -->
+<input type="hidden" id="rentalPerDay" value="@Model.RentalPerDay.GetValueOrDefault(0).ToString("0.00")" />
+
 @section Scripts {
-    <style>
-        .flatpickr-day.reserved-day {
-            background-color: #c8f7c5 !important;
-            border-radius: 50%;
-            color: #000 !important;
-        }
-    </style>
-
-    <script>
-        const reservedDates = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((List<string>)ViewBag.UnavailableDates));
-
-        function isReservedDate(date) {
-            const iso = date.toISOString().split('T')[0];
-            return reservedDates.includes(iso);
-        }
-
-        const returnPicker = flatpickr("#returnDate", {
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            defaultDate: "@Model.ReturnDate.ToString("yyyy-MM-dd")",
-            disable: reservedDates,
-            onDayCreate: function (dObj, dStr, fp, dayElem) {
-                if (isReservedDate(dayElem.dateObj)) {
-                    dayElem.classList.add("reserved-day");
-                }
-            }
-        });
-
-        const startPicker = flatpickr("#startDate", {
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            defaultDate: "@Model.StartDate.ToString("yyyy-MM-dd")",
-            disable: reservedDates,
-            onChange: function (selectedDates, dateStr) {
-                const startDate = new Date(dateStr);
-                let maxDate = null;
-                for (let i = 1; i < 30; i++) {
-                    const checkDate = new Date(startDate);
-                    checkDate.setDate(startDate.getDate() + i);
-                    if (reservedDates.includes(checkDate.toISOString().split('T')[0])) {
-                        maxDate = new Date(checkDate);
-                        maxDate.setDate(maxDate.getDate() - 1);
-                        break;
-                    }
-                }
-                returnPicker.set('minDate', dateStr);
-                returnPicker.set('maxDate', maxDate);
-            },
-            onDayCreate: function (dObj, dStr, fp, dayElem) {
-                if (isReservedDate(dayElem.dateObj)) {
-                    dayElem.classList.add("reserved-day");
-                }
-            }
-        });
-
-        function calculateDaysAndTotal() {
-            const start = new Date(document.getElementById('startDate').value);
-            const end = new Date(document.getElementById('returnDate').value);
-            const perDay = parseFloat('@Model.RentalPerDay.GetValueOrDefault(0)');
-
-            if (!isNaN(start) && !isNaN(end) && end >= start) {
-                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                const total = perDay * days;
-                document.getElementById('numberOfDays').value = days;
-                document.getElementById('totalCost').value = total.toFixed(2);
-            } else {
-                document.getElementById('numberOfDays').value = "";
-                document.getElementById('totalCost').value = "0.00";
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', calculateDaysAndTotal);
-        document.getElementById('startDate').addEventListener('change', calculateDaysAndTotal);
-        document.getElementById('returnDate').addEventListener('change', calculateDaysAndTotal);
-    </script>
+    <!-- Shared logic: flatpickr setup, validation, dynamic cost -->
+    <script src="~/js/rental-request.js"></script>
 }

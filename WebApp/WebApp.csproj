@@ -7,6 +7,14 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\js\FlatpickrScript.js" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Views\Shared\JavaScript.js" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="AWSSDK.S3" Version="3.7.416.16" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="6.0.36" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.35" />

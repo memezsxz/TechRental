@@ -1,42 +1,190 @@
 ﻿@model IEnumerable<Database.Core.Domain.SystemErrorLog>
 
+@* -------------------------------------------------------------------------------------
+    Page: Index.cshtml
+    Purpose:
+        Displays a searchable, sortable, and filterable table of error logs.
+        Logs are shown with their timestamp, user, source, procedure, and message.
+
+    Features:
+        - Toggle buttons to switch between Error Logs and Audit Trails
+        - Filter by Source (ErrorSource field)
+        - Keyword search across multiple fields
+        - Sorting by timestamp (newest/oldest)
+        - Pagination with URL state persistence
+        - Dynamic form submission on filter/sort changes
+
+    Script Integration:
+        - JavaScript auto-submits the form on filter/sort changes or pressing Enter
+-------------------------------------------------------------------------------------- *@
+
 @{
     ViewData["Title"] = "Error Logs";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentSearch = ViewBag.Search as string;
+    var currentSort = ViewBag.SortBy as string;
+    var currentSource = ViewBag.SourceFilter as string;
+    var allSources = ViewBag.AllSources as List<string> ?? new List<string>();
 }
 
-
 <div class="container py-4">
+    <!-- Page Header -->
+    <h2 class="text-center mb-5 page-title">Error Logs</h2>
 
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <h2 class="text-success fw-bold">Error Logs</h2>
-    <div class="btn-group">
-        <a class="btn btn-outline-success" href="/auditlogs" >Audit Trails</a>
-        <a class="btn btn-success active">Error Logs</a>
+    <!-- Toggle: Switch between Audit and Error Logs -->
+    <div class="mt-2 mb-5 text-end">
+        <div class="btn-group" role="group">
+            <a href="@Url.Action("Index", "AuditLogs")"
+               class="btn btn-outline-success px-4"
+               style="border-radius: 8px 0 0 8px;">
+                AUDIT TRAILS
+            </a>
+            <a href="@Url.Action("Index", "ErrorLogs", new { search = currentSearch, sortBy = currentSort, sourceFilter = currentSource })"
+               class="btn btn-outline-success px-4 active"
+               style="border-radius: 0 8px 8px 0;">
+                ERROR LOGS
+            </a>
+        </div>
     </div>
+
+    <!-- Filter/Search/Sort Form -->
+    <form method="get" id="filterForm" class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="max-width: 1100px;">
+
+        <!-- Source Dropdown -->
+        <div style="flex: 1; min-width: 180px;">
+            <select name="sourceFilter" class="form-select">
+                <option value="">All Sources</option>
+                @foreach (var source in allSources)
+                {
+                    var selected = source == currentSource ? "selected" : "";
+                    @:<option value="@source" @selected>@source</option>
+                }
+            </select>
+        </div>
+
+        <!-- Search Input -->
+        <div style="flex: 2; min-width: 240px;">
+            <input type="text" name="search" class="form-control" placeholder="Search..." value="@currentSearch" />
+        </div>
+
+        <!-- Sort Dropdown -->
+        <div style="flex: 1; min-width: 180px;">
+            <select name="sortBy" class="form-select">
+                <option value="timestamp_desc" selected="@(currentSort != "timestamp_asc")">Newest First</option>
+                <option value="timestamp_asc" selected="@(currentSort == "timestamp_asc")">Oldest First</option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-success px-4">Search</button>
+        </div>
+    </form>
+
+    <!-- Error Logs Table -->
+    <table class="table table-bordered text-center">
+        <thead class="table-light text-success">
+            <tr>
+                <th>Timestamp</th>
+                <th>User</th>
+                <th>Source</th>
+                <th>Procedure</th>
+                <th>Error Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="5" class="text-muted">No error logs found.</td>
+                </tr>
+            }
+            else
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Timestamp?.ToString("g")</td>
+                        <td>@item.User?.Email</td>
+                        <td>@item.ErrorSource</td>
+                        <td>@item.SourceProcedure</td>
+                        <td>@item.ErrorMessage</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+
+    <!-- Pagination -->
+    @{
+        var currentPage = (int)ViewBag.CurrentPage;
+        var totalPages = (int)ViewBag.TotalPages;
+    }
+
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link text-success"
+                           asp-action="Index"
+                           asp-route-page="@(currentPage - 1)"
+                           asp-route-search="@currentSearch"
+                           asp-route-sortBy="@currentSort"
+                           asp-route-sourceFilter="@currentSource">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                }
+
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    var isActive = i == currentPage ? "active" : "";
+                    var linkClass = isActive == "active" ? "bg-success text-white border-success" : "text-success";
+
+                    <li class="page-item @isActive">
+                        <a class="page-link @linkClass"
+                           asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-search="@currentSearch"
+                           asp-route-sortBy="@currentSort"
+                           asp-route-sourceFilter="@currentSource"
+                           style="border-radius: 8px; margin: 0 4px;">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link text-success"
+                           asp-action="Index"
+                           asp-route-page="@(currentPage + 1)"
+                           asp-route-search="@currentSearch"
+                           asp-route-sortBy="@currentSort"
+                           asp-route-sourceFilter="@currentSource">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
 </div>
 
-<table class="table audit-table table-bordered">
-    <thead class="table-light text-success">
-        <tr>
-            <th>Timestamp</th>
-            <th>User ID</th>
-            <th>Source</th>
-            <th>Error Produce</th>
-            <th>Error Message</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.Timestamp</td>
-                <td>@item.User?.Id</td>
-                <td>@item.ErrorSource</td>
-                <td>@item.SourceProcedure</td>
-                <td>@item.ErrorMessage</td>
-            </tr>
-        }
-    </tbody>
-</table>
-</div>
+<!-- JavaScript for Dynamic Auto-Filtering -->
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("filterForm");
+
+        form.querySelector("select[name='sortBy']").addEventListener("change", () => form.submit());
+        form.querySelector("select[name='sourceFilter']").addEventListener("change", () => form.submit());
+
+        form.querySelector("input[name='search']").addEventListener("keypress", function (e) {
+            if (e.key === "Enter") form.submit();
+        });
+    });
+</script>
