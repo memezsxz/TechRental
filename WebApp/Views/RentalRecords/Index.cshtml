@@ -1,8 +1,10 @@
 ﻿@model IEnumerable<Database.Core.Domain.RentalRecord>
+
 @{
     var isCustomer = User.IsInRole("Customer");
     var userEmail = isCustomer ? User.Identity?.Name : null;
 }
+
 @{
     ViewData["Title"] = "Rental Records";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -10,19 +12,6 @@
     var currentSearch = ViewBag.Search as string;
     var currentSort = ViewBag.SortBy as string;
 }
-
-<style>
-    table.table tbody tr.clickable-row {
-        background-color: #ffffff !important;
-        transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
-    }
-
-    table.table tbody tr.clickable-row:hover {
-        background-color: #54d18b !important;
-        transform: translateY(-4px);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-    }
-</style>
 
 <div class="container mt-5">
      <!-- Title -->
@@ -269,20 +258,3 @@
 
     </ul>
 </nav>
-
-@section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipTriggerList.forEach(function (tooltipTriggerEl) {
-                new bootstrap.Tooltip(tooltipTriggerEl);
-            });
-
-            document.querySelectorAll(".clickable-row").forEach(function (row) {
-                row.addEventListener("click", function () {
-                    window.location.href = this.dataset.href;
-                });
-            });
-        });
-    </script>
-}
