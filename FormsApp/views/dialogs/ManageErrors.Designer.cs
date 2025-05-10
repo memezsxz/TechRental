@@ -205,6 +205,7 @@
             // 
             AutoScaleDimensions = new SizeF(11F, 28F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
             ClientSize = new Size(600, 604);
             Controls.Add(dtpTimestamp);
             Controls.Add(tbErrorMessage);

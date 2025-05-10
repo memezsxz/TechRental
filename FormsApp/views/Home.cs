@@ -33,5 +33,10 @@ namespace FormsApp
             pnlNavigation.Controls.Clear();
             pnlNavigation.Controls.Add(navigationPanelPanel);
         }
+
+        private void Home_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            Application.Exit();
+        }
     }
 }

@@ -342,6 +342,7 @@
             // 
             AutoScaleDimensions = new SizeF(11F, 28F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
             ClientSize = new Size(883, 521);
             Controls.Add(lblPhoneNumberError);
             Controls.Add(tbPhoneNumber);

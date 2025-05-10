@@ -64,6 +64,7 @@
             Name = "Home";
             StartPosition = FormStartPosition.CenterScreen;
             Text = "TechRental";
+            FormClosing += Home_FormClosing;
             Load += Home_Load;
             ResumeLayout(false);
         }

@@ -184,6 +184,7 @@
             // 
             AutoScaleDimensions = new SizeF(11F, 28F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
             ClientSize = new Size(600, 386);
             Controls.Add(cbIsActive);
             Controls.Add(lblClose);
