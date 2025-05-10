@@ -232,3 +232,38 @@
     font-weight: 600;
 }
 
+.nav-link {
+    color: black !important;
+}
+
+    .nav-link.active {
+        color: #3CAD68 !important;
+        font-weight: bold;
+    }
+
+
+
+/* When dropdown is open, highlight the toggle */
+.nav-item.show > .nav-link.dropdown-toggle {
+    background-color: green !important;
+    color: white !important;
+}
+
+/* Dropdown items (fix the background + hover + active states) */
+.dropdown-menu .dropdown-item {
+    background-color: white;
+    color: black;
+}
+
+    .dropdown-menu .dropdown-item:hover,
+    .dropdown-menu .dropdown-item:focus {
+        background-color: green !important;
+        color: white !important;
+    }
+
+    /* Highlight selected dropdown item based on current route */
+    .dropdown-menu .dropdown-item.active {
+        background-color: green !important;
+        color: white !important;
+        font-weight: bold;
+    }
