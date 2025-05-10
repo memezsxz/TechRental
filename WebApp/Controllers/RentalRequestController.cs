@@ -13,7 +13,7 @@ using Microsoft.AspNetCore.Authorization;
 
 namespace WebApp.Controllers
 {
-    [Authorize]
+    [Authorize] // Require authentication for all actions
     [Route("RentalRequest")]
     public class RentalRequestController : Controller
     {
@@ -107,6 +107,7 @@ namespace WebApp.Controllers
         }
 
         // GET: RentalRequest/Details/5
+        [HttpGet("Details/{id}")]
         public async Task<IActionResult> Details(int? id)
         {
 
@@ -155,6 +156,8 @@ namespace WebApp.Controllers
         }
 
         // GET: RentalRequest/Create
+        [HttpGet("Create")]
+        [Authorize(Roles = RoleConstants.Customer)]
         public IActionResult Create(int equipmentId)
         {
             if (!User.Identity.IsAuthenticated)
@@ -200,10 +203,9 @@ namespace WebApp.Controllers
             return View();
         }
 
-        // POST: RentalRequest/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        [HttpPost]
+        [HttpPost("Create")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = RoleConstants.Customer)]
         public async Task<IActionResult> Create(RentalRequest rentalRequest)
         {
             if (rentalRequest.StartDate == default)
@@ -265,6 +267,7 @@ namespace WebApp.Controllers
 
 
         // GET: RentalRequest/Edit/5
+        [HttpGet("Edit/{id}")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null || _context.RentalRequests == null)
@@ -312,7 +315,7 @@ namespace WebApp.Controllers
 
         // POST: RentalRequest/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
-        [HttpPost]
+        [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, RentalRequest rentalRequest)
         {
