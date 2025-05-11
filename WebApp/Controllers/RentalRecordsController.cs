@@ -4,8 +4,11 @@ using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
 using Helper;
+using Identity;
 using Microsoft.AspNetCore.Authorization;
-using WebApp.Helpers;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.AspNetCore.Identity;
+
 
 namespace WebApp.Controllers
 {
@@ -13,10 +16,12 @@ namespace WebApp.Controllers
     public class RentalRecordsController : Controller
     {
         private readonly RentalDBContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public RentalRecordsController(RentalDBContext context)
+        public RentalRecordsController(RentalDBContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: RentalRecords
@@ -45,6 +50,7 @@ namespace WebApp.Controllers
             if (User.IsInRole(RoleConstants.Customer))
             {
                 var loggedInEmail = User.Identity.Name;
+                // Filter the data to only show this user's records
                 query = query.Where(u => u.RentalRequest.Customer.Email == loggedInEmail);
             }
 
@@ -149,7 +155,7 @@ namespace WebApp.Controllers
                 var loggedInEmail = User.Identity.Name;
                 if (rentalRecord.RentalRequest.Customer.Email != loggedInEmail)
                 {
-                    return Forbid(); //Authenticated but not allowed
+                    return View("Forbidden"); //Authenticated but not allowed
 
                 }
 

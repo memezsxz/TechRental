@@ -29,9 +29,12 @@ namespace FormsApp.views.dialogs
         private Payment payment;
 
         ItemType itemType;
-        public ManageRental(ItemType itemType, ViewType viewType, int? id) : base(viewType, id)
+
+
+        public ManageRental(ItemType itemType, ViewType viewType, int? id, bool canDelete = false) : base(viewType, id, canDelete, false)
         {
             this.itemType = itemType;
+            SwitchType();
         }
 
         #region Form Initialization
@@ -45,9 +48,7 @@ namespace FormsApp.views.dialogs
             InitializeComponent();
 
             DisableAllErrors();
-            MapActionButtons();
-            if (itemType == ItemType.Record) request = record.RentalRequest;
-            if (itemType == ItemType.Request) record = context.RentalRecords.GetWithDetailsByRentalRequest(id.Value);
+            MapActionButtons(lblClose, lblSave, lblDelete);
 
             if (record != null)
             {
@@ -70,19 +71,16 @@ namespace FormsApp.views.dialogs
             LoadRequestStatusDropDownList();
         }
 
-        /// <summary>
-        /// Maps form action buttons (Save, Close, Delete) to corresponding UI labels in the base class to attach listeners on them.
-        /// </summary>
-        private void MapActionButtons()
-        {
-            closeLabel = lblClose;
-            saveLabel = lblSave;
-            deleteLabel = lblDelete;
-            PrepareActionButtons();
-        }
+
         #endregion
 
         #region View Preparation
+
+        protected override void PrepareForView()
+        {
+           base.PrepareForView();
+            LoadItemInfo();
+        }
 
         protected override void PrepareForAdd()
         {
@@ -352,49 +350,40 @@ namespace FormsApp.views.dialogs
             //}
 
         }
+
+
         protected override async Task SaveItem()
         {
+            await StandardSave<RentalRequest>(
+                ValidateInput,
+                MapFormToEntity,
+                context.RentalRequests.Add,
+                context.RentalRequests.Update,
+                request,
+                itemType == ItemType.Request ? "Rental Request" : "Rental Record"
+            );
+        }
 
-            if (!await ValidateInput()) return;
+        protected override void MapFormToEntity()
+        {
+            request.StatusId = (int)ddlReqStatus.SelectedValue;
 
-            Console.WriteLine("1");
-            try
+
+            if (record != null)
             {
-                //request.UpdatedAt = DateTime.UtcNow;
-
-                //record.UpdatedAt = DateTime.UtcNow;
-
-                if (FormViewType == ViewType.EDIT)
+                if (record.Id == 0)
                 {
-                    context.RentalRequests.Update(request);
-                    Console.WriteLine("2");
+                    record.ExtraCharges = decimal.Parse(tbRecExtraCharge.Text.Trim(), NumberStyles.Currency, CultureInfo.CurrentCulture);
+                    record.ExtraChargeDescription = tbRecExtraChargeDescreption.Text.Trim();
+
+                    payment.Amount = record.TotalCost.Value;
 
                 }
-                else if (FormViewType == ViewType.ADD)
-                {
-                    context.RentalRequests.Add(request);
-                    Console.WriteLine("3");
-                }
 
-                int rows = await context.SaveChangesAsync();
-
-                if (rows > 0)
+                if (record.ActualReturnDate != null)
                 {
-                    MessageBox.Show($"Request {(FormViewType == ViewType.ADD ? "added" : "updated")} successfully");
-                    RaiseSuccessfulComplete();
-                    Close();
+                    record.ReturnConditionId = (int)ddlRetCondetion.SelectedValue;
                 }
-                else
-                {
-                    Console.WriteLine("5");
-
-                    MessageBox.Show($"Please Try Again");
-                }
-            }
-            catch (Exception e)
-            {
-                Global.DisplayReportErrorDialog(e);
-                RaiseFailedComplete();
             }
         }
         #endregion
@@ -407,7 +396,7 @@ namespace FormsApp.views.dialogs
         /// Validates form input and uploads the image if applicable.
         /// </summary>
         /// <returns>True if validation passed and image uploaded successfully; false otherwise.</returns>
-        private async Task<bool> ValidateInput()
+        private bool ValidateInput()
         {
             DisableAllErrors();
 
@@ -423,31 +412,7 @@ namespace FormsApp.views.dialogs
 
             Console.WriteLine($"Final validation result: {isValidInput}");
 
-
-            if (!isValidInput) return false;
-
-            request.StatusId = (int)ddlReqStatus.SelectedValue;
-
-
-            if (record != null )
-            {
-                if (record.Id == 0)
-                {
-                record.ExtraCharges = decimal.Parse(tbRecExtraCharge.Text.Trim(), NumberStyles.Currency, CultureInfo.CurrentCulture);
-                record.ExtraChargeDescription = tbRecExtraChargeDescreption.Text.Trim();
-
-                payment.Amount = record.TotalCost.Value;
-
-                }
-
-                if (record.ActualReturnDate != null)
-                {
-                    record.ReturnConditionId = (int)ddlRetCondetion.SelectedValue;
-                }
-            }
-
-
-            return true;
+            return isValidInput;
 
         }
 

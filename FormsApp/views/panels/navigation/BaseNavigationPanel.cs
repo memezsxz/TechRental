@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Database.Core.Domain;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace FormsApp.views.panels
 {
@@ -15,7 +16,7 @@ namespace FormsApp.views.panels
     /// A navigation panel for the admin interface that allows access to different views 
     /// (e.g., Dashboard, Equipment, Rental Records, Logs) based on label selection.
     /// </summary>
-    public partial class AdminNavigationPanel : UserControl
+    public partial class BaseNavigationPanel : UserControl
     {
         #region Fields
 
@@ -24,6 +25,8 @@ namespace FormsApp.views.panels
         /// Used to determine which entity is shown and what operations are allowed.
         /// </summary>
         private Dictionary<Label, (Type entity, bool allowAdd, bool allowEdit, bool allowDelete)> _tabTypeMap;
+
+        private Dictionary<Type, Label> _entityToLabel = new();
 
         /// <summary>
         /// The container panel where selected views will be loaded.
@@ -34,10 +37,10 @@ namespace FormsApp.views.panels
 
         #region Constructor
         /// <summary>
-        /// Initializes the AdminNavigationPanel with a reference to the main view container.
+        /// Initializes the BaseNavigationPanel with a reference to the main view container.
         /// </summary>
         /// <param name="view">Panel to display entity views and dashboard controls.</param>
-        public AdminNavigationPanel(Panel view)
+        public BaseNavigationPanel(Panel view)
         {
             InitializeComponent();
             this.Dock = DockStyle.Fill;
@@ -53,6 +56,7 @@ namespace FormsApp.views.panels
         private void AdminNavigationPanel_Load(object sender, EventArgs e)
         {
             InitializeTabMap();
+            AdjustRowHeights();
             AttachClickEvents();
             DisplayDashboard();
         }
@@ -62,17 +66,88 @@ namespace FormsApp.views.panels
         /// </summary>
         private void InitializeTabMap()
         {
-            _tabTypeMap = new()
+            _tabTypeMap = new();
+
+            // 1. Remember current profile control and its row index
+            pnlPanel.Controls.Remove(tlpProfile);
+            pnlPanel.RowStyles.RemoveAt(3);
+            pnlPanel.RowCount--; // temporarily remove it
+
+            int insertAt = 2; // Insert role-specific labels starting at row 2
+
+            // 2. Insert role-specific labels
+            foreach (var kvp in Global.TabTypeMap)
             {
-                { lblCategories, (typeof(Category), true, true, true) },
-                { lblRentalRequests, (typeof(RentalRequest), true, true, true) },
-                { lblEquipment, (typeof(Equipment), true, true, true) },
-                { lblRentalRecords, (typeof(RentalRecord), true, true, true) },
-                { lblAuditTrails, (typeof(AuditLog), false, false, false) },
-                { lblErrorLogs, (typeof(SystemErrorLog), false, false, false) },
-                { lblUsers, (typeof(User), true, true, true) }
+                var entityType = kvp.Key;
+                var (allowAdd, allowEdit, allowDelete) = kvp.Value;
+
+                Label label = new Label
+                {
+                    AutoSize = true,
+                    Dock = DockStyle.Fill,
+                    Font = new Font("Cascadia Mono", 14F, FontStyle.Regular, GraphicsUnit.Point),
+                    ForeColor = Color.Black,
+                    Margin = new Padding(3, 20, 3, 20),
+                    Name = $"lbl{entityType.Name}",
+                    Size = new Size(334, 53),
+                    TabIndex = 10 + insertAt,
+                    Text = GetDisplayName(entityType),
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Cursor = Cursors.Hand
+                };
+
+                pnlPanel.RowStyles.Insert(insertAt, new RowStyle(SizeType.Percent, 1));
+                pnlPanel.RowCount++;
+                pnlPanel.Controls.Add(label, 0, insertAt);
+
+                _tabTypeMap[label] = (entityType, allowAdd, allowEdit, allowDelete);
+                _entityToLabel[entityType] = label;
+
+                insertAt++;
+            }
+
+            // 3. Re-add the profile control to the last row
+            pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
+            pnlPanel.RowCount++;
+            pnlPanel.Controls.Add(tlpProfile, 0, pnlPanel.RowCount - 1);
+        }
+
+
+
+        private void AdjustRowHeights()
+        {
+            int totalRows = pnlPanel.RowCount;
+
+            if (totalRows < 3) return; // Need at least 3 rows to apply this logic
+
+            pnlPanel.RowStyles.Clear();
+
+            pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10)); // First row (brand)
+
+            int dynamicRowCount = totalRows - 2;
+            float dynamicHeight = 80f / dynamicRowCount;
+
+            for (int i = 0; i < dynamicRowCount; i++)
+            {
+                pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, dynamicHeight)); // Middle rows (nav)
+            }
+
+            pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10)); // Last row (profile/notification)
+        }
+
+        private static string GetDisplayName(Type type)
+        {
+            return type.Name switch
+            {
+                nameof(AuditLog) => "Audit Trails",
+                nameof(SystemErrorLog) => "System Errors",
+                nameof(RentalRequest) => "Rental Requests",
+                nameof(RentalRecord) => "Rental Records",
+                _ => type.Name
             };
         }
+
+
 
         /// <summary>
         /// Subscribes all mapped labels to the click event that will load their respective views.
@@ -84,6 +159,7 @@ namespace FormsApp.views.panels
         }
 
         #endregion
+
         #region Event Handlers
 
         /// <summary>
@@ -104,7 +180,6 @@ namespace FormsApp.views.panels
                 LoadEntityPanel(targetInfo);
             }
         }
-
         private void lblDashboard_Click(object sender, EventArgs e)
         {
             DisplayDashboard();
@@ -162,7 +237,7 @@ namespace FormsApp.views.panels
                 config.allowDelete
             );
 
-                FillView(userControl);
+            FillView(userControl);
         }
 
         /// <summary>
@@ -182,7 +257,16 @@ namespace FormsApp.views.panels
         private void DisplayDashboard()
         {
             SetLabelAsSelected(lblDashboard);
-            FillView(new AdminDashboardView());
+            if (Global.userType.ToLower() == "admin")
+            {
+                FillView(new AdminDashboardView());
+            }
+            else if (Global.userType.ToLower() == "manager")
+
+            {
+                FillView(new ManagerDashboardView());
+            }
+
         }
 
         /// <summary>
@@ -191,9 +275,7 @@ namespace FormsApp.views.panels
         private void DisplayProfile()
         {
             ResetAllLabelsToRegularFont();
-
-            // TODO: Implement loading of profile view
-            // FillView(new AdminProfileView());
+            FillView(new ProfileView());
         }
 
         /// <summary>
@@ -203,8 +285,7 @@ namespace FormsApp.views.panels
         {
             ResetAllLabelsToRegularFont();
 
-            // TODO: Implement loading of notification view
-            // FillView(new AdminNotificationView());
+            FillView(new NotificationsView());
         }
         #endregion
 

@@ -166,7 +166,7 @@ namespace Database.Persistence.Repositories
         public override Dictionary<string, string> GetEntityColumnsWithTypes()
         {
             var d = base.GetEntityColumnsWithTypes();
-            //d.Remove("Description");
+            d.Remove("Image");
             return d;
         }
 

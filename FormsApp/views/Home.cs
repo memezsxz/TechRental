@@ -8,6 +8,8 @@ namespace FormsApp
 {
     public partial class Home : Form
     {
+        public bool isLoggingOut = false;
+
         public Home()
         {
             InitializeComponent();
@@ -15,23 +17,23 @@ namespace FormsApp
 
         private void Home_Load(object sender, EventArgs e)
         {
-
-            //pnlMainView.Paint += Panel_Paint;
-
             Global.SizeAndCenterForm(this, 0.8f);
-            CenterToScreen();
+            CenterToScreen(); 
             LoadNavigation();
-
         }
 
         void LoadNavigation()
         {
-            new UnitOfWork().Equipment.GetAll();
-            // check user type and load the proper navigation user control
-            AdminNavigationPanel navigationPanelPanel = new AdminNavigationPanel(pnlMainView);
+
+            BaseNavigationPanel navigationPanelPanel = new BaseNavigationPanel(pnlMainView);
 
             pnlNavigation.Controls.Clear();
             pnlNavigation.Controls.Add(navigationPanelPanel);
+        }
+
+        private void Home_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (!isLoggingOut) Application.Exit();
         }
     }
 }

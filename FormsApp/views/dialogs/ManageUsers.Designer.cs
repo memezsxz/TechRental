@@ -42,15 +42,15 @@
             tbFirstName = new TextBox();
             tbId = new TextBox();
             cbIsActive = new CheckBox();
-            label6 = new Label();
-            label4 = new Label();
-            label2 = new Label();
-            label1 = new Label();
             lblEmailError = new Label();
             tbEmail = new TextBox();
-            label9 = new Label();
             lblPhoneNumberError = new Label();
             tbPhoneNumber = new TextBox();
+            label1 = new Label();
+            label2 = new Label();
+            label4 = new Label();
+            label6 = new Label();
+            label9 = new Label();
             label11 = new Label();
             pnlImage.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
@@ -173,6 +173,7 @@
             // 
             ddlRole.BackColor = Color.FromArgb(247, 247, 249);
             ddlRole.DropDownStyle = ComboBoxStyle.DropDownList;
+            ddlRole.Enabled = false;
             ddlRole.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             ddlRole.FormattingEnabled = true;
             ddlRole.Location = new Point(189, 388);
@@ -184,6 +185,7 @@
             // tbLastName
             // 
             tbLastName.BackColor = Color.FromArgb(247, 247, 249);
+            tbLastName.Enabled = false;
             tbLastName.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbLastName.Location = new Point(189, 157);
             tbLastName.Margin = new Padding(2);
@@ -194,6 +196,7 @@
             // tbFirstName
             // 
             tbFirstName.BackColor = Color.FromArgb(247, 247, 249);
+            tbFirstName.Enabled = false;
             tbFirstName.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbFirstName.Location = new Point(189, 76);
             tbFirstName.Margin = new Padding(2);
@@ -215,6 +218,7 @@
             // cbIsActive
             // 
             cbIsActive.AutoSize = true;
+            cbIsActive.Enabled = false;
             cbIsActive.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             cbIsActive.Location = new Point(605, 22);
             cbIsActive.Margin = new Padding(2);
@@ -223,50 +227,6 @@
             cbIsActive.TabIndex = 37;
             cbIsActive.Text = "Active";
             cbIsActive.UseVisualStyleBackColor = true;
-            // 
-            // label6
-            // 
-            label6.AutoSize = true;
-            label6.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label6.Location = new Point(20, 391);
-            label6.Margin = new Padding(2, 0, 2, 0);
-            label6.Name = "label6";
-            label6.Size = new Size(63, 31);
-            label6.TabIndex = 35;
-            label6.Text = "Role:";
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label4.Location = new Point(20, 157);
-            label4.Margin = new Padding(2, 0, 2, 0);
-            label4.Name = "label4";
-            label4.Size = new Size(127, 31);
-            label4.TabIndex = 33;
-            label4.Text = "Last Name:";
-            // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label2.Location = new Point(20, 76);
-            label2.Margin = new Padding(2, 0, 2, 0);
-            label2.Name = "label2";
-            label2.Size = new Size(129, 31);
-            label2.TabIndex = 31;
-            label2.Text = "First Name:";
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label1.Location = new Point(18, 21);
-            label1.Margin = new Padding(2, 0, 2, 0);
-            label1.Name = "label1";
-            label1.Size = new Size(99, 31);
-            label1.TabIndex = 30;
-            label1.Text = "User ID: ";
             // 
             // lblEmailError
             // 
@@ -282,23 +242,13 @@
             // tbEmail
             // 
             tbEmail.BackColor = Color.FromArgb(247, 247, 249);
+            tbEmail.Enabled = false;
             tbEmail.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbEmail.Location = new Point(188, 236);
             tbEmail.Margin = new Padding(2);
             tbEmail.Name = "tbEmail";
             tbEmail.Size = new Size(394, 38);
             tbEmail.TabIndex = 54;
-            // 
-            // label9
-            // 
-            label9.AutoSize = true;
-            label9.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label9.Location = new Point(19, 236);
-            label9.Margin = new Padding(2, 0, 2, 0);
-            label9.Name = "label9";
-            label9.Size = new Size(75, 31);
-            label9.TabIndex = 53;
-            label9.Text = "Email:";
             // 
             // lblPhoneNumberError
             // 
@@ -314,12 +264,68 @@
             // tbPhoneNumber
             // 
             tbPhoneNumber.BackColor = Color.FromArgb(247, 247, 249);
+            tbPhoneNumber.Enabled = false;
             tbPhoneNumber.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbPhoneNumber.Location = new Point(189, 313);
             tbPhoneNumber.Margin = new Padding(2);
             tbPhoneNumber.Name = "tbPhoneNumber";
             tbPhoneNumber.Size = new Size(394, 38);
             tbPhoneNumber.TabIndex = 57;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            label1.Location = new Point(18, 21);
+            label1.Margin = new Padding(2, 0, 2, 0);
+            label1.Name = "label1";
+            label1.Size = new Size(99, 31);
+            label1.TabIndex = 30;
+            label1.Text = "User ID: ";
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            label2.Location = new Point(20, 76);
+            label2.Margin = new Padding(2, 0, 2, 0);
+            label2.Name = "label2";
+            label2.Size = new Size(129, 31);
+            label2.TabIndex = 31;
+            label2.Text = "First Name:";
+            // 
+            // label4
+            // 
+            label4.AutoSize = true;
+            label4.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            label4.Location = new Point(20, 157);
+            label4.Margin = new Padding(2, 0, 2, 0);
+            label4.Name = "label4";
+            label4.Size = new Size(127, 31);
+            label4.TabIndex = 33;
+            label4.Text = "Last Name:";
+            // 
+            // label6
+            // 
+            label6.AutoSize = true;
+            label6.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            label6.Location = new Point(20, 391);
+            label6.Margin = new Padding(2, 0, 2, 0);
+            label6.Name = "label6";
+            label6.Size = new Size(63, 31);
+            label6.TabIndex = 35;
+            label6.Text = "Role:";
+            // 
+            // label9
+            // 
+            label9.AutoSize = true;
+            label9.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            label9.Location = new Point(19, 236);
+            label9.Margin = new Padding(2, 0, 2, 0);
+            label9.Name = "label9";
+            label9.Size = new Size(75, 31);
+            label9.TabIndex = 53;
+            label9.Text = "Email:";
             // 
             // label11
             // 
@@ -336,6 +342,7 @@
             // 
             AutoScaleDimensions = new SizeF(11F, 28F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
             ClientSize = new Size(883, 521);
             Controls.Add(lblPhoneNumberError);
             Controls.Add(tbPhoneNumber);
@@ -359,8 +366,10 @@
             Controls.Add(label4);
             Controls.Add(label2);
             Controls.Add(label1);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             Name = "ManageUser";
-            Text = "ManageCategory";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Manage User";
             pnlImage.ResumeLayout(false);
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
@@ -384,15 +393,15 @@
         private TextBox tbFirstName;
         private TextBox tbId;
         private CheckBox cbIsActive;
-        private Label label6;
-        private Label label4;
-        private Label label2;
-        private Label label1;
         private Label lblEmailError;
         private TextBox tbEmail;
-        private Label label9;
         private Label lblPhoneNumberError;
         private TextBox tbPhoneNumber;
+        private Label label1;
+        private Label label2;
+        private Label label4;
+        private Label label6;
+        private Label label9;
         private Label label11;
     }
 }

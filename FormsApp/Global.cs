@@ -6,15 +6,17 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence;
+using Image = System.Drawing.Image;
 
 namespace FormsApp
 {
     static class Global
     {
         public static int userID = 2;
-        public static int userType = 1; // admin
+        public static string userType = "manager"; // admin
         // public static BindingList<string> pageSizes = new BindingList<string>() { "10", "20", "30" };
         public static BindingList<int> pageSizes = new BindingList<int>() { 10, 20, 30 };
 
@@ -25,6 +27,40 @@ namespace FormsApp
         public static Color DarkGreen = Color.FromArgb(49, 129, 80);
         public static Color NeonGreen = Color.FromArgb(120, 226, 161);
         #endregion
+
+        /// <summary>
+        /// Maps labels to the associated entity type and permission flags (Add, Edit, Delete).
+        /// Used to determine which entity is shown and what operations are allowed.
+        /// </summary>
+
+        public static Dictionary<Type, (bool allowAdd, bool allowEdit, bool allowDelete)>? TabTypeMap
+        {
+            get
+            {
+                if (Global.userType.ToLower() == "admin") return new()
+                {
+                    { typeof(AuditLog), (false, false, false) },
+                    { typeof(SystemErrorLog), (false, false, false) },
+                    { typeof(User), (false, false, false) },
+                    { typeof(Category), (true, true, true) },
+                    { typeof(Equipment), (true, true, true) },
+                    { typeof(RentalRequest), (false, true, false) },
+                    { typeof(RentalRecord), (false, true, false) },
+                };
+
+                if (Global.userType.ToLower() == "manager") return new()
+                {
+                    { typeof(Category), (false, false, false) },
+                    { typeof(RentalRequest), (false, true, false) },
+                    { typeof(Equipment), (false, false, false) },
+                    { typeof(RentalRecord), (false, true, false) }
+                };
+
+                return null;
+            }
+        }
+
+
         public static void Panel_Paint(object sender, PaintEventArgs e)
         {
             Panel panel = sender as Panel;
@@ -167,6 +203,48 @@ namespace FormsApp
             }
         }
 
+        public static async Task<bool> LoadImage(Guid? guid, string imageType, Panel displayPanel, Label imageLabel)
+        {
+            try
+            {
+                if (!guid.HasValue)
+                {
+                    imageLabel.Text = ("No Image Selected");
+                    return false;
+                }
 
+                var image = await Global.GetImage(guid.Value, imageType);
+
+                if (image == null)
+                {
+                    imageLabel.Text = ("Unable To Load Image");
+                    return false;
+                }
+
+                displayPanel.Controls.Clear();
+                displayPanel.Controls.Add(new PictureBox
+                {
+                    Dock = DockStyle.Fill,
+                    SizeMode = PictureBoxSizeMode.StretchImage,
+                    Image = new Bitmap(image)
+                });
+
+                imageLabel.Text = "Upload";
+
+                displayPanel.Invalidate();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                imageLabel.Text = ("Image Not Found");
+                Console.WriteLine($"Image loading error: {ex.Message}");
+                return false;
+            }
+
+        }
+        public static void SetBorderColor(Label sender, PaintEventArgs e, Color color)
+        {
+            ControlPaint.DrawBorder(e.Graphics, sender.DisplayRectangle, color, ButtonBorderStyle.Solid);
+        }
     }
 }
