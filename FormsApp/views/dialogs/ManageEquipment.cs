@@ -71,6 +71,15 @@ namespace FormsApp.views.dialogs
         protected override void PrepareForView()
         {
             base.PrepareForView();
+            foreach (Control control in this.Controls)
+            {
+                if (control is TextBox or ComboBox or CheckBox)
+                {
+                    control.Enabled = false;
+                }
+            }
+
+            lblImage.Click -= lblImage_Click;
             LoadItemInfo();
         }
         protected override void PrepareForAdd()

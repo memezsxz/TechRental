@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using Database.Core.Domain;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace FormsApp.views.panels
 {
@@ -256,7 +257,16 @@ namespace FormsApp.views.panels
         private void DisplayDashboard()
         {
             SetLabelAsSelected(lblDashboard);
-            FillView(new AdminDashboardView());
+            if (Global.userType.ToLower() == "admin")
+            {
+                FillView(new AdminDashboardView());
+            }
+            else if (Global.userType.ToLower() == "manager")
+
+            {
+                FillView(new ManagerDashboardView());
+            }
+
         }
 
         /// <summary>

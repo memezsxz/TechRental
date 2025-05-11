@@ -16,7 +16,7 @@ namespace FormsApp
     static class Global
     {
         public static int userID = 2;
-        public static string userType = "Admin"; // admin
+        public static string userType = "manager"; // admin
         // public static BindingList<string> pageSizes = new BindingList<string>() { "10", "20", "30" };
         public static BindingList<int> pageSizes = new BindingList<int>() { 10, 20, 30 };
 
