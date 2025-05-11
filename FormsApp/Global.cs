@@ -38,12 +38,12 @@ namespace FormsApp
             get
             {
                 if (Global.userType.ToLower() == "admin") return new()
-                { 
-                    { typeof(AuditLog), (false, false, false) }, 
-                    { typeof(SystemErrorLog), (false, false, false) }, 
-                    { typeof(User), (false, false, false) }, 
+                {
+                    { typeof(AuditLog), (false, false, false) },
+                    { typeof(SystemErrorLog), (false, false, false) },
+                    { typeof(User), (false, false, false) },
                     { typeof(Category), (true, true, true) },
-                    { typeof(Equipment), (true, true, true) }, 
+                    { typeof(Equipment), (true, true, true) },
                     { typeof(RentalRequest), (false, true, false) },
                     { typeof(RentalRecord), (false, true, false) },
                 };
@@ -59,8 +59,6 @@ namespace FormsApp
                 return null;
             }
         }
-
-
 
 
         public static void Panel_Paint(object sender, PaintEventArgs e)
@@ -244,7 +242,7 @@ namespace FormsApp
             }
 
         }
-     public   static void SetBorderColor(Label sender, PaintEventArgs e, Color color)
+        public static void SetBorderColor(Label sender, PaintEventArgs e, Color color)
         {
             ControlPaint.DrawBorder(e.Graphics, sender.DisplayRectangle, color, ButtonBorderStyle.Solid);
         }

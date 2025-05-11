@@ -63,55 +63,55 @@ namespace FormsApp.views.panels
         /// <summary>
         /// Defines mappings between labels and their corresponding entity types and permission sets.
         /// </summary>
-            private void InitializeTabMap()
+        private void InitializeTabMap()
+        {
+            _tabTypeMap = new();
+
+            // 1. Remember current profile control and its row index
+            pnlPanel.Controls.Remove(tlpProfile);
+            pnlPanel.RowStyles.RemoveAt(3);
+            pnlPanel.RowCount--; // temporarily remove it
+
+            int insertAt = 2; // Insert role-specific labels starting at row 2
+
+            // 2. Insert role-specific labels
+            foreach (var kvp in Global.TabTypeMap)
             {
-                _tabTypeMap = new();
+                var entityType = kvp.Key;
+                var (allowAdd, allowEdit, allowDelete) = kvp.Value;
 
-                // 1. Remember current profile control and its row index
-                pnlPanel.Controls.Remove(tlpProfile);
-                pnlPanel.RowStyles.RemoveAt(3);
-                pnlPanel.RowCount--; // temporarily remove it
-
-                int insertAt = 2; // Insert role-specific labels starting at row 2
-
-                // 2. Insert role-specific labels
-                foreach (var kvp in Global.TabTypeMap)
+                Label label = new Label
                 {
-                    var entityType = kvp.Key;
-                    var (allowAdd, allowEdit, allowDelete) = kvp.Value;
+                    AutoSize = true,
+                    Dock = DockStyle.Fill,
+                    Font = new Font("Cascadia Mono", 14F, FontStyle.Regular, GraphicsUnit.Point),
+                    ForeColor = Color.Black,
+                    Margin = new Padding(3, 20, 3, 20),
+                    Name = $"lbl{entityType.Name}",
+                    Size = new Size(334, 53),
+                    TabIndex = 10 + insertAt,
+                    Text = GetDisplayName(entityType),
+                    TextAlign = ContentAlignment.MiddleCenter,
+                    Cursor = Cursors.Hand
+                };
 
-                    Label label = new Label
-                    {
-                        AutoSize = true,
-                        Dock = DockStyle.Fill,
-                        Font = new Font("Cascadia Mono", 14F, FontStyle.Regular, GraphicsUnit.Point),
-                        ForeColor = Color.Black,
-                        Margin = new Padding(3, 20, 3, 20),
-                        Name = $"lbl{entityType.Name}",
-                        Size = new Size(334, 53),
-                        TabIndex = 10 + insertAt,
-                        Text = GetDisplayName(entityType),
-                        TextAlign = ContentAlignment.MiddleCenter,
-                        Cursor = Cursors.Hand
-                    };
-
-                    pnlPanel.RowStyles.Insert(insertAt, new RowStyle(SizeType.Percent, 1));
-                    pnlPanel.RowCount++;
-                    pnlPanel.Controls.Add(label, 0, insertAt);
-
-                    _tabTypeMap[label] = (entityType, allowAdd, allowEdit, allowDelete);
-                    _entityToLabel[entityType] = label;
-
-                    insertAt++;
-                }
-
-                // 3. Re-add the profile control to the last row
-                pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
+                pnlPanel.RowStyles.Insert(insertAt, new RowStyle(SizeType.Percent, 1));
                 pnlPanel.RowCount++;
-                pnlPanel.Controls.Add(tlpProfile, 0, pnlPanel.RowCount - 1);
+                pnlPanel.Controls.Add(label, 0, insertAt);
+
+                _tabTypeMap[label] = (entityType, allowAdd, allowEdit, allowDelete);
+                _entityToLabel[entityType] = label;
+
+                insertAt++;
             }
 
-        
+            // 3. Re-add the profile control to the last row
+            pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
+            pnlPanel.RowCount++;
+            pnlPanel.Controls.Add(tlpProfile, 0, pnlPanel.RowCount - 1);
+        }
+
+
 
         private void AdjustRowHeights()
         {
@@ -275,7 +275,7 @@ namespace FormsApp.views.panels
         {
             ResetAllLabelsToRegularFont();
 
-             FillView(new NotificationsView());
+            FillView(new NotificationsView());
         }
         #endregion
 
