@@ -37,7 +37,7 @@ namespace FormsApp
         {
             get
             {
-                if (userType.ToLower() == "admin") return new()
+                if (Global.userType.ToLower() == "admin") return new()
                 { 
                     { typeof(AuditLog), (false, false, false) }, 
                     { typeof(SystemErrorLog), (false, false, false) }, 
@@ -48,12 +48,12 @@ namespace FormsApp
                     { typeof(RentalRecord), (false, true, false) },
                 };
 
-                if (userType.ToLower() == "manager") return new()
+                if (Global.userType.ToLower() == "manager") return new()
                 {
                     { typeof(Category), (false, false, false) },
-                    { typeof(RentalRequest), (false, true, true) },
+                    { typeof(RentalRequest), (false, true, false) },
                     { typeof(Equipment), (false, false, false) },
-                    { typeof(RentalRecord), (false, true, true) }
+                    { typeof(RentalRecord), (false, true, false) }
                 };
 
                 return null;

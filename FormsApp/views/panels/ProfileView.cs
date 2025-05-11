@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using Database.Core.Domain;
 using Database.Persistence;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace FormsApp.views.panels
 {
@@ -52,7 +53,14 @@ namespace FormsApp.views.panels
 
         private void LogOut()
         {
-            Console.WriteLine("Logged out");
+            Home home = ((Home)this.TopLevelControl);
+            Form login = home.Owner;
+
+            home.isLoggingOut = true;
+            home.Close(); 
+            home.Dispose();    
+
+            login.Show();  
         }
 
         private void lblLogout_Click(object sender, EventArgs e)

@@ -36,8 +36,7 @@ namespace FormsApp
 
         private void Login_Load(object sender, EventArgs e)
         {
-            DisableAllErrors();
-            pbLoading.Visible = false;
+            Refresh();
         }
 
         private void lblLogin_Click(object sender, EventArgs e)
@@ -100,11 +99,15 @@ namespace FormsApp
                         if (user != null)
                         {
                             Global.userID = user.Id;
-                            Global.userType = user.Role.RoleName;
-
-                            if (Global.userType.ToLower() is not "admin" or not "manager")
+                            Global.userType = user.Role.RoleName.ToLower();
+                            Console.WriteLine($"role is {Global.userType}");
+                            if (Global.userType.ToLower() is not "admin" and not "manager")
                             {
                                 lblLoginError.Text = "Invalid user role, this app is only for admins and managers.";
+                                return false;
+                            }
+                            else if ((user.IsActive ?? true) == false)
+                            {
                                 return false;
                             }
 
@@ -149,7 +152,7 @@ namespace FormsApp
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error " + ex.Message);
+                Global.DisplayReportErrorDialog(ex);
             }
         }
 
@@ -193,5 +196,20 @@ namespace FormsApp
             return true;
         }
 
+        private void Refresh()
+        {
+            DisableAllErrors();
+            //tbEmail.Text = "";
+            //tbPassword.Text = "";
+            //pbLoading.Visible = false;
+            //tbEmail.Focus();
+            //Global.userID = -1;
+            //Global.userType = null;
+        }
+
+        private void Login_VisibleChanged(object sender, EventArgs e)
+        {
+            if (this.Visible) { Refresh(); }
+        }
     }
 }

@@ -28,10 +28,13 @@
         /// </summary>
         private void InitializeComponent()
         {
+            TableLayoutPanel tableLayoutPanel1;
+            TableLayoutPanel tableLayoutPanel2;
+            Panel panel1;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Login));
-            tableLayoutPanel1 = new TableLayoutPanel();
-            tableLayoutPanel2 = new TableLayoutPanel();
-            panel1 = new Panel();
+            Label label2;
+            Label label1;
+            Panel panel2;
             pbLoading = new PictureBox();
             lblPasswordError = new Label();
             lblLogin = new Label();
@@ -39,6 +42,9 @@
             lblEmailError = new Label();
             tbPassword = new TextBox();
             tbEmail = new TextBox();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            tableLayoutPanel2 = new TableLayoutPanel();
+            panel1 = new Panel();
             label2 = new Label();
             label1 = new Label();
             panel2 = new Panel();
@@ -132,7 +138,7 @@
             lblLogin.Margin = new Padding(0);
             lblLogin.Name = "lblLogin";
             lblLogin.Size = new Size(154, 48);
-            lblLogin.TabIndex = 45;
+            lblLogin.TabIndex = 3;
             lblLogin.Text = "Login";
             lblLogin.TextAlign = ContentAlignment.MiddleCenter;
             lblLogin.Click += lblLogin_Click;
@@ -171,7 +177,8 @@
             tbPassword.Name = "tbPassword";
             tbPassword.PasswordChar = '*';
             tbPassword.Size = new Size(365, 38);
-            tbPassword.TabIndex = 39;
+            tbPassword.TabIndex = 2;
+            tbPassword.Text = "Pa$$word123";
             // 
             // tbEmail
             // 
@@ -182,7 +189,8 @@
             tbEmail.Margin = new Padding(2);
             tbEmail.Name = "tbEmail";
             tbEmail.Size = new Size(365, 38);
-            tbEmail.TabIndex = 38;
+            tbEmail.TabIndex = 1;
+            tbEmail.Text = "admin1@gmail.com";
             // 
             // label2
             // 
@@ -231,6 +239,7 @@
             StartPosition = FormStartPosition.CenterScreen;
             Text = "TechRental";
             Load += Login_Load;
+            VisibleChanged += Login_VisibleChanged;
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel2.ResumeLayout(false);
             panel1.ResumeLayout(false);

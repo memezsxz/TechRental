@@ -161,9 +161,6 @@ namespace Database.Persistence.Repositories
                 .FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
         }
 
-
-
-
         #endregion
     }
 }
