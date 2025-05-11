@@ -4,10 +4,9 @@ using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
 using Helper;
+using Identity;
 using Microsoft.AspNetCore.Authorization;
-using WebApp.Helpers;
 using Microsoft.AspNetCore.Identity;
-using WebApp.Areas.Identity.Data;
 
 namespace WebApp.Controllers
 {
