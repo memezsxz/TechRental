@@ -8,7 +8,7 @@ using Database.ViewModels;
 
 namespace Database.Core.Repositories
 {
-    public interface IRentalRecordRepository : IRepository<RentalRecord>
+    public interface IRentalRecordRepository : IRepository<RentalRecord>, IToBeTracked
     {
         Task<List<QuarterEarnings>> GetQuarterEarningsByYearAsync(int year);
         Task<Dictionary<string, int>> GetWeeklyCategoryRentalDataAsync(int categoryLimit = 10);

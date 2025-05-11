@@ -114,6 +114,7 @@ namespace FormsApp.views.dialogs
                 context.Categories.Add,
                 context.Categories.Update,
                 item,
+                item.Id,
                 "Category"
             );
         }
@@ -161,5 +162,9 @@ namespace FormsApp.views.dialogs
             lblDescreptionError.Visible = false;
         }
         #endregion
+
+
+  
+
     }
 }

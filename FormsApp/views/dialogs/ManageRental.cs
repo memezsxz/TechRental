@@ -78,7 +78,7 @@ namespace FormsApp.views.dialogs
 
         protected override void PrepareForView()
         {
-           base.PrepareForView();
+            base.PrepareForView();
             LoadItemInfo();
         }
 
@@ -354,14 +354,34 @@ namespace FormsApp.views.dialogs
 
         protected override async Task SaveItem()
         {
-            await StandardSave<RentalRequest>(
-                ValidateInput,
-                MapFormToEntity,
-                context.RentalRequests.Add,
-                context.RentalRequests.Update,
-                request,
-                itemType == ItemType.Request ? "Rental Request" : "Rental Record"
-            );
+            //Console.WriteLine($"record {record.Id}           request {request.Id}");
+            if (record != null)
+            {
+                //Console.WriteLine("record");
+                await StandardSave<RentalRecord>(
+                    ValidateInput,
+                    MapFormToEntity,
+                    context.RentalRecords.Add,
+                    context.RentalRecords.Update,
+                    record,
+                    record.Id,
+                  itemType == ItemType.Request ? "Rental request" : "Rental record"
+                );
+
+            }
+            else
+            {
+                //Console.WriteLine("request");
+                await StandardSave<RentalRequest>(
+                    ValidateInput,
+                    MapFormToEntity,
+                    context.RentalRequests.Add,
+                    context.RentalRequests.Update,
+                    request,
+                    request.Id,
+                    "Rental request"
+                );
+            }
         }
 
         protected override void MapFormToEntity()
@@ -526,7 +546,7 @@ namespace FormsApp.views.dialogs
             };
 
             record = rec;
-            request.RentalRecords.Add(record);
+            //request.RentalRecords.Add(record);
 
             Payment pay = new Payment()
             {
@@ -605,7 +625,7 @@ namespace FormsApp.views.dialogs
             ddlRetCondetion.Enabled = true;
 
             record.ActualReturnDate = DateTime.Now.Date;
-            record.LateReturnFees = (record.ActualReturnDate.Value -  request.ReturnDate).Days * request.RentalPerDay;
+            record.LateReturnFees = (record.ActualReturnDate.Value - request.ReturnDate).Days * request.RentalPerDay;
             if (record.LateReturnFees < 0) record.LateReturnFees = 0;
             record.ReturnConditionId = 1; // TODO Maryam: create a method to retrive the status
 

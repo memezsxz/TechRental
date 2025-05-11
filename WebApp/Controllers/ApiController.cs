@@ -79,7 +79,7 @@ namespace WebApp.Controllers
             if (notification == null) return NotFound();
 
             notification.IsRead = true;
-            _unitOfWork.SaveChanges(); // Or SaveChanges()
+            _unitOfWork.SaveChangesAsync(); // Or SaveChanges()
 
             return Ok();
         }

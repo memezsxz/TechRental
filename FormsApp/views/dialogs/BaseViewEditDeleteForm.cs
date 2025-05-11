@@ -1,4 +1,5 @@
 ﻿using Database.Persistence;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace FormsApp.views.dialogs;
 public abstract class BaseViewEditDeleteForm : Form
 {
     protected int? id;
-    protected UnitOfWork context = new UnitOfWork();
+    protected UnitOfWork context = new UnitOfWork(Global.userID);
     protected Label deleteLabel;
     protected Label closeLabel;
     protected Label saveLabel;
@@ -411,6 +412,7 @@ public abstract class BaseViewEditDeleteForm : Form
         Action<T> addFunc,
         Action<T> updateFunc,
         T entity,
+        int id,
         string entityLabel)
     {
         if (!validateFunc()) return false;
@@ -419,13 +421,19 @@ public abstract class BaseViewEditDeleteForm : Form
         {
             mapFormToEntity();
 
-            if (FormViewType == ViewType.ADD)
+            if (id == 0)
+            {
+                //Console.WriteLine("Adding");
                 addFunc(entity);
+            }
             else
+            {
+                //Console.WriteLine("updating");
                 updateFunc(entity);
+            }
 
 
-            var rows = await context.SaveChangesAsync();
+            var rows =  context.SaveChanges();
 
             if (rows > 0)
             {
@@ -456,7 +464,9 @@ public abstract class BaseViewEditDeleteForm : Form
         Action<T> addFunc,
         Action<T> updateFunc,
         T entity,
-        string entityLabel)
+        int id,
+        string entityLabel,
+        int userId)
     {
         if (!await validateFuncAsync()) return false;
 
@@ -464,12 +474,12 @@ public abstract class BaseViewEditDeleteForm : Form
         {
             mapFormToEntity();
 
-            if (FormViewType == ViewType.ADD)
+            if (id == 0)
                 addFunc(entity);
             else
                 updateFunc(entity);
 
-            var rows = await context.SaveChangesAsync();
+            var rows =  context.SaveChanges();
 
             if (rows > 0)
             {

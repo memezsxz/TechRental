@@ -2,12 +2,14 @@ using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Text.Json;
 
 namespace Database.Persistence.Repositories
 {
     internal class RentalRecordRepository : Repository<RentalRecord>, IRentalRecordRepository
     {
-        public RentalRecordRepository(RentalDBContext context) : base(context)
+        public RentalRecordRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 
@@ -133,6 +135,20 @@ namespace Database.Persistence.Repositories
         }
 
         #endregion
+
+        protected override bool ShouldIgnoreProperty(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(RentalRecord.Feedbacks) => true,
+                nameof(RentalRecord.Payments) => true,
+                nameof(RentalRecord.RentalRequest) => true,
+                nameof(RentalRecord.ReturnCondition) => true,
+                nameof(RentalRecord.UpdatedAt) => true,
+                nameof(RentalRecord.CreatedAt) => true,
+                _ => base.ShouldIgnoreProperty(propertyName)
+            };
+        }
 
     }
 }

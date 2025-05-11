@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class SystemErrorLogRepository : Repository<SystemErrorLog>, ISystemErrorLogRepository
     {
-        public SystemErrorLogRepository(RentalDBContext context) : base(context)
+        public SystemErrorLogRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

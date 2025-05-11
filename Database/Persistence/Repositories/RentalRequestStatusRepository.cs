@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class RentalRequestStatusRepository : Repository<RentalRequestStatus>, IRentalRequestStatusRepository
     {
-        public RentalRequestStatusRepository(RentalDBContext context) : base(context)
+        public RentalRequestStatusRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

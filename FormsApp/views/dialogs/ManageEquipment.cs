@@ -187,7 +187,9 @@ namespace FormsApp.views.dialogs
                 context.Equipment.Add,
                 context.Equipment.Update,
                 item,
-                "Equipment"
+                item.Id,
+                "Equipment",
+                Global.userID
             );
         }
 
@@ -362,5 +364,7 @@ namespace FormsApp.views.dialogs
         }
 
         #endregion
+
+
     }
 }

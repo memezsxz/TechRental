@@ -1,13 +1,16 @@
+using Database.Core;
 using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Database.Persistence.Repositories
 {
     internal class RentalRequestRepository : Repository<RentalRequest>, IRentalRequestRepository
     {
-        public RentalRequestRepository(RentalDBContext context) : base(context)
+        public RentalRequestRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 
@@ -15,7 +18,6 @@ namespace Database.Persistence.Repositories
         {
             get { return context as RentalDBContext; }
         }
-
 
         private IQueryable<RentalRequest> GetWithDetails()
         {
@@ -102,5 +104,57 @@ namespace Database.Persistence.Repositories
 
         #endregion
 
+        #region Audit Trails
+
+        public (bool needsLog, int id, string dataBeforeAction, string dataAfterAction) GenerateLogDetails(RentalRequest item)
+        {
+            Console.WriteLine("here1");
+            var entry = RentalDBContext.Entry(item);
+            Console.WriteLine("here1");
+            if (entry.State != EntityState.Modified)
+                return (false, item.Id, "", "");
+
+            Console.WriteLine("state is modified");
+            var originalValues = new Dictionary<string, object>();
+            var currentValues = new Dictionary<string, object>();
+
+            foreach (var prop in entry.Properties)
+            {
+                var original = prop.OriginalValue;
+                var current = prop.CurrentValue;
+
+                if (!Equals(original, current))
+                {
+                    originalValues[prop.Metadata.Name] = original ?? "null";
+                    currentValues[prop.Metadata.Name] = current ?? "null";
+                }
+            }
+
+            bool hasChanged = originalValues.Count > 0;
+
+            if (hasChanged) item.UpdatedAt = DateTime.Now;
+
+            return (
+                hasChanged,
+                item.Id,
+                JsonSerializer.Serialize(originalValues),
+                JsonSerializer.Serialize(currentValues)
+            );
+        }
+
+
+        #endregion
+
+        protected override bool ShouldIgnoreProperty(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(RentalRequest.CreatedAt) => true,
+                nameof(RentalRequest.UpdatedAt) => true,
+                nameof(RentalRequest.RentalRecords) => true,
+                nameof(RentalRequest.Status) => true,
+                _ => base.ShouldIgnoreProperty(propertyName)
+            };
+        }
     }
 }

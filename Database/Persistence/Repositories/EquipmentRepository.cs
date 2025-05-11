@@ -9,12 +9,14 @@ using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Database.Persistence.Repositories
 {
     internal class EquipmentRepository : Repository<Equipment>, IEquipmentRepository
     {
-        public EquipmentRepository(RentalDBContext context) : base(context)
+        public EquipmentRepository(RentalDBContext context, int? userId ) : base(context, userId)
         {
         }
 
@@ -188,5 +190,20 @@ namespace Database.Persistence.Repositories
 
 
         #endregion
+        protected override bool ShouldIgnoreProperty(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(Equipment.UpdatedAt) => true,
+                nameof(Equipment.CreatedAt) => true,
+                nameof(Equipment.AvailabilityStatus) => true,
+                nameof(Equipment.Category) => true,
+                nameof(Equipment.ConditionStatus) => true,
+                nameof(Equipment.Feedbacks) => true,
+                nameof(Equipment.Image) => true,
+                nameof(Equipment.RentalRequests) => true,
+                _ => base.ShouldIgnoreProperty(propertyName)
+            };
+        }
     }
 }

@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class AuditLogRepository : Repository<AuditLog>, IAuditLogRepository
     {
-        public AuditLogRepository(RentalDBContext context) : base(context)
+        public AuditLogRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

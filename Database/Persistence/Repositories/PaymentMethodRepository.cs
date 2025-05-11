@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class PaymentMethodRepository : Repository<PaymentMethod>, IPaymentMethodRepository
     {
-        public PaymentMethodRepository(RentalDBContext context) : base(context)
+        public PaymentMethodRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

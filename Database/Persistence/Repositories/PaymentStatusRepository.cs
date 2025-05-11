@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class PaymentStatusRepository : Repository<PaymentStatus>, IPaymentStatusRepository
     {
-        public PaymentStatusRepository(RentalDBContext context) : base(context)
+        public PaymentStatusRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

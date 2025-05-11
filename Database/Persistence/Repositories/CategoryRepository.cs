@@ -11,7 +11,7 @@ namespace Database.Persistence.Repositories
 {
     internal class CategoryRepository : Repository<Category>, ICategoryRepository
     {
-        public CategoryRepository(RentalDBContext context) : base(context)
+        public CategoryRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 
@@ -56,5 +56,14 @@ namespace Database.Persistence.Repositories
         }
 
         #endregion
+        protected override bool ShouldIgnoreProperty(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(Category.CreatedAt) => true,
+                nameof(Category.UpdatedAt) => true,
+                _ => base.ShouldIgnoreProperty(propertyName)
+            };
+        }
     }
 }

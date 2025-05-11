@@ -9,7 +9,7 @@ using Database.ViewModels;
 
 namespace Database.Core.Repositories
 {
-    public interface IEquipmentRepository : IRepository<Equipment>, IStatus
+    public interface IEquipmentRepository : IRepository<Equipment>, IStatus, IToBeTracked
     {
         Task<IEnumerable<Equipment>> GetAllWithDetailsAsync();
         Task<Equipment?> GetByIdWithDetailsAsync(int id);
