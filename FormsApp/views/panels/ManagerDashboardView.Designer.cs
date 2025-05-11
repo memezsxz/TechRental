@@ -1,6 +1,6 @@
 ﻿namespace FormsApp.views.panels
 {
-    partial class AdminDashboardView
+    partial class ManagerDashboardView
     {
         /// <summary> 
         /// Required designer variable.

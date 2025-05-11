@@ -8,7 +8,7 @@ using Amazon.S3.Model;
 
 namespace FormsApp.views.panels
 {
-    public partial class AdminDashboardView : UserControl
+    public partial class ManagerDashboardView : UserControl
     {
         #region Fields
         private Label lblNoSalesMessage;
@@ -34,7 +34,7 @@ namespace FormsApp.views.panels
         /// <summary>
         /// Initializes the dashboard view and prepares default labels.
         /// </summary>
-        public AdminDashboardView()
+        public ManagerDashboardView()
         {
             InitializeComponent();
             lblNoSalesMessage = new Label
