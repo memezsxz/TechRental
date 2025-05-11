@@ -58,7 +58,7 @@ namespace WebApp.Controllers
 
             var id = currentUser.UserID;
 
-            var notifications = _unitOfWork.Notifications.GetAllAsync().Result;
+            var notifications = _unitOfWork.Notifications.GetAllAsync().Result.OrderByDescending(u => u.CreatedAt);
 
             var notificationList = new List<Notification>();
 
