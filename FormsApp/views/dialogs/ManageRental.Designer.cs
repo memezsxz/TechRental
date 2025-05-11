@@ -861,8 +861,10 @@
             Controls.Add(lblClose);
             Controls.Add(lblDelete);
             Controls.Add(lblSave);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             Name = "ManageRental";
-            Text = "ManageRental";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Manage Rental";
             gbRequest.ResumeLayout(false);
             gbRequest.PerformLayout();
             gbCustomer.ResumeLayout(false);

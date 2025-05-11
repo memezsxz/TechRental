@@ -1,11 +1,9 @@
 using Database.Core;
 using Database.Core.Domain;
 using Database.Persistence;
+using Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
-using WebApp.Data;
-using WebApp.Areas.Identity.Data;
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.

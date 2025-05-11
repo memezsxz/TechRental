@@ -29,7 +29,7 @@ namespace FormsApp.views.dialogs
         /// </summary>
         /// <param name="viewType">The mode in which the form is opened (Add, Edit, or View).</param>
         /// <param name="id">Optional ID of the category to load in Edit mode.</param>
-        public ManageCategory(BaseViewEditDeleteForm.ViewType viewType, int? id = null) : base(viewType, id) { }
+        public ManageCategory(BaseViewEditDeleteForm.ViewType viewType, int? id, bool canDelete = false) : base(viewType, id, canDelete) { }
 
         #endregion
         #region Form Initialization
@@ -43,23 +43,18 @@ namespace FormsApp.views.dialogs
             InitializeComponent();
 
             DisableAllErrors();
-            MapActionButtons();
+            MapActionButtons(lblClose, lblSave, lblDelete);
         }
 
-        /// <summary>
-        /// Maps form action buttons (Save, Close, Delete) to corresponding UI labels in the base class to attach listeners on them.
-        /// </summary>
-        private void MapActionButtons()
-        {
-            closeLabel = lblClose;
-            saveLabel = lblSave;
-            deleteLabel = lblDelete;
-            PrepareActionButtons();
-        }
+      
         #endregion
 
         #region View Preparation
-
+        protected override void PrepareForView()
+        {
+            base.PrepareForView();
+            LoadItemInfo();
+        }
         protected override void PrepareForAdd()
         {
             lblSave.Text = "Add";
@@ -103,103 +98,30 @@ namespace FormsApp.views.dialogs
         #region Save/Delete Logic
         public override void Delete()
         {
-            if (id == null)
-            {
-                MessageBox.Show("Cannot delete id null");
-                Dispose();
-                return;
-            }
-
-            item = context.Categories.Get(id.Value);
-
-            if (item == null)
-            {
-                MessageBox.Show($"Category with the id {id.Value} not found");
-               Dispose();
-                //Close();
-            }
-
-            if (context.Categories.IsReferenced(id.Value))
-            {
-                var result = MessageBox.Show($"This category is in use. Do you want to mark it as inactive instead?", "Category in use", MessageBoxButtons.YesNo);
-
-                if (result == DialogResult.Yes)
-                {
-                    try
-                    {
-                        item.IsActive = false;
-                        context.Categories.Update(item);
-                        context.SaveChanges();
-                        RaiseSuccessfulComplete();
-                    }
-                    catch (Exception e)
-                    {
-                        Global.DisplayReportErrorDialog(e);
-                        RaiseFailedComplete();
-                    }
-                }
-                Dispose();
-
-                return;
-            }
-
-            try
-            {
-                context.Categories.Remove(item);
-                context.SaveChanges();
-                RaiseSuccessfulComplete();
-                Dispose();
-
-            }
-            catch (Exception e)
-            {
-                Global.DisplayReportErrorDialog(e);
-                RaiseFailedComplete();
-                Dispose();
-            }
+            StandardDelete<Category>(
+                context.Categories.Get,
+                context.Categories.IsReferenced,
+                item => item.IsActive = false,
+                context.Categories.Remove,
+                "Category"
+            );
         }
         protected override async Task SaveItem()
         {
+            await StandardSave<Category>(
+                ValidateInput,
+                MapFormToEntity,
+                context.Categories.Add,
+                context.Categories.Update,
+                item,
+                "Category"
+            );
+        }
 
-            if (!await ValidateInput()) return;
-
-            Console.WriteLine("1");
-            try
-            {
-                if (FormViewType == ViewType.EDIT)
-                {
-                    item.UpdatedAt = DateTime.UtcNow;
-                    context.Categories.Update(item);
-                    Console.WriteLine("2");
-
-                }
-                else if (FormViewType == ViewType.ADD)
-                {
-                    context.Categories.Add(item);
-                    Console.WriteLine("3");
-                }
-
-                int rows = await context.SaveChangesAsync();
-
-                if (rows > 0)
-                {
-                    MessageBox.Show($"Category {(FormViewType == ViewType.ADD ? "added" : "updated")} successfully");
-                    RaiseSuccessfulComplete();
-                    Close();
-                }
-                else
-                {
-                    Console.WriteLine("5");
-
-                    MessageBox.Show($"Please Try Again");
-                }
-            }
-            catch (Exception e)
-            {
-                Global.DisplayReportErrorDialog(e);
-                RaiseFailedComplete();
-
-            }
+        protected override void MapFormToEntity()
+        {
+            item.Name = lblName.Text.Trim();
+            item.Description = tbDescription.Text.Trim();
         }
         #endregion
 
@@ -211,7 +133,7 @@ namespace FormsApp.views.dialogs
         /// Validates form input and uploads the image if applicable.
         /// </summary>
         /// <returns>True if validation passed and image uploaded successfully; false otherwise.</returns>
-        private async Task<bool> ValidateInput()
+        private bool ValidateInput()
         {
             DisableAllErrors();
 

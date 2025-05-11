@@ -18,6 +18,9 @@ using System.Xml.Linq;
 using Image = System.Drawing.Image;
 using Helper;
 using System.Drawing.Imaging;
+using System.Windows.Forms.DataVisualization.Charting;
+using PdfSharpCore.Pdf.Content.Objects;
+using System.Diagnostics;
 
 namespace FormsApp.views.dialogs
 {
@@ -41,7 +44,7 @@ namespace FormsApp.views.dialogs
         /// </summary>
         /// <param name="viewType">The mode in which the form is opened (Add, Edit, or View).</param>
         /// <param name="id">Optional ID of the equipment to load in Edit mode.</param>
-        public ManageEquipment(BaseViewEditDeleteForm.ViewType viewType, int? id = null) : base(viewType, id) { }
+        public ManageEquipment(BaseViewEditDeleteForm.ViewType viewType, int? id, bool canDelete = false) : base(viewType, id, canDelete) { }
 
         #endregion
         #region Form Initialization
@@ -55,26 +58,30 @@ namespace FormsApp.views.dialogs
             InitializeComponent();
 
             DisableAllErrors();
-            MapActionButtons();
+            MapActionButtons(lblClose, lblSave, lblDelete);
             LoadAvailabilityDropDownList();
             LoadConditionDropDownList();
             LoadCategoryDropDownList();
         }
 
-        /// <summary>
-        /// Maps form action buttons (Save, Close, Delete) to corresponding UI labels in the base class to attach listeners on them.
-        /// </summary>
-        private void MapActionButtons()
-        {
-            closeLabel = lblClose;
-            saveLabel = lblSave;
-            deleteLabel = lblDelete;
-            PrepareActionButtons();
-        }
+       
         #endregion
 
         #region View Preparation
+        protected override void PrepareForView()
+        {
+            base.PrepareForView();
+            foreach (Control control in this.Controls)
+            {
+                if (control is TextBox or ComboBox or CheckBox)
+                {
+                    control.Enabled = false;
+                }
+            }
 
+            lblImage.Click -= lblImage_Click;
+            LoadItemInfo();
+        }
         protected override void PrepareForAdd()
         {
             lblSave.Text = "Add";
@@ -99,7 +106,8 @@ namespace FormsApp.views.dialogs
             ddlCategory.SelectedValue = item.CategoryId;
             tbDescription.Text = item.Description;
             cbIsActive.Checked = item.IsActive ?? false;
-            LoadImage();
+            if (item.Image != null) LoadImage(item.Image.Guid, item.Image.ImageType, pnlImage, lblImage);
+            else lblImage.Text = "No Image";
         }
 
         #endregion
@@ -155,43 +163,6 @@ namespace FormsApp.views.dialogs
         /// <summary>
         /// Loads the image associated with the equipment from storage and displays it in the panel.
         /// </summary>
-        private async Task LoadImage()
-        {
-            try
-            {
-                if (!item.Image.Guid.HasValue)
-                {
-                    lblImage.Text = ("No Image Selected");
-                    return;
-                }
-
-                var image = await Global.GetImage(item.Image.Guid.Value, item.Image.ImageType);
-
-                if (image == null)
-                {
-                    lblImage.Text = ("Unable To Load Image");
-                    return;
-                }
-
-                pnlImage.Controls.Clear();
-                pnlImage.Controls.Add(new PictureBox
-                {
-                    Dock = DockStyle.Fill,
-                    SizeMode = PictureBoxSizeMode.StretchImage,
-                    Image = new Bitmap(image)
-                });
-
-                lblImage.Text = "Upload";
-
-                pnlImage.Invalidate();
-            }
-            catch (Exception ex)
-            {
-                lblImage.Text = ("Image Not Found");
-                Console.WriteLine($"Image loading error: {ex.Message}");
-            }
-
-        }
 
         #endregion
 
@@ -199,104 +170,42 @@ namespace FormsApp.views.dialogs
         #region Save/Delete Logic
         public override void Delete()
         {
-            if (id == null)
-            {
-                MessageBox.Show("Cannot delete id null");
-                Dispose();
-                return;
-            }
-
-            item = context.Equipment.GetEquipmentWithImage(id.Value);
-
-            if (item == null)
-            {
-                MessageBox.Show($"Equipment with the id {id.Value} not found");
-                Dispose();
-return;
-            }
-
-            if (context.Equipment.IsReferenced(id.Value))
-            {
-                var result = MessageBox.Show($"This equipment is in use. Do you want to mark it as inactive instead?", "Equipment in use", MessageBoxButtons.YesNo);
-
-                if (result == DialogResult.Yes)
-                {
-                    try
-                    {
-                        item.IsActive = false;
-                        context.Equipment.Update(item);
-                        context.SaveChanges();
-                        RaiseSuccessfulComplete();
-
-                    }
-                    catch (Exception e)
-                    {
-                        Global.DisplayReportErrorDialog(e);
-                        RaiseFailedComplete();
-                    }
-                }
-                Dispose();
-                return;
-            }
-
-            try
-            {
-                context.Equipment.Remove(item);
-                context.SaveChanges();
-                RaiseSuccessfulComplete();
-            }
-            catch (Exception e)
-            {
-                Global.DisplayReportErrorDialog(e);
-                RaiseFailedComplete();
-            }
-            Dispose();
-            return;
-
+            StandardDelete<Equipment>(
+                context.Equipment.GetEquipmentWithImage,
+                context.Equipment.IsReferenced,
+                item => item.IsActive = false,
+                context.Equipment.Remove,
+                "Equipment"
+            );
         }
+  
         protected override async Task SaveItem()
         {
-
-            if (!await ValidateInput()) return;
-
-            Console.WriteLine("1");
-            try
-            {
-                if (FormViewType == ViewType.EDIT)
-                {
-                    item.UpdatedAt = DateTime.UtcNow;
-                    context.Equipment.Update(item);
-                    Console.WriteLine("2");
-
-                }
-                else if (FormViewType == ViewType.ADD)
-                {
-                    context.Equipment.Add(item);
-                    Console.WriteLine("3");
-                }
-
-                int rows = await context.SaveChangesAsync();
-
-                if (rows > 0)
-                {
-                    MessageBox.Show($"Equipment {(FormViewType == ViewType.ADD ? "added" : "updated")} successfully");
-                    RaiseSuccessfulComplete();
-                    Close();
-                }
-                else
-                {
-                    Console.WriteLine("5");
-
-                    MessageBox.Show($"Please Try Again");
-                }
-            }
-            catch (Exception e)
-            {
-                Global.DisplayReportErrorDialog(e);
-                RaiseFailedComplete();
-
-            }
+            await StandardSaveAsync<Equipment>(
+                ValidateInput,
+                MapFormToEntity,
+                context.Equipment.Add,
+                context.Equipment.Update,
+                item,
+                "Equipment"
+            );
         }
+
+        protected override void MapFormToEntity()
+        {
+            item.Name = lblName.Text.Trim();
+
+            item.RentalPricePerDay = decimal.Parse(lblPrice.Text.Trim(), NumberStyles.Currency, CultureInfo.CurrentCulture);
+            item.AvailabilityStatusId = (int)ddlAvalability.SelectedValue;
+            item.ConditionStatusId = (int)ddlCondition.SelectedValue;
+            item.CategoryId = (int)ddlCategory.SelectedValue;
+
+            item.Description = tbDescription.Text.Trim();
+            item.IsActive = cbIsActive.Checked;
+
+            // image is uploaded and verified in validation when calling UploadImage
+        }
+
         #endregion
 
 
@@ -344,23 +253,7 @@ return;
 
             Console.WriteLine($"Final validation result: {isValidInput}");
 
-
-            if (!isValidInput) return false;
-
-            item.Name = lblName.Text.Trim();
-
-            item.RentalPricePerDay = price.Value;
-            item.AvailabilityStatusId = (int)ddlAvalability.SelectedValue;
-            item.ConditionStatusId = (int)ddlCondition.SelectedValue;
-            item.CategoryId = (int)ddlCategory.SelectedValue;
-
-            item.Description = tbDescription.Text.Trim();
-            item.IsActive = cbIsActive.Checked;
-
-
-
-            return true;
-
+            return isValidInput;
         }
 
         /// <summary>

@@ -27,8 +27,8 @@ namespace Database.Core.Repositories
         Task<User?> GetUserWithRoleAsync(int id);
         Task<User?> GetUserWithProfileAsync(int id);
         Task<bool> UserExistsAsync(int id);
-
-        int GetUserByEmail(string email);
+        public User? GetUserWithProfile(int id);
+        public User? GetUserByEmail(string email);
     }
 
     public static class EnumExtensions
@@ -42,5 +42,4 @@ namespace Database.Core.Repositories
                    ?? enumValue.ToString();
         }
     }
-
 }

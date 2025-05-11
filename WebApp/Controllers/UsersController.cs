@@ -14,14 +14,13 @@ using Database.Core.Repositories;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Drawing.Printing;
 using Microsoft.AspNetCore.Identity;
-using WebApp.Areas.Identity.Data;
 using Sprache;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Encodings.Web;
 using System.Text;
 using Microsoft.AspNetCore.Authorization;
-using WebApp.Helpers;
+using Identity;
 
 
 namespace WebApp.Controllers

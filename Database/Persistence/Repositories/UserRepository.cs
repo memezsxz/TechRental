@@ -17,6 +17,11 @@ namespace Database.Persistence.Repositories
             get { return context as RentalDBContext; }
         }
 
+        public bool IsReferenced(int id)
+        {
+            return RentalDBContext.RentalRequests.Any(r => r.EquipmentId == id);
+        }
+
         #region Async
 
         public async Task<IEnumerable<User>> GetUsersAsync(string? searchString, string? roleFilter, IUserRepository.SortOption? sortBy)
@@ -101,6 +106,14 @@ namespace Database.Persistence.Repositories
 
 
         #endregion
+        public  User? GetUserWithProfile(int id)
+        {
+            return  RentalDBContext.Users
+                .Include(u => u.Role)
+                .Include(u => u.Image)
+                .FirstOrDefault(u => u.Id == id);
+        }
+
 
 
         #region IStatus
@@ -113,6 +126,18 @@ namespace Database.Persistence.Repositories
         #endregion
 
         #region Search
+        public override Dictionary<string, string> GetEntityColumnsWithTypes()
+        {
+            var d = base.GetEntityColumnsWithTypes();
+
+            d.Remove("Image");
+
+            foreach (var kv in d)
+            {
+                Console.WriteLine(kv);
+            }
+            return d;
+        }
 
         public override IQueryable<object> SelectViewColumns(IQueryable query)
         {
@@ -122,19 +147,19 @@ namespace Database.Persistence.Repositories
                 FirstName = u.FirstName,
                 LastName = u.LastName,
                 Email = u.Email,
+                PhoneNumber = u.PhoneNumber,
                 Role = u.Role != null ? u.Role.RoleName : "",
             });
 
             return query.Cast<object>();
         }
 
-        public int GetUserByEmail(string email)
+        public User? GetUserByEmail(string email)
         {
-            return  RentalDBContext.Users.Where(u => u.Email == email).FirstOrDefault().Id;
+            return  RentalDBContext.Users
+                .Include(u => u.Role)
+                .FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
         }
-
-
-
 
         #endregion
     }

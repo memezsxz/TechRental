@@ -378,8 +378,10 @@
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(label1);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
             Margin = new Padding(2);
             Name = "ManageEquipment";
+            StartPosition = FormStartPosition.CenterScreen;
             Text = "Manage Equipment";
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();

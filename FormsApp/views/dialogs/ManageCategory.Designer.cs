@@ -180,10 +180,11 @@
             cbIsActive.Text = "Active";
             cbIsActive.UseVisualStyleBackColor = true;
             // 
-            // ManageUser
+            // ManageCategory
             // 
             AutoScaleDimensions = new SizeF(11F, 28F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = Color.White;
             ClientSize = new Size(600, 386);
             Controls.Add(cbIsActive);
             Controls.Add(lblClose);
@@ -197,8 +198,10 @@
             Controls.Add(label3);
             Controls.Add(label2);
             Controls.Add(label1);
-            Name = "ManageUser";
-            Text = "ManageUser";
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            Name = "ManageCategory";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Manage Category";
             ResumeLayout(false);
             PerformLayout();
         }
