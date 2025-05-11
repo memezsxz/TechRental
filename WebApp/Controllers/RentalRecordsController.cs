@@ -7,6 +7,7 @@ using Helper;
 using Identity;
 using Microsoft.AspNetCore.Authorization;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using Microsoft.AspNetCore.Identity;
 
 namespace WebApp.Controllers
 {
@@ -14,14 +15,16 @@ namespace WebApp.Controllers
     public class RentalRecordsController : Controller
     {
         private readonly RentalDBContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public RentalRecordsController(RentalDBContext context)
+        public RentalRecordsController(RentalDBContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: RentalRecords
-        public async Task<IActionResult> Index(string? userEmail, string search, string sortBy, string status, string conditionFilter, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Index( string search, string sortBy, string status, string conditionFilter, int page = 1, int pageSize = 10)
         {
 
             //do not allow the Unuthenticated users to enter this
@@ -41,11 +44,7 @@ namespace WebApp.Controllers
             {
                 var loggedInEmail = User.Identity.Name;
 
-                // If the passed email doesn't match the logged-in user's email, deny access
-                if (!string.Equals(userEmail, loggedInEmail, StringComparison.OrdinalIgnoreCase))
-                {
-                    return Forbid(); //Authenticated but not allowed
-                }
+              
 
                 // Filter the data to only show this user's records
                 query = query.Where(u => u.RentalRequest.Customer.Email == loggedInEmail);
@@ -142,7 +141,7 @@ namespace WebApp.Controllers
                 var loggedInEmail = User.Identity.Name;
                 if (rentalRecord.RentalRequest.Customer.Email != loggedInEmail)
                 {
-                    return Forbid(); //Authenticated but not allowed
+                    return View("Forbidden"); //Authenticated but not allowed
 
                 }
 

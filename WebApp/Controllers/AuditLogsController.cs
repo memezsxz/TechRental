@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Database.Persistence;
+using Microsoft.AspNetCore.Authorization;
+using Identity;
 
 namespace WebApp.Controllers
 {
@@ -32,6 +34,11 @@ namespace WebApp.Controllers
         /// <returns>Paginated and filtered list of AuditLog entries</returns>
         public async Task<IActionResult> Index(string search, string sortBy, string sourceFilter, string userIdFilter, int page = 1, int pageSize = 15)
         {
+            if (!User.IsInRole(RoleConstants.Admin)) {
+                return View("Forbidden");
+            }
+
+
             // Base query with related User included
             var query = _context.AuditLogs
                 .Include(a => a.User)
