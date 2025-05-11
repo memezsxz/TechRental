@@ -195,7 +195,7 @@ namespace WebApp.Controllers
         [Authorize(Roles = "Admin")]
         //DeleteConfirmed ==> Post method (handel delete button click)
         [HttpPost, ActionName("Delete")]
-        //[ValidateAntiForgeryToken]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
             if (!User.IsInRole("Admin"))

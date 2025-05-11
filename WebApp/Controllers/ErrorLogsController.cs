@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Database.Persistence;
+using Identity;
+using Microsoft.AspNetCore.Authorization;
 
 namespace WebApp.Controllers
 {
@@ -33,6 +35,12 @@ namespace WebApp.Controllers
         /// <returns>View with filtered and paginated error logs</returns>
         public async Task<IActionResult> Index(string search, string sortBy, string sourceFilter, string userIdFilter, int page = 1, int pageSize = 15)
         {
+
+            if (!User.IsInRole(RoleConstants.Admin))
+            {
+                return View("Forbidden");
+            }
+
             // Base query includes related user for display
             var query = _context.SystemErrorLogs
                 .Include(e => e.User)
