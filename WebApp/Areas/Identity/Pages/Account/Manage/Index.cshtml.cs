@@ -8,11 +8,11 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Database.Core.Domain;
 using Database.Persistence;
+using Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using WebApp.Areas.Identity.Data;
 
 namespace WebApp.Areas.Identity.Pages.Account.Manage
 {

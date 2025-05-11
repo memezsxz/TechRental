@@ -154,9 +154,11 @@ namespace Database.Persistence.Repositories
             return query.Cast<object>();
         }
 
-        public int GetUserByEmail(string email)
+        public User? GetUserByEmail(string email)
         {
-            return  RentalDBContext.Users.Where(u => u.Email == email).FirstOrDefault().Id;
+            return  RentalDBContext.Users
+                .Include(u => u.Role)
+                .FirstOrDefault(u => u.Email.ToLower() == email.ToLower());
         }
 
 

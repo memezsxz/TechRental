@@ -3,9 +3,8 @@ using Database.Persistence;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Sprache;
-using WebApp.Helpers;
 
-namespace WebApp.Areas.Identity.Data
+namespace Identity
 {
     public class ContextSeed
     {

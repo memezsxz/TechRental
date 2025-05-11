@@ -16,7 +16,7 @@ namespace FormsApp
     static class Global
     {
         public static int userID = 2;
-        public static int userType = 1; // admin
+        public static string userType = "Admin"; // admin
         // public static BindingList<string> pageSizes = new BindingList<string>() { "10", "20", "30" };
         public static BindingList<int> pageSizes = new BindingList<int>() { 10, 20, 30 };
 
@@ -37,7 +37,7 @@ namespace FormsApp
         {
             get
             {
-                if (userType == 1) return new()
+                if (userType.ToLower() == "admin") return new()
                 { 
                     { typeof(AuditLog), (false, false, false) }, 
                     { typeof(SystemErrorLog), (false, false, false) }, 
@@ -48,7 +48,7 @@ namespace FormsApp
                     { typeof(RentalRecord), (false, true, false) },
                 };
 
-                if (userType == 2) return new()
+                if (userType.ToLower() == "manager") return new()
                 {
                     { typeof(Category), (false, false, false) },
                     { typeof(RentalRequest), (false, true, true) },
