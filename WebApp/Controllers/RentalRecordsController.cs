@@ -6,7 +6,6 @@ using Database.Persistence;
 using Helper;
 using Microsoft.AspNetCore.Authorization;
 using WebApp.Helpers;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace WebApp.Controllers
 {
@@ -21,39 +20,35 @@ namespace WebApp.Controllers
         }
 
         // GET: RentalRecords
-        public async Task<IActionResult> Index(string? userEmail, string search, string sortBy, string status, string conditionFilter, int page = 1, int pageSize = 10)
+        /// <summary>
+        /// Displays a list of rental records with support for:
+        /// - Role-based filtering (customer vs admin/manager)
+        /// - Transaction vs Return toggle
+        /// - Search by equipment name or request ID
+        /// - Filtering by return condition (for returns)
+        /// - Filtering by due status (for transactions)
+        /// - Sorting and pagination
+        /// </summary>
+        public async Task<IActionResult> Index(string search, string sortBy, string status, string conditionFilter, string dueFilter, int page = 1, int pageSize = 10)
         {
 
-            //do not allow the Unuthenticated users to enter this
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
+            // Block unauthenticated users
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
 
-
-
+            // Base query with related entities
             var query = _context.RentalRecords
                 .Include(r => r.RentalRequest).ThenInclude(r => r.Customer)
                 .Include(r => r.ReturnCondition)
                 .AsQueryable();
 
+            // Role-based filter: Customers only see their own records
             if (User.IsInRole(RoleConstants.Customer))
             {
                 var loggedInEmail = User.Identity.Name;
-
-                // If the passed email doesn't match the logged-in user's email, deny access
-                if (!string.Equals(userEmail, loggedInEmail, StringComparison.OrdinalIgnoreCase))
-                {
-                    return Forbid(); //Authenticated but not allowed
-                }
-
-                // Filter the data to only show this user's records
                 query = query.Where(u => u.RentalRequest.Customer.Email == loggedInEmail);
-
             }
 
-
-            // Search
+            // Search by Equipment Name or Request ID
             if (!string.IsNullOrWhiteSpace(search))
             {
                 query = query.Where(r =>
@@ -61,47 +56,59 @@ namespace WebApp.Controllers
                     r.RentalRequest.Id.ToString().Contains(search));
             }
 
-            // Transaction/Return Toggle
+            // Transaction / Return toggle
             if (!string.IsNullOrWhiteSpace(status))
             {
                 if (status.ToLower() == "transaction")
+                {
                     query = query.Where(r => r.ActualReturnDate == null);
+
+                    // Due Filter only applies to ongoing transactions
+                    if (!string.IsNullOrWhiteSpace(dueFilter))
+                    {
+                        var today = DateTime.Today;
+
+                        query = dueFilter switch
+                        {
+                            "overdue" => query.Where(r => r.RentalRequest.ReturnDate < today),
+                            "today" => query.Where(r => r.RentalRequest.ReturnDate == today),
+                            "upcoming" => query.Where(r => r.RentalRequest.ReturnDate > today),
+                            _ => query
+                        };
+                    }
+                }
                 else if (status.ToLower() == "return")
+                {
                     query = query.Where(r => r.ActualReturnDate != null);
+                }
             }
 
-            // Return Condition Filter
+            // Return Condition filter (for returns)
             if (!string.IsNullOrWhiteSpace(conditionFilter))
             {
                 query = query.Where(r => r.ReturnCondition.ConditionName == conditionFilter);
             }
 
-            // Sort
-            if (!string.IsNullOrWhiteSpace(sortBy))
+            // Sorting
+            query = !string.IsNullOrWhiteSpace(sortBy) switch
             {
-                query = sortBy switch
-                {
-                    "date_asc" => query.OrderBy(r => r.PickupDate),
-                    "date_desc" => query.OrderByDescending(r => r.PickupDate),
-                    _ => query.OrderByDescending(r => r.CreatedAt),
-                };
-            }
-            else
-            {
-                query = query.OrderByDescending(r => r.CreatedAt);
-            }
+                true when sortBy == "date_asc" => query.OrderBy(r => r.PickupDate),
+                true when sortBy == "date_desc" => query.OrderByDescending(r => r.PickupDate),
+                _ => query.OrderByDescending(r => r.CreatedAt)
+            };
 
             // Pagination
             var total = await query.CountAsync();
             var records = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
-            // ViewBag for dropdown & pagination
+            // ViewBag values for UI state
             ViewBag.Search = search;
             ViewBag.SortBy = sortBy;
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
             ViewBag.RecordStatus = status;
             ViewBag.ConditionFilter = conditionFilter;
+            ViewBag.DueFilter = dueFilter;
             ViewBag.Conditions = await _context.ReturnConditionStatuses
                 .Select(c => c.ConditionName)
                 .Distinct()

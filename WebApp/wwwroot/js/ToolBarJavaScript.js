@@ -13,3 +13,26 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("auto-filter-form");
+
+    if (!form) return;
+
+    // Auto-submit on change for all select elements
+    form.querySelectorAll("select").forEach(select => {
+        select.addEventListener("change", () => form.submit());
+    });
+
+    // Auto-submit on Enter key in all text inputs
+    form.querySelectorAll("input[type='text']").forEach(input => {
+        input.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                form.submit();
+            }
+        });
+    });
+});
+

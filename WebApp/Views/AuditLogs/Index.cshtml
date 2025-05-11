@@ -1,7 +1,7 @@
 ﻿@model IEnumerable<Database.Core.Domain.AuditLog>
 
 @* -------------------------------------------------------------------------------------
-    Page: AuditLogs/Index.cshtml
+    Page: Index.cshtml
     Purpose:
         Displays a paginated, searchable, and filterable list of system audit logs.
         Each log shows metadata about user actions including timestamp, source, 
@@ -50,7 +50,7 @@
     </div>
 
     <!-- Filter/Search/Sort Form -->
-    <form method="get" id="filterForm" class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="max-width: 1100px;">
+    <form method="get" id="auto-filter-form" class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="max-width: 1100px;">
         
         <!-- SourceEntity Filter -->
         <div style="flex: 1; min-width: 180px;">
@@ -176,17 +176,3 @@
         </nav>
     }
 </div>
-
-<!-- JS: Auto-submit form on change -->
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("filterForm");
-
-        form.querySelector("select[name='sortBy']").addEventListener("change", () => form.submit());
-        form.querySelector("select[name='sourceFilter']").addEventListener("change", () => form.submit());
-
-        form.querySelector("input[name='search']").addEventListener("keypress", function (e) {
-            if (e.key === "Enter") form.submit();
-        });
-    });
-</script>

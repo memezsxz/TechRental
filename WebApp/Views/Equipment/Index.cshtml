@@ -40,7 +40,7 @@
 <div class="container my-4">
     <!-- Filter/Search/Sort Form -->
     <form method="get"
-          id="filterForm"
+          id="auto-filter-form"
           class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3"
           style="max-width: 1100px;">
 
@@ -198,20 +198,3 @@
         }
     </ul>
 </nav>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function () {
-        const form = document.getElementById("filterForm");
-
-        // Auto-submit when sort or category changes
-        form.querySelector("select[name='sortBy']").addEventListener("change", () => form.submit());
-        form.querySelector("select[name='category']").addEventListener("change", () => form.submit());
-
-        // Optional: auto-submit when pressing Enter in search
-        form.querySelector("input[name='search']").addEventListener("keypress", function (e) {
-            if (e.key === "Enter") {
-                form.submit();
-            }
-        });
-    });
-</script>

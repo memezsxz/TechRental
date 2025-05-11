@@ -1,9 +1,23 @@
 ﻿@model IEnumerable<Database.Core.Domain.RentalRecord>
 
-@{
-    var isCustomer = User.IsInRole("Customer");
-    var userEmail = isCustomer ? User.Identity?.Name : null;
-}
+@* -------------------------------------------------------------------------------------
+    Page: RentalRecords/Index.cshtml
+    Purpose:
+        Displays rental records with a toggle between:
+        - Transactions (ongoing rentals)
+        - Returns (completed rentals)
+
+    Features:
+        - Role-based filtering (Customers see only their own data)
+        - Toggle buttons: Transactions / Returns
+        - Due filter (Overdue / Today / Upcoming) for transactions
+        - Condition filter (Good, Damaged, Lost, etc.) for returns
+        - Search by Equipment Name or Request ID
+        - Sort by Pickup Date (newest/oldest)
+        - Responsive table display of rental data
+        - Clickable rows with tooltips (navigates to Details view)
+        - Pagination with URL state persistence
+-------------------------------------------------------------------------------------- *@
 
 @{
     ViewData["Title"] = "Rental Records";
@@ -11,15 +25,18 @@
 
     var currentSearch = ViewBag.Search as string;
     var currentSort = ViewBag.SortBy as string;
+    var isCustomer = User.IsInRole("Customer");
+    var userEmail = isCustomer ? User.Identity?.Name : null;
 }
 
 <div class="container mt-5">
      <!-- Title -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="fw-bold text-success mb-4">Rental Records</h2>
+     <h2 class="text-center mb-5 page-title">Rental Records</h2>
 
-        <!-- Toggle Buttons -->
-        <div class="btn-group mb-3" role="group">
+    <!-- Page title and toggle buttons -->
+    <div class="mt-2 mb-5 text-end">
+        <!-- Toggle between HIDDEN and UNHIDDEN feedback using ViewBag.Status -->
+        <div class="btn-group" role="group">
             <a href="@Url.Action("Index", new { status = "transaction", search = ViewBag.Search, sortBy = ViewBag.SortBy ,userEmail= User.Identity.Name})"
                class="btn btn-outline-success px-4 @(ViewBag.RecordStatus == "transaction" ? "active" : "")"
                style="border-radius: 8px 0 0 8px;">
@@ -31,21 +48,32 @@
                 RETURNS
             </a>
         </div>
-
     </div>
 
-    <form method="get" class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="max-width: 1100px;">
-       <!-- Return Condition Filter -->
-        <div style="flex: 1; min-width: 200px;">
-            <select name="conditionFilter" class="form-select">
-                <option value="">All Conditions</option>
-                @foreach (var condition in ViewBag.Conditions as List<string>)
-                {
-                    var selected = ViewBag.ConditionFilter == condition ? "selected" : "";
-                    @:<option value="@condition" @selected>@condition</option>
-                }
-            </select>
-        </div>
+    <form method="get" id="auto-filter-form" class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="max-width: 1100px;">
+       @if (ViewBag.RecordStatus == "transaction")
+       {
+            <div style="flex: 1; min-width: 200px;">
+                <select name="dueFilter" class="form-select">
+                    <option value="">All Due Status</option>
+                    <option value="overdue" selected="@(ViewBag.DueFilter == "overdue" ? "selected" : null)">Overdue</option>
+                    <option value="today" selected="@(ViewBag.DueFilter == "today" ? "selected" : null)">Return Today</option>
+                    <option value="upcoming" selected="@(ViewBag.DueFilter == "upcoming" ? "selected" : null)">Upcoming</option>
+                </select>
+            </div>
+       } else {
+             <!-- Return Condition Filter -->
+            <div style="flex: 1; min-width: 200px;">
+                <select name="conditionFilter" class="form-select">
+                    <option value="">All Conditions</option>
+                    @foreach (var condition in ViewBag.Conditions as List<string>)
+                    {
+                        var selected = ViewBag.ConditionFilter == condition ? "selected" : "";
+                        @:<option value="@condition" @selected>@condition</option>
+                    }
+                </select>
+            </div>
+       }
 
         <!-- Search -->
         <div style="flex: 2; min-width: 300px;">
@@ -70,6 +98,7 @@
         <div>
             <button type="submit" class="btn btn-success px-4">Search</button>
         </div>
+        <input type="hidden" name="status" value="@ViewBag.RecordStatus" />
     </form>
 
     <table class="table text-center align-middle">
@@ -78,7 +107,10 @@
         {
             <tr>
                 <th>Rental Request ID</th>
-                <th>Customer ID</th>
+                 @if (!User.IsInRole("Customer"))
+                {
+                    <th>Customer ID</th>
+                }
                 <th>Equipment</th>
                 <th>Pickup Date</th>
                 <th>Return Date</th>
@@ -89,7 +121,10 @@
         {
             <tr>
                 <th>Record ID</th>
-                <th>Customer ID</th>
+                @if (!User.IsInRole("Customer"))
+                {
+                    <th>Customer ID</th>
+                }                
                 <th>Equipment</th>
                 <th>Pickup Date</th>
                 <th>Return Date</th>
@@ -113,7 +148,10 @@
                     data-href="@Url.Action("Details", "RentalRecords", new { id = item.Id })"
                     style="cursor: pointer;">
                     <td>@item.RentalRequest.Id</td>
-                    <td>@item.RentalRequest.CustomerId</td>
+                    @if (!User.IsInRole("Customer"))
+                    {
+                        <td>@item.RentalRequest.CustomerId</td>
+                    }                    
                     <td>@item.EquipmentName</td>
                     <td>@item.PickupDate.ToString("d/M/yyyy")</td>
                     <td style="@returnDateStyle">@item.RentalRequest.ReturnDate.ToString("d/M/yyyy")</td>
@@ -129,7 +167,10 @@
                     data-href="@Url.Action("Details", "RentalRecords", new { id = item.Id })"
                     style="cursor: pointer;">
                     <td>@item.Id</td>
-                    <td>@item.RentalRequest.CustomerId</td>
+                    @if (!User.IsInRole("Customer"))
+                    {
+                        <td>@item.RentalRequest.CustomerId</td>
+                    }
                     <td>@item.EquipmentName</td>
                     <td>@item.PickupDate.ToString("d/M/yyyy")</td>
                     <td>@item.ActualReturnDate?.ToString("d/M/yyyy")</td>
@@ -154,10 +195,24 @@
                 </tr>
             }
         }
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="@(ViewBag.RecordStatus == "transaction" ? (User.IsInRole("Customer") ? 5 : 6) : (User.IsInRole("Customer") ? 6 : 7))"
+                class="text-muted py-5">                    
+                    @if (ViewBag.RecordStatus == "transaction")
+                    {
+                        <span>No transaction records found.</span>
+                    }
+                    else
+                    {
+                        <span>No return records found.</span>
+                    }
+                </td>
+            </tr>
+        }
     </tbody>
 </table>
-
-
 </div>
 
 <!-- Pagination -->
