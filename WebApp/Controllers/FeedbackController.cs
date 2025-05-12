@@ -62,20 +62,10 @@ namespace WebApp.Controllers
         /// Accessible by Customers only.
         /// </summary>
         /// <returns>View for creating a new feedback record</returns>
-        public IActionResult Create()
+        public IActionResult Create(int rentalRecordId)
         {
-
-            if (!User.Identity.IsAuthenticated)
-            {
-                return View("Unauthorized");
-            }
-
-
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
-            {
-                return View("Forbidden");
-
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized");
+            if (!User.IsInRole(RoleConstants.Customer)) return View("Forbidden");
 
             // Populate dropdowns for Equipment and Users
             ViewData["EquipmentId"] = new SelectList(_context.Equipment, "Id", "Name");
@@ -105,20 +95,11 @@ namespace WebApp.Controllers
         /// </summary>
         /// <param name="feedback">Feedback model bound from the form</param>
         /// <returns>Redirect to Index on success, or redisplay form with errors, or error view on exception</returns>
-        public async Task<IActionResult> Create([Bind("Id,Note,Rate,TimeDate,UserId,EquipmentId,IsHidden,CreatedAt,UpdatedAt")] Feedback feedback)
+        public async Task<IActionResult> Create(Feedback feedback)
         {
 
-            if (!User.Identity.IsAuthenticated)
-            {
-                return View("Unauthorized");
-            }
-
-
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
-            {
-                return View("Forbidden");
-
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized");
+            if (!User.IsInRole(RoleConstants.Customer)) return View("Forbidden");
 
             // If form data is invalid, repopulate dropdowns and return the form
             if (!ModelState.IsValid)

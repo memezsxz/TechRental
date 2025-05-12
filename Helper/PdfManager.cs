@@ -31,5 +31,20 @@ namespace Helper
 
             return true;
         }
+
+        public static async Task<bool> DeletePdfFromDatabaseAndS3(RentalDBContext context, int docId)
+        {
+            var doc = await context.Documents.FindAsync(docId);
+            if (doc == null || !doc.Guid.HasValue)
+                return false;
+
+            var deleted = await S3Uploader.DeleteFileAsync(doc.Guid.Value);
+            if (!deleted)
+                return false;
+
+            context.Documents.Remove(doc);
+            await context.SaveChangesAsync();
+            return true;
+        }
     }
 }
