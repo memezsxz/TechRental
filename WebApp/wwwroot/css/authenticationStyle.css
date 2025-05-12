@@ -267,3 +267,15 @@
         color: white !important;
         font-weight: bold;
     }
+.user-row {
+    transition: all 0.3s ease-in-out;
+}
+
+    .user-row:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        transform: translateY(-4px);
+        background-color: #f9fdf9;
+        z-index: 1;
+        position: relative;
+    }
+
