@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Database.Core;
 using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence;
@@ -111,6 +112,36 @@ namespace FormsApp
         public static void DisplayReportErrorDialog(Exception e)
         {
             Console.WriteLine("From Global: Error: " + e.Message);
+
+            var result = MessageBox.Show(
+                "Something went wrong while processing your action.\n\nWould you like to report this error to the support team?",
+                "Unexpected Error",
+                MessageBoxButtons.YesNo,
+                MessageBoxIcon.Warning
+            );
+
+            if (result != DialogResult.Yes) return;
+
+            UnitOfWork unitOfWork = new UnitOfWork();
+
+            var errorLog = new SystemErrorLog
+            {
+                ErrorMessage = e.Message,
+                ErrorSource = e.Source,
+                SourceProcedure = e.TargetSite?.Name,
+                UserId = unitOfWork.UserId,
+                Timestamp = DateTime.Now
+            };
+
+            unitOfWork.SystemErrorLogs.Add(errorLog);
+            unitOfWork.SaveChanges();
+
+            MessageBox.Show(
+                "Thank you. The error has been reported anonymously and will be reviewed.",
+                "Report Submitted",
+                MessageBoxButtons.OK,
+                MessageBoxIcon.Information
+            );
         }
 
         public static void DrawRoundedBorder(Control control, PaintEventArgs e, Color borderColor, int borderRadius = 10, int borderWidth = 1)

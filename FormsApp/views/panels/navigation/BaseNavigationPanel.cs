@@ -266,7 +266,6 @@ namespace FormsApp.views.panels
             {
                 FillView(new ManagerDashboardView());
             }
-
         }
 
         /// <summary>
