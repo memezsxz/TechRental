@@ -25,7 +25,6 @@ using Identity;
 
 namespace WebApp.Controllers
 {
-    [Authorize(Roles ="Admin")]
     public class UsersController : Controller
     {
         
@@ -44,12 +43,11 @@ namespace WebApp.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
         //Index ==> Get method (Display the view)
         public async Task<IActionResult> Index(string? searchString, string? roleFilter, SortOption? sortBy, int page = 1, int pageSize = 10)
         {
             if (!User.IsInRole("Admin")) {
-                return Unauthorized();
+                return View("Forbidden");
             }
 
             var allUsers = await _unitOfWork.Users.GetUsersAsync(searchString, roleFilter, sortBy);
@@ -73,25 +71,24 @@ namespace WebApp.Controllers
         }
 
 
-        [Authorize(Roles = "Admin")]
         //Edit ==> Get method (Display the view of the edit)
         public async Task<IActionResult> Edit(int? id)
         {
             if (!User.IsInRole("Admin"))
             {
-                return Unauthorized();
+                return View("Forbidden");
             }
 
 
             if (id == null || _unitOfWork.Users == null || id == 0)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
             var user = await _unitOfWork.Users.GetUserWithRoleAsync(id.Value);
             if (user == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
             var viewModel = new EditUserViewModel
@@ -105,7 +102,6 @@ namespace WebApp.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
         //Index ==> Post method (handel the form submit)
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -114,7 +110,7 @@ namespace WebApp.Controllers
 
             if (!User.IsInRole("Admin"))
             {
-                return Unauthorized();
+                return View("Forbidden");
             }
 
             //do some server side validation 
@@ -174,7 +170,7 @@ namespace WebApp.Controllers
                 catch (DbUpdateConcurrencyException) // TODO Fatima: check the for the other error from SaveChangesAsync 
                 {
                     if (!await _unitOfWork.Users.UserExistsAsync(editUser.User.Id))
-                        return NotFound();
+                        return View("NotFound");
                     else
                         throw;
 
@@ -192,7 +188,6 @@ namespace WebApp.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
         //DeleteConfirmed ==> Post method (handel delete button click)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -200,19 +195,19 @@ namespace WebApp.Controllers
         {
             if (!User.IsInRole("Admin"))
             {
-                return Unauthorized();
+                return View("Forbidden");
             }
 
             if (id == null || _unitOfWork.Users == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
             var user = await _unitOfWork.Users.GetAsync(id.Value);
 
             if (user == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
             try
@@ -321,12 +316,11 @@ namespace WebApp.Controllers
 
 
 
-        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> SendResetLink(int id)
         {
             if (!User.IsInRole("Admin"))
             {
-                return Unauthorized();
+                return View("Forbidden");
             }
 
             var identityUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserID == id);

@@ -203,7 +203,7 @@
                 <div class="d-flex">
 
                     @{
-                        if (User.IsInRole(RoleConstants.Customer) || User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager))
+                        if (User.IsInRole(RoleConstants.Customer))
                         {
                             <button class="btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#notificationsPanel" aria-controls="notificationsPanel">
                                 <i id="navbarBellIcon" class="bi bi-bell" style="font-size: 1.5rem;"></i>
