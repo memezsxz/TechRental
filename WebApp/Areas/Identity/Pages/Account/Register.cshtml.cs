@@ -13,6 +13,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Database.Core.Domain;
 using Database.Persistence;
+using Identity;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -21,8 +22,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.Extensions.Logging;
-using WebApp.Areas.Identity.Data;
-using WebApp.Helpers;
 
 namespace WebApp.Areas.Identity.Pages.Account
 {
@@ -119,6 +118,9 @@ namespace WebApp.Areas.Identity.Pages.Account
             [Required]
             public string LastName { get; set; }
 
+            [Required]
+            public string PhoneNumber { get; set; }
+
         }
 
 
@@ -126,7 +128,9 @@ namespace WebApp.Areas.Identity.Pages.Account
         {
             await ContextSeed.SeedRoleAsync(_userManager, _roleManager);
             await ContextSeed.SeedAdminAsync(_userManager, _roleManager, _context);
+            await ContextSeed.SeedManagerAsync(_userManager, _roleManager, _context);
 
+            
 
             //if (!_roleManager.RoleExistsAsync("Admin").GetAwaiter().GetResult())
             //{
@@ -216,6 +220,7 @@ namespace WebApp.Areas.Identity.Pages.Account
                     Email = Input.Email,
                     RoleId = customerRole.Id, //asign the customer role id with customer 
                     IsActive = true,
+                    PhoneNumber = Input.PhoneNumber
 
                 };
 
@@ -227,7 +232,8 @@ namespace WebApp.Areas.Identity.Pages.Account
                 {
                     FirstName = Input.FirstName,
                     LastName = Input.LastName,
-                    UserID = newCustomer.Id
+                    UserID = newCustomer.Id,
+                    PhoneNumber = Input.PhoneNumber
                 };
 
 

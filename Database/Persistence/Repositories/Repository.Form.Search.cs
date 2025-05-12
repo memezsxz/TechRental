@@ -1,6 +1,7 @@
 ﻿using System.Linq.Expressions;
 using System.Reflection;
 using Database.Core.Repositories;
+using Database.Search;
 using Microsoft.EntityFrameworkCore;
 
 namespace Database.Persistence.Repositories;

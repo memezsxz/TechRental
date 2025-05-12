@@ -20,10 +20,10 @@ namespace Database.Core.Domain
         [Column("file_type")]
         [StringLength(50)]
         public string? FileType { get; set; }
-        [Column("file_data")]
-        public byte[]? FileData { get; set; }
         [Column("created_at", TypeName = "datetime")]
         public DateTime? CreatedAt { get; set; }
+        [Column("guid")]
+        public Guid? Guid { get; set; }
 
         [ForeignKey("RentalId")]
         [InverseProperty("Documents")]

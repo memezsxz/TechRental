@@ -9,6 +9,10 @@ using Database.Core.Domain;
 
 namespace Database.Core.Repositories
 {
+    /// <summary>
+    /// Repository interface for managing <see cref="Feedback"/> entities.
+    /// Inherits standard CRUD operations from <see cref="IRepository{T}"/>.
+    /// </summary>
     public interface IFeedbackRepository : IRepository<Feedback>
     {
     }

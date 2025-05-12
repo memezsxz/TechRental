@@ -99,7 +99,7 @@ public static class S3Uploader
 
 
     // Helper method to return the appropriate MIME type based on file extension  
-    private static string GetContentType(string extension)
+    public static string GetContentType(string extension)
     {
         switch (extension.ToLower())
         {

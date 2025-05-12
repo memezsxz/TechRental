@@ -1,6 +1,8 @@
 ﻿using Database.Core;
 using Database.Core.Domain;
 using Database.Persistence;
+using Identity;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApp.Controllers
@@ -9,12 +11,15 @@ namespace WebApp.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly RentalDBContext _contxet;
-        
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public ApiController(IUnitOfWork unitOfWork, RentalDBContext context)
+
+
+        public ApiController(IUnitOfWork unitOfWork, RentalDBContext context, UserManager<ApplicationUser> userManager)
         {
             _unitOfWork = unitOfWork;
             _contxet = context;
+            _userManager = userManager;
         }
 
         public IActionResult ping()
@@ -39,41 +44,52 @@ namespace WebApp.Controllers
             return Json(categorieslist);
         }
 
-        public IActionResult notifications() {
+        [HttpGet("/api/notifications")]
+        public async Task<IActionResult> GetCurrentUserNotifications()
+        {
+            if (!User.Identity.IsAuthenticated)
+                return Unauthorized();
 
-            if (User.Identity.Name == null || User.Identity.Name == "") {
-                return Unauthorized("What are you doing here ??? Go and Login");
+            if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin)) {
+                return View("Forbidden");
             }
 
-            var user = _contxet.Users.FirstOrDefault(u => u.Email == User.Identity.Name);
-            if (user == null)
-            {
-                return Unauthorized("User not found in database.");
-            }
-            var id = user.Id;
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return NotFound();
 
-            var notifications = _unitOfWork.Notifications.GetAllAsync().Result;
+            var id = currentUser.UserID;
 
-            var notificationList = new List<Notification>();
+            var notifications = (await _unitOfWork.Notifications.GetAllAsync())
+                .Where(n => n.UserId == id)
+                .OrderByDescending(n => n.CreatedAt)
+                .ToList();
 
-            foreach (var notification in notifications)
-            {
-                if (notification.UserId != id)
-                    continue;
-
-                notificationList.Add(notification);
-            }
-            return Json(notificationList);
+            return Json(notifications);
         }
 
+
+
         [HttpPost("/api/notifications/markread/{id}")]
-        public IActionResult MarkAsRead(int id)
+        public async Task<IActionResult> MarkAsRead(int id)
         {
-            var notification = _unitOfWork.Notifications.GetAsync(id).Result;
-            if (notification == null) return NotFound();
+            if (!User.Identity.IsAuthenticated)
+                return Unauthorized();
+
+            var currentUser = await _userManager.GetUserAsync(User);
+            if (currentUser == null)
+                return NotFound();
+
+            var notification = await _unitOfWork.Notifications.GetAsync(id);
+            if (notification == null)
+                return NotFound();
+
+            // Prevent access to other users’ notifications
+            if (notification.UserId != currentUser.UserID)
+                return Forbid();
 
             notification.IsRead = true;
-            _unitOfWork.SaveChanges(); // Or SaveChanges()
+            await _unitOfWork.SaveChangesAsync();
 
             return Ok();
         }

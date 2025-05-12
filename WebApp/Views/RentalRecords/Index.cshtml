@@ -1,0 +1,315 @@
+﻿@model IEnumerable<Database.Core.Domain.RentalRecord>
+
+@* -------------------------------------------------------------------------------------
+    Page: RentalRecords/Index.cshtml
+    Purpose:
+        Displays rental records with a toggle between:
+        - Transactions (ongoing rentals)
+        - Returns (completed rentals)
+
+    Features:
+        - Role-based filtering (Customers see only their own data)
+        - Toggle buttons: Transactions / Returns
+        - Due filter (Overdue / Today / Upcoming) for transactions
+        - Condition filter (Good, Damaged, Lost, etc.) for returns
+        - Search by Equipment Name or Request ID
+        - Sort by Pickup Date (newest/oldest)
+        - Responsive table display of rental data
+        - Clickable rows with tooltips (navigates to Details view)
+        - Pagination with URL state persistence
+-------------------------------------------------------------------------------------- *@
+
+@{
+    ViewData["Title"] = "Rental Records";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentSearch = ViewBag.Search as string;
+    var currentSort = ViewBag.SortBy as string;
+    var isCustomer = User.IsInRole("Customer");
+    var userEmail = isCustomer ? User.Identity?.Name : null;
+}
+
+<div class="container mt-5">
+     <!-- Title -->
+     <h2 class="text-center mb-5 page-title">Rental Records</h2>
+
+    <!-- Page title and toggle buttons -->
+    <div class="mt-2 mb-5 text-end">
+        <!-- Toggle between HIDDEN and UNHIDDEN feedback using ViewBag.Status -->
+        <div class="btn-group" role="group">
+            <a href="@Url.Action("Index", new { status = "transaction", search = ViewBag.Search, sortBy = ViewBag.SortBy ,userEmail= User.Identity.Name})"
+               class="btn btn-outline-success px-4 @(ViewBag.RecordStatus == "transaction" ? "active" : "")"
+               style="border-radius: 8px 0 0 8px;">
+                TRANSACTIONS
+            </a>
+            <a href="@Url.Action("Index", new { status = "return", search = ViewBag.Search, sortBy = ViewBag.SortBy ,userEmail= User.Identity.Name})"
+               class="btn btn-outline-success px-4 @(ViewBag.RecordStatus == "return" ? "active" : "")"
+               style="border-radius: 0 8px 8px 0;">
+                RETURNS
+            </a>
+        </div>
+    </div>
+
+    <form method="get" id="auto-filter-form" class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="max-width: 1100px;">
+       @if (ViewBag.RecordStatus == "transaction")
+       {
+            <div style="flex: 1; min-width: 200px;">
+                <select name="dueFilter" class="form-select">
+                    <option value="">All Due Status</option>
+                    <option value="overdue" selected="@(ViewBag.DueFilter == "overdue" ? "selected" : null)">Overdue</option>
+                    <option value="today" selected="@(ViewBag.DueFilter == "today" ? "selected" : null)">Return Today</option>
+                    <option value="upcoming" selected="@(ViewBag.DueFilter == "upcoming" ? "selected" : null)">Upcoming</option>
+                </select>
+            </div>
+       } else {
+             <!-- Return Condition Filter -->
+            <div style="flex: 1; min-width: 200px;">
+                <select name="conditionFilter" class="form-select">
+                    <option value="">All Conditions</option>
+                    @foreach (var condition in ViewBag.Conditions as List<string>)
+                    {
+                        var selected = ViewBag.ConditionFilter == condition ? "selected" : "";
+                        @:<option value="@condition" @selected>@condition</option>
+                    }
+                </select>
+            </div>
+       }
+
+        <!-- Search -->
+        <div style="flex: 2; min-width: 300px;">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Search by Equipment Name or Request ID"
+                   value="@currentSearch" />
+        </div>
+
+        <!-- Sort -->
+        <div style="flex: 1; min-width: 180px;">
+            <select name="sortBy" class="form-select">
+                @{
+                    var selectedSort = currentSort == "date_desc" ? "selected" : "";
+                    @:<option value="date_desc" @selectedSort>Newest First</option>
+
+                    selectedSort = currentSort == "date_asc" ? "selected" : "";
+                    @:<option value="date_asc" @selectedSort>Oldest First</option>
+                }
+            </select>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-success px-4">Search</button>
+        </div>
+        <input type="hidden" name="status" value="@ViewBag.RecordStatus" />
+    </form>
+
+    <table class="table text-center align-middle">
+    <thead>
+        @if (ViewBag.RecordStatus == "transaction")
+        {
+            <tr>
+                <th>Rental Request ID</th>
+                 @if (!User.IsInRole("Customer"))
+                {
+                    <th>Customer ID</th>
+                }
+                <th>Equipment</th>
+                <th>Pickup Date</th>
+                <th>Return Date</th>
+                <th>Total Cost</th>
+            </tr>
+        }
+        else
+        {
+            <tr>
+                <th>Record ID</th>
+                @if (!User.IsInRole("Customer"))
+                {
+                    <th>Customer ID</th>
+                }                
+                <th>Equipment</th>
+                <th>Pickup Date</th>
+                <th>Return Date</th>
+                <th>Total Cost</th>
+                <th>Return Condition</th>
+            </tr>
+        }
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            if (ViewBag.RecordStatus == "transaction")
+            {
+                var isOverdue = DateTime.Now.Date > item.RentalRequest?.ReturnDate.Date;
+                var returnDateStyle = isOverdue ? "color:red; font-weight:bold;" : "";
+
+                <tr class="clickable-row"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Click to view details"
+                    data-href="@Url.Action("Details", "RentalRecords", new { id = item.Id })"
+                    style="cursor: pointer;">
+                    <td>@item.RentalRequest.Id</td>
+                    @if (!User.IsInRole("Customer"))
+                    {
+                        <td>@item.RentalRequest.CustomerId</td>
+                    }                    
+                    <td>@item.EquipmentName</td>
+                    <td>@item.PickupDate.ToString("d/M/yyyy")</td>
+                    <td style="@returnDateStyle">@item.RentalRequest.ReturnDate.ToString("d/M/yyyy")</td>
+                    <td>@item.TotalCost?.ToString("0.00")</td>
+                </tr>
+            }
+            else
+            {
+                <tr class="clickable-row"
+                    data-bs-toggle="tooltip"
+                    data-bs-placement="top"
+                    title="Click to view details"
+                    data-href="@Url.Action("Details", "RentalRecords", new { id = item.Id })"
+                    style="cursor: pointer;">
+                    <td>@item.Id</td>
+                    @if (!User.IsInRole("Customer"))
+                    {
+                        <td>@item.RentalRequest.CustomerId</td>
+                    }
+                    <td>@item.EquipmentName</td>
+                    <td>@item.PickupDate.ToString("d/M/yyyy")</td>
+                    <td>@item.ActualReturnDate?.ToString("d/M/yyyy")</td>
+                    <td>@item.TotalCost.Value.ToString("0.00")</td>
+                    @{
+                        var condition = item.ReturnCondition?.ConditionName?.ToLower();
+                        var badgeClass = condition switch
+                        {
+                            "good condition" => "success",
+                            "damaged" => "danger",
+                            "lost" => "dark",
+                            "requires inspection" => "warning",
+                            _ => "secondary"
+                        };
+                    }
+                    <td>
+                        <span class="badge bg-@badgeClass text-uppercase">
+                            @item.ReturnCondition?.ConditionName
+                        </span>
+                    </td>
+
+                </tr>
+            }
+        }
+        @if (!Model.Any())
+        {
+            <tr>
+                <td colspan="@(ViewBag.RecordStatus == "transaction" ? (User.IsInRole("Customer") ? 5 : 6) : (User.IsInRole("Customer") ? 6 : 7))"
+                class="text-muted py-5">                    
+                    @if (ViewBag.RecordStatus == "transaction")
+                    {
+                        <span>No transaction records found.</span>
+                    }
+                    else
+                    {
+                        <span>No return records found.</span>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
+
+<!-- Pagination -->
+<nav aria-label="Pagination" class="mt-4">
+    <ul class="pagination justify-content-center">
+
+        @if (ViewBag.CurrentPage > 1)
+        {
+            <li class="page-item">
+                @if (isCustomer)
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort"
+                       asp-route-userEmail="@userEmail">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                }
+                else
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@(ViewBag.CurrentPage - 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort">
+                        <i class="bi bi-chevron-left"></i> Previous
+                    </a>
+                }
+            </li>
+        }
+
+        @for (int i = 1; i <= (int)ViewBag.TotalPages; i++)
+        {
+            var isActive = (int)ViewBag.CurrentPage == i ? "active" : "";
+            var linkClass = isActive == "active" ? "bg-success text-white border-success" : "text-success";
+
+            <li class="page-item @isActive">
+                @if (isCustomer)
+                {
+                    <a class="page-link @linkClass"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@i"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort"
+                       asp-route-userEmail="@userEmail"
+                       style="border-radius: 8px; margin: 0 4px;">
+                        @i
+                    </a>
+                }
+                else
+                {
+                    <a class="page-link @linkClass"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@i"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort"
+                       style="border-radius: 8px; margin: 0 4px;">
+                        @i
+                    </a>
+                }
+            </li>
+        }
+
+        @if (ViewBag.CurrentPage < ViewBag.TotalPages)
+        {
+            <li class="page-item">
+                @if (isCustomer)
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort"
+                       asp-route-userEmail="@userEmail">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+                else
+                {
+                    <a class="page-link text-success"
+                       asp-action="Index"
+                       asp-route-status="@ViewBag.RecordStatus"
+                       asp-route-page="@(ViewBag.CurrentPage + 1)"
+                       asp-route-search="@currentSearch"
+                       asp-route-sortBy="@currentSort">
+                        Next <i class="bi bi-chevron-right"></i>
+                    </a>
+                }
+            </li>
+        }
+
+    </ul>
+</nav>

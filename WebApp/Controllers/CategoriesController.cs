@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
+using Identity;
 
 namespace WebApp.Controllers
 {
@@ -24,6 +25,15 @@ namespace WebApp.Controllers
         // GET: Categories
         public  IActionResult Index()
         {
+            if (!User.Identity.IsAuthenticated) {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin)) {
+                return View("Forbidden");
+            }
+
+
             return _context.Categories != null ?
                         View( _context.Categories.ToList()) :
                         Problem("Entity set 'RentalDBContext.Categories'  is null.");
@@ -32,6 +42,17 @@ namespace WebApp.Controllers
         // GET: Categories/Details/5
         public IActionResult Details(int id)
         {
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin))
+            {
+                return View("Forbidden");
+            }
+
             if (id == null || _context.Categories == null)
             {
                 return NotFound();
@@ -49,6 +70,16 @@ namespace WebApp.Controllers
         // GET: Categories/Create
         public IActionResult Create()
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin))
+            {
+                return View("Forbidden");
+            }
+
             return View();
         }
 
@@ -59,6 +90,17 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Name,Description,IsActive,CreatedAt,UpdatedAt")] Category category)
         {
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin))
+            {
+                return View("Forbidden");
+            }
+
             if (ModelState.IsValid)
             {
                 await _context.Categories.AddAsync(category);
@@ -71,6 +113,17 @@ namespace WebApp.Controllers
         // GET: Categories/Edit/5
         public IActionResult Edit(int id)
         {
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin))
+            {
+                return View("Forbidden");
+            }
+
             if (id == null || _context.Categories == null)
             {
                 return NotFound();
@@ -91,6 +144,17 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,Name,Description,IsActive,CreatedAt,UpdatedAt")] Category category)
         {
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin))
+            {
+                return View("Forbidden");
+            }
+
             if (id != category.Id)
             {
                 return NotFound();
@@ -119,6 +183,16 @@ namespace WebApp.Controllers
         // GET: Categories/Delete/5
         public async Task<IActionResult> Delete(int id)
         {
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin))
+            {
+                return View("Forbidden");
+            }
+
             if (id == null || _context.Categories == null)
             {
                 return NotFound();
@@ -138,6 +212,17 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin))
+            {
+                return View("Forbidden");
+            }
+
             if (_context.Categories == null)
             {
                 return Problem("Entity set 'RentalDBContext.Categories'  is null.");

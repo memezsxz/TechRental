@@ -5,11 +5,11 @@
 using System;
 using System.ComponentModel.DataAnnotations;
 using System.Threading.Tasks;
+using Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
-using WebApp.Areas.Identity.Data;
 
 namespace WebApp.Areas.Identity.Pages.Account.Manage
 {
@@ -120,8 +120,9 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
 
             await _signInManager.RefreshSignInAsync(user);
             _logger.LogInformation("User changed their password successfully.");
-            StatusMessage = "Your password has been changed.";
-
+            //StatusMessage = "Your password has been changed.";
+            TempData["MessageText"] = "Your password has been changed successfully!";
+            TempData["MessageType"] = "success";
             return RedirectToPage();
         }
     }

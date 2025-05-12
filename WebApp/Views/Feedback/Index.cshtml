@@ -1,20 +1,42 @@
 ﻿@model IEnumerable<Database.Core.Domain.Feedback>
 
+@* -------------------------------------------------------------------------------------
+    Page: Index.cshtml
+    Purpose:
+        Displays feedback submitted by users for a specific equipment item.
+        Allows toggling between hidden and unhidden feedback entries.
+
+    Features:
+        - Back button to return to the Equipment Index
+        - Toggle buttons for "HIDDEN" and "UNHIDDEN" feedback
+        - Feedback cards displaying:
+            - User avatar (via ImageController)
+            - User name and feedback note
+            - Star rating (1–5 stars)
+            - Visibility toggle button (Hide / Unhide)
+        - Responsive layout using Bootstrap
+
+    ViewBag:
+        - EquipmentId: Equipment identifier used to preserve context during filter toggles
+        - Status: Current filter status ("Hidden" or "Unhidden") for highlighting the active toggle
+-------------------------------------------------------------------------------------- *@
+
 @{
     ViewData["Title"] = "Feedback";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container my-5">
+    <!-- Back button to return to Equipment index page -->
     <div class="mb-3">
         <a asp-action="Index" asp-controller="Equipment" class="text-success text-decoration-none">&lt; Back</a>
     </div>
 
-    <!-- Title -->
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2 class="page-title">FEEDBACK</h2>
+    <h2 class="text-center mb-5 page-title">FEEDBACK</h2>
 
-        <!-- Toggle Buttons -->
+    <!-- Page title and toggle buttons -->
+    <div class="mt-2 mb-5 text-end">
+        <!-- Toggle between HIDDEN and UNHIDDEN feedback using ViewBag.Status -->
         <div class="btn-group" role="group">
             <a href="@Url.Action("Index", "Feedback", new { id = ViewBag.EquipmentId, status = "Hidden" })"
                class="btn btn-outline-success px-4 @(ViewBag.Status == "Hidden" ? "active" : "")"
@@ -29,35 +51,57 @@
         </div>
     </div>
 
-    <!-- Feedback Cards -->
-    @foreach (var comment in Model)
+    <!-- Loop through each feedback comment -->
+    @if (Model.Any())
     {
-        <div class="feedback-card d-flex justify-content-between align-items-center py-3 border-bottom">
-            <div class="d-flex align-items-start">
-                <img src="@Url.Action("GetImage", "Image", new { id = comment.User.ImageId })"
-                     class="user-avatar me-3"
-                     style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; margin-top: -6px;"
-                     alt="User Avatar"
-                     loading="lazy" />
-                <div>
-                    <strong>@comment.User.FirstName @comment.User.LastName</strong>
-                    <p class="text-muted mb-1">@comment.Note</p>
-                    <div class="rating-stars">
-                        @for (int i = 1; i <= 5; i++)
-                        {
-                            <i class="fa fa-star @(i <= comment.Rate ? "text-success" : "text-secondary")"></i>
-                        }
+        foreach (var comment in Model)
+        {
+            <div class="feedback-card d-flex justify-content-between align-items-center py-3 border-bottom">
+                <div class="d-flex align-items-start">
+                    <!-- User avatar image -->
+                    <img src="@Url.Action("GetImage", "Image", new { id = comment.User.ImageId })"
+                         class="user-avatar me-3"
+                         style="width: 50px; height: 50px; object-fit: cover; border-radius: 50%; margin-top: -6px;"
+                         alt="User Avatar"
+                         loading="lazy" />
+
+                    <!-- Feedback details -->
+                    <div>
+                        <strong>@comment.User.FirstName @comment.User.LastName</strong>
+                        <p class="text-muted mb-1">@comment.Note</p>
+
+                        <!-- Star rating -->
+                        <div class="rating-stars">
+                            @for (int i = 1; i <= 5; i++)
+                            {
+                                <i class="fa fa-star @(i <= comment.Rate ? "text-success" : "text-secondary")"></i>
+                            }
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <form asp-action="Edit" asp-route-id="@comment.Id" method="post" class="align-self-center">
-                <button type="submit"
-                        class="btn text-white"
-                        style="background-color: #dc3545; border-radius: 8px; border: 1px solid #dc3545; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); padding: 6px 18px;">
-                    @(comment.IsHidden == true ? "Unhide" : "Hide")
-                </button>
-            </form>
+                <!-- Hide/Unhide form -->
+                <form asp-action="Edit" asp-route-id="@comment.Id" method="post" class="align-self-center">
+                    <button type="submit"
+                            class="btn text-white"
+                            style="background-color: #dc3545; border-radius: 8px; border: 1px solid #dc3545; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1); padding: 6px 18px;">
+                        @(comment.IsHidden == true ? "Unhide" : "Hide")
+                    </button>
+                </form>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="text-center text-muted py-5">
+            @if (ViewBag.Status == "Hidden")
+            {
+                <p>No hidden comments found for this equipment.</p>
+            }
+            else
+            {
+                <p>No visible (unhidden) comments found for this equipment.</p>
+            }
         </div>
     }
 </div>

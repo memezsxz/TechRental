@@ -9,6 +9,11 @@ using Database.Core.Domain;
 
 namespace Database.Core.Repositories
 {
+    /// <summary>
+    /// Repository interface for managing <see cref="AuditLog"/> entities.
+    /// Inherits basic CRUD operations from <see cref="IRepository{T}"/>
+    /// </summary>
+
     public interface IAuditLogRepository : IRepository<AuditLog>
     {
     }

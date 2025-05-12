@@ -22,17 +22,14 @@ namespace Database.Core.Domain
         [Key]
         [Column("id")]
         public int Id { get; set; }
-
         [Column("first_name")]
         [Required(ErrorMessage = "First name is required.")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "First name must contain at least 3 characters.")]
         public string FirstName { get; set; } = null!;
-
         [Column("last_name")]
         [Required(ErrorMessage = "Last name is required.")]
         [StringLength(50, MinimumLength = 3, ErrorMessage = "Last name must contain at least 3 characters.")]
         public string LastName { get; set; } = null!;
-
         [Column("email")]
         [StringLength(100)]
         [Required(ErrorMessage = "Email is required.")]

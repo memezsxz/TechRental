@@ -103,3 +103,17 @@ function showNotificationDetails(notification) {
     document.getElementById('notificationList').style.display = 'none';
     document.getElementById('notificationDetails').style.display = 'block';
 }
+
+
+
+///Login show password
+
+  const passwordInput = document.getElementById("passwordInput");
+        const toggleIcon = document.getElementById("toggleIcon");
+
+        toggleIcon.addEventListener("click", function () {
+            const isPassword = passwordInput.type === "password";
+            passwordInput.type = isPassword ? "text" : "password";
+            toggleIcon.classList.toggle("bi-eye");
+            toggleIcon.classList.toggle("bi-eye-slash");
+        });

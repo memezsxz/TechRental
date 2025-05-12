@@ -1,0 +1,256 @@
+﻿@model Database.Core.Domain.RentalRecord
+
+@{
+    ViewData["Title"] = ViewBag.Mode == "return" ? "Complete Rental Return" : "Create Rental Record";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var request = ViewBag.RentalRequest as Database.Core.Domain.RentalRequest;
+    var mode = ViewBag.Mode as string ?? "transaction";
+    var totalDays = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
+    var totalCost = totalDays * request.RentalPerDay;
+    var today = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
+}
+
+<div class="mb-4 mt-3">
+    <a asp-action="Index" class="text-success">&lt; Back</a>
+</div>
+
+<h2 class="text-center mb-5 page-title">@ViewData["Title"]</h2>
+
+<!-- CUSTOMER INFO -->
+<div class="container mb-5 pb-4 border-bottom">
+    <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>First Name</label>
+            <input class="form-control" value="@request?.Customer?.FirstName" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Last Name</label>
+            <input class="form-control" value="@request?.Customer?.LastName" readonly />
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Phone Number</label>
+            <input class="form-control" value="@request?.Customer?.PhoneNumber" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Email</label>
+            <input class="form-control" value="@request?.Customer?.Email" readonly />
+        </div>
+    </div>
+</div>
+
+<!-- TRANSACTION INFO -->
+<div class="container mb-5 pb-4 border-bottom">
+    <h4 class="mb-4 text-success fw-semibold">Transaction Info</h4>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Request ID</label>
+            <input class="form-control" value="@request?.Id" readonly />
+        </div>
+        @if (mode == "return"){
+            <div class="col-md-6">
+                <label>Rental Record ID</label>
+                <input class="form-control" value="@Model?.Id" readonly />
+            </div>
+        }
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Equipment Title</label>
+            <input class="form-control" value="@request?.Equipment?.Name" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Actual Pickup Date</label>
+            <input class="form-control" value="@Model?.PickupDate.ToString("g")" readonly />
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label>Start Date</label>
+            <input class="form-control" value="@request?.StartDate.ToString("g")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Return Date</label>
+            <input class="form-control" value="@request?.ReturnDate.ToString("g")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Number of Days</label>
+            <input class="form-control" value="@totalDays" readonly />
+        </div>
+    </div>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label>Deposit</label>
+            <input class="form-control" value="@Model?.Deposit?.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Rental Fee (BD)</label>
+            <input class="form-control" value="@Model?.RentalFee?.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Total Cost (BD)</label>
+            <input class="form-control" value="@Model?.TotalCost?.ToString("0.00")" readonly />
+        </div>
+    </div>
+    <div class="mb-4">
+        @if (mode == "return")
+        {
+            <a href="@Url.Action("DownloadAgreement", "Document", new { rentalRequestId = request.Id })"
+               class="btn btn-outline-primary" target="_blank">View Agreement</a>
+        }
+    </div>
+</div>
+
+<!-- FORM -->
+<div class="container mb-5">
+    <h4 class="mb-4 text-success fw-semibold">Rental @((mode == "return") ? "Return" : "Transaction")</h4>
+
+    <form asp-action="@(mode == "return" ? "CompleteReturn" : "CreateTransaction")"
+          enctype="multipart/form-data"
+          onsubmit="return validateReturnForm()">
+        <input type="hidden" asp-for="RentalRequestId" value="@request?.Id" />
+        <input type="hidden" asp-for="Id" />
+
+        @if (mode == "transaction")
+        {
+            <div class="form-group mb-4">
+                <label>Rental Agreement</label>
+                <div class="d-flex justify-content-between align-items-center">
+                    <a href="@Url.Action("DownloadAgreement", "Document", new { rentalRequestId = request.Id })" class="btn btn-outline-primary" target="_blank">Download Agreement PDF</a>
+                    <input type="file" id="agreementUpload" name="Agreement" class="form-control w-50" accept="application/pdf" />
+                </div>
+                <small class="text-danger d-none" id="fileError">Please upload the signed agreement PDF.</small>
+            </div>
+        }
+        else
+        {
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label asp-for="ActualReturnDate">Actual Return Date</label>
+                    <input asp-for="ActualReturnDate" type="datetime-local" class="form-control" value="@today" />
+                    <span asp-validation-for="ActualReturnDate" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ReturnConditionId">Return Condition</label>
+                    <select asp-for="ReturnConditionId" asp-items="ViewBag.ReturnConditionId" class="form-select"></select>
+                    <span asp-validation-for="ReturnConditionId" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <label asp-for="LateReturnFees">Late Return Fees</label>
+                    <input asp-for="LateReturnFees" class="form-control" id="lateFee" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" />
+                    <span asp-validation-for="LateReturnFees" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="ExtraCharges">Extra Charges</label>
+                    <input asp-for="ExtraCharges" class="form-control" id="extraCharge" value="0.00" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" />
+                    <span asp-validation-for="ExtraCharges" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-4">
+                <label asp-for="ExtraChargeDescription">Extra Charge Description</label>
+                <textarea asp-for="ExtraChargeDescription" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="ExtraChargeDescription" class="text-danger"></span>
+            </div>
+        }
+
+        <div class="form-group">
+            <input type="submit" value="@(mode == "return" ? "Complete Return" : "Create")" class="btn btn-success px-4" />
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        function validateReturnForm() {
+            const mode = '@mode';
+
+            if (mode === 'transaction') {
+                const fileInput = document.getElementById('agreementUpload');
+                const fileError = document.getElementById('fileError');
+
+                if (!fileInput || fileInput.files.length === 0) {
+                    showFlash("Please upload the signed agreement PDF.", "warning");
+                    fileError.classList.remove('d-none');
+                    return false;
+                }
+
+                fileError.classList.add('d-none');
+                return true;
+            }
+
+            // Validate return fields
+            const actualReturnDate = document.querySelector('[name="ActualReturnDate"]').value;
+            const returnCondition = document.querySelector('[name="ReturnConditionId"]').value;
+            const lateFee = document.querySelector('#lateFee')?.value;
+            const extraCharge = document.querySelector('#extraCharge')?.value;
+
+            if (!actualReturnDate || !returnCondition || lateFee === "" || extraCharge === "") {
+                showFlash("All fields except Extra Charge Description must be filled.", "warning");
+                return false;
+            }
+
+            return true;
+        }
+
+        window.addEventListener("DOMContentLoaded", () => {
+            const returnDate = new Date('@request.ReturnDate.ToString("yyyy-MM-ddTHH:mm")');
+            const actualReturnInput = document.querySelector('[name="ActualReturnDate"]');
+            const rentalPerDay = parseFloat('@request.RentalPerDay');
+            const lateFeeInput = document.getElementById('lateFee');
+
+            // Set default return date to today
+            if (actualReturnInput && !actualReturnInput.value) {
+                const now = new Date();
+                actualReturnInput.value = now.toISOString().slice(0, 16);
+            }
+
+            if (actualReturnInput && lateFeeInput) {
+                actualReturnInput.addEventListener("change", () => {
+                    const actualReturn = new Date(actualReturnInput.value);
+                    let daysLate = Math.floor((actualReturn - returnDate) / (1000 * 60 * 60 * 24));
+
+                    if (daysLate > 0) {
+                        let totalLateFee = 0;
+                        for (let i = 1; i <= daysLate; i++) {
+                            const multiplier = Math.min(1 + 0.05 * i, 1.20);
+                            totalLateFee += rentalPerDay * multiplier;
+                        }
+                        lateFeeInput.value = totalLateFee.toFixed(2);
+                    } else {
+                        lateFeeInput.value = "0.00";
+                    }
+                });
+            }
+
+            // Restrict Late Fee & Extra Charges to numeric input
+            ["lateFee", "extraCharge"].forEach(id => {
+                const input = document.getElementById(id);
+                if (input) {
+                    input.addEventListener("input", () => {
+                        input.value = input.value.replace(/[^0-9.]/g, '');
+                    });
+                }
+            });
+        });
+
+        function showFlash(message, type) {
+            const iconMap = {
+                success: "fas fa-check-circle text-success",
+                error: "fas fa-times-circle text-danger",
+                info: "fas fa-info-circle text-primary",
+                warning: "fas fa-exclamation-circle text-warning"
+            };
+
+            document.getElementById("flashIcon").className = iconMap[type] || "fas fa-info-circle text-secondary";
+            document.getElementById("flashText").textContent = message;
+
+            const modal = new bootstrap.Modal(document.getElementById("flashMessageModal"));
+            modal.show();
+            setTimeout(() => modal.hide(), 2500);
+        }
+    </script>
+}

@@ -14,18 +14,20 @@ using Database.Core.Repositories;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Drawing.Printing;
 using Microsoft.AspNetCore.Identity;
-using WebApp.Areas.Identity.Data;
 using Sprache;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text.Encodings.Web;
 using System.Text;
+using Microsoft.AspNetCore.Authorization;
+using Identity;
 
 
 namespace WebApp.Controllers
 {
     public class UsersController : Controller
     {
+        
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
@@ -39,11 +41,15 @@ namespace WebApp.Controllers
             _emailSender = emailSender;
         }
 
-        
+
 
         //Index ==> Get method (Display the view)
         public async Task<IActionResult> Index(string? searchString, string? roleFilter, SortOption? sortBy, int page = 1, int pageSize = 10)
         {
+            if (!User.IsInRole("Admin")) {
+                return View("Forbidden");
+            }
+
             var allUsers = await _unitOfWork.Users.GetUsersAsync(searchString, roleFilter, sortBy);
             var roles = await _unitOfWork.UserRoles.GetAllAsync();
             var totalUsers = allUsers.Count();
@@ -65,19 +71,24 @@ namespace WebApp.Controllers
         }
 
 
-
         //Edit ==> Get method (Display the view of the edit)
         public async Task<IActionResult> Edit(int? id)
         {
+            if (!User.IsInRole("Admin"))
+            {
+                return View("Forbidden");
+            }
+
+
             if (id == null || _unitOfWork.Users == null || id == 0)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
             var user = await _unitOfWork.Users.GetUserWithRoleAsync(id.Value);
             if (user == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
             var viewModel = new EditUserViewModel
@@ -91,12 +102,17 @@ namespace WebApp.Controllers
 
 
 
-
         //Index ==> Post method (handel the form submit)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(EditUserViewModel editUser)
         {
+
+            if (!User.IsInRole("Admin"))
+            {
+                return View("Forbidden");
+            }
+
             //do some server side validation 
             ValidateUser(editUser.User);
 
@@ -122,10 +138,24 @@ namespace WebApp.Controllers
                         identityUser.NormalizedEmail = editUser.User.Email.ToUpper();
                         identityUser.NormalizedUserName = editUser.User.Email.ToUpper();
 
+                        var currentRoles = await _userManager.GetRolesAsync(identityUser);
+                        await _userManager.RemoveFromRolesAsync(identityUser, currentRoles);
+
+                       
+                            var getRoleName = _unitOfWork.UserRoles.getRoleNameByID((int)editUser.User.RoleId);
+
+
+                        if (editUser.User.RoleId != null)
+                        {
+                            await _userManager.AddToRoleAsync(identityUser, getRoleName);
+                        }
+
+
                         var result = await _userManager.UpdateAsync(identityUser);
                         if (!result.Succeeded)
                         {
-                            TempData["faild"] = "Failed to update Identity User.";
+                            TempData["MessageText"] = "An error occurred while saving the equipment.";
+                            TempData["MessageType"] = "error";
                             return RedirectToAction("Index");
                         }
                     }
@@ -133,13 +163,14 @@ namespace WebApp.Controllers
 
 
                     //to show successful message at the top using the TempData
-                    TempData["editSuccess"] = "User Updated Successfully";
+                    TempData["MessageText"] = "User was saved successfully!";
+                    TempData["MessageType"] = "success";
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException) // TODO Fatima: check the for the other error from SaveChangesAsync 
                 {
                     if (!await _unitOfWork.Users.UserExistsAsync(editUser.User.Id))
-                        return NotFound();
+                        return View("NotFound");
                     else
                         throw;
 
@@ -156,21 +187,27 @@ namespace WebApp.Controllers
 
 
 
+
         //DeleteConfirmed ==> Post method (handel delete button click)
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int? id)
         {
+            if (!User.IsInRole("Admin"))
+            {
+                return View("Forbidden");
+            }
+
             if (id == null || _unitOfWork.Users == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
             var user = await _unitOfWork.Users.GetAsync(id.Value);
 
             if (user == null)
             {
-                return NotFound();
+                return View("NotFound");
             }
 
             try
@@ -179,30 +216,30 @@ namespace WebApp.Controllers
 
                 if (dbUser != null)
                 {
-                    
                     var identityResult = await _userManager.DeleteAsync(dbUser);
 
                     if (!identityResult.Succeeded)
                     {
-                        TempData["faild"] = "Failed to delete user from Identity DB.";
-                        return RedirectToAction(nameof(Index));
+                        return Json(new { success = false, message = "Failed to delete user from Identity DB", type = "error" });
                     }
                 }
 
-                // Soft delete from your main DB
                 user.IsActive = false;
+                user.Email = "Deleted" + user.Id.ToString();
                 await _unitOfWork.Users.UpdateAsync(user);
                 await _unitOfWork.SaveChangesAsync();
 
-                TempData["editSuccess"] = "User Deleted Successfully";
-                return RedirectToAction(nameof(Index));
+                return Json(new
+                {
+                    success = true,
+                    message = "User deleted successfully.",
+                    redirectUrl = Url.Action("Index"),
+                    type = "success"
+                });
             }
             catch (Exception)
             {
-                if (!await _unitOfWork.Users.UserExistsAsync(user.Id))
-                    return NotFound();
-                else
-                    throw;
+                return Json(new { success = false, message = "Unexpected error occurred.", type = "error" });
             }
         }
 
@@ -279,15 +316,18 @@ namespace WebApp.Controllers
 
 
 
-
         public async Task<IActionResult> SendResetLink(int id)
         {
+            if (!User.IsInRole("Admin"))
+            {
+                return View("Forbidden");
+            }
+
             var identityUser = await _userManager.Users.FirstOrDefaultAsync(u => u.UserID == id);
 
             if (identityUser == null)
             {
-                return RedirectToAction("Index", "Users"); // or show a message
-                //return NotFound("error like your head");
+                return RedirectToAction("Index", "Users");
             }
 
             var code = await _userManager.GeneratePasswordResetTokenAsync(identityUser);
@@ -295,14 +335,16 @@ namespace WebApp.Controllers
 
             var callbackUrl = Url.Page(
                 "/Account/ResetPassword",
-            null,
+                null,
                 new { area = "Identity", code },
                 protocol: Request.Scheme);
 
             await _emailSender.SendEmailAsync(identityUser.Email, "Reset Password",
                 $"Reset your password by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-            TempData["editSuccess"] = "Password reset link sent to the user's email.";
+            TempData["MessageText"] = "A password reset link has been sent to the user's email.";
+            TempData["MessageType"] = "success";
+
             return RedirectToAction("Index");
         }
 

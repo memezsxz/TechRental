@@ -1,5 +1,29 @@
 ﻿@model Database.Core.Domain.RentalRequest
 
+@* -------------------------------------------------------------------------------------
+    Page: Create.cshtml
+    Purpose:
+        This page allows a customer to create a new rental request for a specific equipment item.
+        It shows equipment details on the left, and a form to input rental dates and notes on the right.
+        Flatpickr is used for date selection, ensuring users cannot select unavailable dates.
+        The total cost is calculated dynamically based on rental duration and daily rate.
+
+    Features:
+        - Displays equipment name, condition, rating, and price
+        - Accepts a start and return date using Flatpickr calendar
+        - Prevents selection of reserved dates (provided via ViewBag)
+        - Calculates and displays the total price and number of days
+        - Accepts customer notes
+        - Hidden fields pass equipment ID, rental rate, customer ID, and status
+        - Submits to POST /RentalRequest/Create
+
+    JS Integration:
+        - JS uses data from a hidden JSON script tag (reservedDatesData)
+        - Automatically sets the first available date for rental
+        - Shows real-time price summary based on selected dates
+        - Shared logic handled by rental-request.js
+   -------------------------------------------------------------------------------------- *@
+
 @{
     ViewData["Title"] = "Create Rental Request";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -8,18 +32,20 @@
 }
 
 <div class="container my-5">
-    <h2 class="text-center mb-5 page-title">Rental Request</h2>
+    <h2 class="text-center mb-5 page-title">Create Rental Request</h2>
 
     <div class="row justify-content-center">
         <div class="col-md-10 d-flex flex-wrap justify-content-between gap-5">
 
-            <!-- Left: Equipment Details -->
+            <!-- Left Column: Equipment Details -->
             <div class="flex-fill" style="min-width: 300px;">
                 <h4>Equipment Details</h4>
+
                 <p><strong>Equipment title:</strong> @equipment?.Name</p>
                 <p><strong>Condition:</strong> @equipment?.ConditionStatus?.ConditionName</p>
 
                 @{
+                    // Average customer rating (default to 0 if no feedbacks)
                     var averageRating = equipment?.Feedbacks?.Any() == true
                     ? equipment.Feedbacks.Average(f => f.Rate)
                     : 0;
@@ -27,7 +53,10 @@
                 <p><strong>Rating:</strong> @Math.Round(averageRating, 1) ⭐</p>
                 <p><strong>Price:</strong> @equipment?.RentalPricePerDay BHD / Day</p>
 
-                <button type="submit" form="rentalForm" class="btn btn-success mt-4 w-100">Send Request</button>
+                <!-- Submit Button -->
+                <button type="submit" form="rentalForm" class="btn btn-success mt-4 w-100">
+                    Send Request
+                </button>
 
                 <!-- Cancel Button -->
                 <a href="@Url.Action("Details", "Equipment", new { id = equipment?.Id })"
@@ -36,46 +65,48 @@
                 </a>
             </div>
 
-            <!-- Right: Request Form -->
+            <!-- Right Column: Rental Request Form -->
             <div class="flex-fill" style="min-width: 300px;">
                 <h4>Request Details</h4>
                 <form asp-action="Create" id="rentalForm">
                     <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
+                    <!-- Equipment ID (Hidden) -->
                     <input type="hidden" asp-for="EquipmentId" value="@equipment?.Id" />
 
-                    <!-- Start Date -->
+                    <!-- Rental Start Date -->
                     <div class="mb-3">
                         <label asp-for="StartDate" class="form-label">From</label>
                         <input asp-for="StartDate" class="form-control" id="startDate" />
                         <span asp-validation-for="StartDate" class="text-danger"></span>
                     </div>
 
-                    <!-- Return Date -->
+                    <!-- Rental Return Date -->
                     <div class="mb-3">
                         <label asp-for="ReturnDate" class="form-label">To</label>
                         <input asp-for="ReturnDate" class="form-control" id="returnDate" />
                         <span asp-validation-for="ReturnDate" class="text-danger"></span>
                     </div>
 
-
-                    <!-- Price Calculation -->
+                    <!-- Price Calculation Display -->
                     <div class="mb-3">
                         <span id="priceDetails">@equipment?.RentalPricePerDay BD/Day → 0 BD/0 Days</span>
                     </div>
 
-                    <!-- Notes -->
+                    <!-- Optional Notes -->
                     <div class="mb-3">
                         <label asp-for="Notes" class="form-label"></label>
                         <textarea asp-for="Notes" class="form-control" placeholder="e.g. I will pick it up at 5pm."></textarea>
                         <span asp-validation-for="Notes" class="text-danger"></span>
                     </div>
 
-                    <!-- Hidden Fields -->
+                    <!-- Hidden Meta Fields -->
                     <input type="hidden" asp-for="CustomerId" />
                     <input type="hidden" asp-for="RentalPerDay" value="@equipment?.RentalPricePerDay" />
                     <input type="hidden" asp-for="StatusId" value="1" />
                 </form>
+
+                <!-- Calendar Legend -->
                 <div class="mt-4">
                     <h5>Legend</h5>
                     <ul class="list-unstyled d-flex gap-4">
@@ -93,128 +124,16 @@
         </div>
     </div>
 </div>
+
+<!-- Pass reserved (unavailable) dates from server to JS -->
+<script id="reservedDatesData" type="application/json">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize((List<string>)ViewBag.UnavailableDates))
+</script>
+
+<!-- Pass daily rental rate to JS -->
+<input type="hidden" id="rentalPerDay" value="@equipment?.RentalPricePerDay" />
+
 @section Scripts {
-    <!-- Style reserved days in green -->
-    <style>
-        .flatpickr-day.reserved-day {
-            background-color: #c8f7c5 !important; /* green highlight */
-            border-radius: 50%;
-            color: #000 !important;
-        }
-    </style>
-
-    <script>
-        /**
-         * Reserved dates are passed from the controller using ViewBag and serialized into a JS array.
-         * These are the dates when the equipment is already booked (status = approved).
-         */
-         const reservedDates = @Html.Raw(System.Text.Json.JsonSerializer.Serialize((List<string>)ViewBag.UnavailableDates));
-
-        // Helper: Checks if a specific date is reserved
-        function isReservedDate(date) {
-            const iso = date.toISOString().split('T')[0];
-            return reservedDates.includes(iso);
-        }
-
-        // Helper: Finds the first available date from today onwards that is NOT reserved
-        function getFirstAvailableDate() {
-            const today = new Date();
-            for (let i = 0; i < 365; i++) {
-                const testDate = new Date(today);
-                testDate.setDate(today.getDate() + i);
-                const iso = testDate.toISOString().split('T')[0];
-                if (!reservedDates.includes(iso)) {
-                    return iso;
-                }
-            }
-            return null;
-        }
-
-        // Get the default starting date (first available day)
-        const firstAvailableDate = getFirstAvailableDate();
-
-        /**
-         * Initialize the RETURN DATE picker
-         * - Disables all reserved dates
-         * - Highlights reserved days in green
-         * - Min date will be set dynamically based on selected start date
-         */
-        const returnPicker = flatpickr("#returnDate", {
-            dateFormat: "Y-m-d",
-            minDate: firstAvailableDate,
-            disable: reservedDates,
-            onDayCreate: function (dObj, dStr, fp, dayElem) {
-                const date = dayElem.dateObj;
-                if (isReservedDate(date)) {
-                    dayElem.classList.add("reserved-day"); // add green background
-                }
-            }
-        });
-
-        /**
-         * Initialize the START DATE picker
-         * - Disables all reserved dates
-         * - Highlights reserved days in green
-         * - Sets the default date to the first available date
-         * - On change: updates the return date min & max boundaries to avoid overlap
-         */
-        const startPicker = flatpickr("#startDate", {
-            dateFormat: "Y-m-d",
-            minDate: "today",
-            disable: reservedDates,
-            defaultDate: firstAvailableDate,
-            onChange: function (selectedDates, dateStr) {
-                if (dateStr) {
-                    const startDate = new Date(dateStr);
-                    let maxDate = null;
-
-                    // Find the next reserved date after the start date
-                    for (let i = 1; i < 30; i++) {
-                        const checkDate = new Date(startDate);
-                        checkDate.setDate(startDate.getDate() + i);
-                        const iso = checkDate.toISOString().split('T')[0];
-                        if (reservedDates.includes(iso)) {
-                            maxDate = new Date(checkDate);
-                            maxDate.setDate(maxDate.getDate() - 1); // set max return date = day before reserved
-                            break;
-                        }
-                    }
-
-                    // Update the returnPicker boundaries
-                    returnPicker.set('minDate', dateStr);
-                    returnPicker.set('maxDate', maxDate);
-                }
-            },
-            onDayCreate: function (dObj, dStr, fp, dayElem) {
-                const date = dayElem.dateObj;
-                if (isReservedDate(date)) {
-                    dayElem.classList.add("reserved-day"); // add green background
-                }
-            }
-        });
-
-        /**
-         * Calculates total rental price based on selected dates
-         * - Displays cost per day, total cost, and total days
-         */
-        function calculateDaysAndTotal() {
-            const start = new Date(document.getElementById('startDate').value);
-            const end = new Date(document.getElementById('returnDate').value);
-            const perDay = parseFloat('@equipment?.RentalPricePerDay' || 0);
-
-            if (!isNaN(start.getTime()) && !isNaN(end.getTime()) && end >= start) {
-                const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24)) + 1;
-                const total = perDay * days;
-                document.getElementById('priceDetails').textContent =
-                    `${perDay.toFixed(2)} BD/Day → ${total.toFixed(2)} BD/${days} Days`;
-            } else {
-                document.getElementById('priceDetails').textContent =
-                    `${perDay.toFixed(2)} BD/Day → 0 BD/0 Days`;
-            }
-        }
-
-        // Bind price calculation on both date inputs
-        document.getElementById('startDate').addEventListener('change', calculateDaysAndTotal);
-        document.getElementById('returnDate').addEventListener('change', calculateDaysAndTotal);
-    </script>
+    <!-- Shared JS logic for flatpickr, validations, and cost calculation -->
+    <script src="~/js/rental-request.js"></script>
 }

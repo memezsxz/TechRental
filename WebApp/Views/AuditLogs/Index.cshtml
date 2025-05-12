@@ -1,48 +1,178 @@
 ﻿@model IEnumerable<Database.Core.Domain.AuditLog>
 
+@* -------------------------------------------------------------------------------------
+    Page: Index.cshtml
+    Purpose:
+        Displays a paginated, searchable, and filterable list of system audit logs.
+        Each log shows metadata about user actions including timestamp, source, 
+        affected entity, and action type.
+
+    Features:
+        - Toggle buttons to switch between Audit Logs and Error Logs
+        - Filtering by source entity (exact match)
+        - Keyword search across key fields (action type, source, entity)
+        - Sorting by timestamp (ascending or descending)
+        - Pagination with state persistence via query strings
+        - Auto-submit filters on change using JavaScript
+
+    JS Integration:
+        - Dynamically submits the form when filters/sort are changed
+-------------------------------------------------------------------------------------- *@
+
 @{
-    ViewData["Title"] = "Audit Trails";
+    ViewData["Title"] = "Audit Logs";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var currentSearch = ViewBag.Search as string;
+    var currentSort = ViewBag.SortBy as string;
+    var currentSource = ViewBag.SourceFilter as string;
+    var allSources = ViewBag.AllSources as List<string>;
 }
+
 <div class="container py-4">
+    <!-- Page Title -->
+    <h2 class="text-center mb-5 page-title">Audit Logs</h2>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h2 class="fw-bold text-success">Audit Trails</h2>
-    <div class="btn-group">
-        <a class="btn btn-success active">Audit Trails</a>
-        <a class="btn btn-outline-success" href="/ErrorLogs">Error Logs</a>
+    <!-- Toggle: Audit vs Error Logs -->
+    <div class="mt-2 mb-5 text-end">
+        <div class="btn-group" role="group">
+            <a href="@Url.Action("Index", "AuditLogs", new { search = currentSearch, sortBy = currentSort, sourceFilter = currentSource })"
+               class="btn btn-outline-success px-4 active"
+               style="border-radius: 8px 0 0 8px;">
+                AUDIT TRAILS
+            </a>
+            <a href="@Url.Action("Index", "ErrorLogs")"
+               class="btn btn-outline-success px-4"
+               style="border-radius: 0 8px 8px 0;">
+                ERROR LOGS
+            </a>
+        </div>
     </div>
-</div>
 
-<div class="table-responsive">
-    <table class="table table-bordered align-middle">
+    <!-- Filter/Search/Sort Form -->
+    <form method="get" id="auto-filter-form" class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3" style="max-width: 1100px;">
+        
+        <!-- SourceEntity Filter -->
+        <div style="flex: 1; min-width: 180px;">
+            <select name="sourceFilter" class="form-select">
+                <option value="">All Entities</option>
+                @foreach (var source in allSources)
+                {
+                    var selected = source == currentSource ? "selected" : "";
+                    @:<option value="@source" @selected>@source</option>
+                }
+            </select>
+        </div>
+
+        <!-- Search -->
+        <div style="flex: 2; min-width: 240px;">
+            <input type="text" name="search" class="form-control" placeholder="Search..." value="@currentSearch" />
+        </div>
+
+        <!-- Sort -->
+        <div style="flex: 1; min-width: 180px;">
+            <select name="sortBy" class="form-select">
+                <option value="timestamp_desc" selected="@(currentSort != "timestamp_asc")">Newest First</option>
+                <option value="timestamp_asc" selected="@(currentSort == "timestamp_asc")">Oldest First</option>
+            </select>
+        </div>
+
+        <div>
+            <button type="submit" class="btn btn-success px-4">Search</button>
+        </div>
+    </form>
+
+    <!-- Audit Table -->
+    <table class="table table-bordered text-center">
         <thead class="table-light text-success">
             <tr>
                 <th>Timestamp</th>
-                <th>User ID</th>
+                <th>User</th>
+                <th>Action Type</th>
                 <th>Source</th>
-                <th>Action</th>
-                <th>Old Value</th>
-                <th>New Value</th>
                 <th>Source Entity</th>
-                <th>Effected Key</th>
+                <th>Record Key</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model)
+            @if (!Model.Any())
             {
                 <tr>
-                    <td>@item.Timestamp</td>
-                    <td>@item.User?.Id</td>
-                    <td>@item.Source</td>
-                    <td>@item.ActionType</td>
-                    <td>@item.DataBeforeAction</td>
-                    <td>@item.DataAfterAction</td>
-                    <td>@item.SourceEntity</td>
-                    <td>@item.AffectedRecordKey</td>
+                    <td colspan="5" class="text-muted">No audit logs found.</td>
                 </tr>
+            }
+            else {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Timestamp?.ToString("g")</td>
+                        <td>@item.User?.Email</td>
+                        <td>@item.ActionType</td>
+                        <td>@item.Source</td>
+                        <td>@item.SourceEntity</td>
+                        <td>@item.AffectedRecordKey</td>
+                    </tr>
+                }
             }
         </tbody>
     </table>
-</div>
+
+    <!-- Pagination Controls -->
+    @{
+        var currentPage = (int)ViewBag.CurrentPage;
+        var totalPages = (int)ViewBag.TotalPages;
+    }
+
+    @if (totalPages > 1)
+    {
+        <nav aria-label="Pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                @if (currentPage > 1)
+                {
+                    <li class="page-item">
+                        <a class="page-link text-success"
+                           asp-action="Index"
+                           asp-route-page="@(currentPage - 1)"
+                           asp-route-search="@currentSearch"
+                           asp-route-sortBy="@currentSort"
+                           asp-route-sourceFilter="@currentSource">
+                            <i class="bi bi-chevron-left"></i> Previous
+                        </a>
+                    </li>
+                }
+
+                @for (int i = 1; i <= totalPages; i++)
+                {
+                    var isActive = i == currentPage ? "active" : "";
+                    var linkClass = isActive == "active" ? "bg-success text-white border-success" : "text-success";
+
+                    <li class="page-item @isActive">
+                        <a class="page-link @linkClass"
+                           asp-action="Index"
+                           asp-route-page="@i"
+                           asp-route-search="@currentSearch"
+                           asp-route-sortBy="@currentSort"
+                           asp-route-sourceFilter="@currentSource"
+                           style="border-radius: 8px; margin: 0 4px;">
+                            @i
+                        </a>
+                    </li>
+                }
+
+                @if (currentPage < totalPages)
+                {
+                    <li class="page-item">
+                        <a class="page-link text-success"
+                           asp-action="Index"
+                           asp-route-page="@(currentPage + 1)"
+                           asp-route-search="@currentSearch"
+                           asp-route-sortBy="@currentSort"
+                           asp-route-sourceFilter="@currentSource">
+                            Next <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </li>
+                }
+            </ul>
+        </nav>
+    }
 </div>

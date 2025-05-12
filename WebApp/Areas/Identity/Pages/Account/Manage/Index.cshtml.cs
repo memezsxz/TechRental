@@ -8,11 +8,11 @@ using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Database.Core.Domain;
 using Database.Persistence;
+using Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using WebApp.Areas.Identity.Data;
 
 namespace WebApp.Areas.Identity.Pages.Account.Manage
 {
@@ -74,6 +74,8 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
             public string LastName { get; set; }
 
             public string role { get; set; }
+
+            public Image image { get; set; }
         }
 
         private async Task LoadAsync(ApplicationUser user)
@@ -83,7 +85,7 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
 
             Username = userName;
 
-            User mainDBUser = _context.Users.Include(u => u.Role).FirstOrDefault(u => u.Id == user.UserID);
+            User mainDBUser = _context.Users.Include(u => u.Role).Include(u => u.Image).FirstOrDefault(u => u.Id == user.UserID);
 
 
             Input = new InputModel
@@ -91,7 +93,8 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
                 PhoneNumber = phoneNumber,
                 FirstName = user.FirstName,
                 LastName = user.LastName,
-                role = mainDBUser.Role.RoleName
+                role = mainDBUser.Role.RoleName,
+                image = mainDBUser.Image
                 
             };
         }
@@ -163,7 +166,10 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
             await _userManager.UpdateAsync(user);
 
             await _signInManager.RefreshSignInAsync(user);
-            StatusMessage = "Your profile has been updated";
+            TempData["MessageText"] = "Your profile was successfully updated!";
+            TempData["MessageType"] = "success";
+
+            //StatusMessage = "Your profile has been updated";
             return RedirectToPage();
         }
     }

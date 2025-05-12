@@ -6,11 +6,19 @@ using System.Text;
 using System.Threading.Tasks;
 using Database.Core.Domain;
 using Database.Persistence;
+using Database.Search;
 
 namespace Database.Core.Repositories
 {
     public interface IRepository<TEntity> where TEntity : class
     {
+
+        #region Fields
+        public int? UserId { get; set; }
+
+        #endregion
+
+
         #region Main
 
         TEntity? Get(int id);
@@ -47,5 +55,8 @@ namespace Database.Core.Repositories
         public IQueryable<object> SelectViewColumns(IQueryable query);
 
         #endregion
+
+        //protected bool ShouldIgnoreProperty(string propertyName);
+
     }
 }

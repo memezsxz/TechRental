@@ -9,6 +9,12 @@ using Database.Core.Domain;
 
 namespace Database.Core.Repositories
 {
+    /// <summary>
+    /// Repository interface for managing <see cref="SystemErrorLog"/> entities.
+    /// Inherits standard CRUD operations from <see cref="IRepository{T}"/>.
+    /// Intended for storing and querying application error logs for diagnostic and auditing purposes.
+    /// </summary>
+
     public interface ISystemErrorLogRepository : IRepository<SystemErrorLog>
     {
     }

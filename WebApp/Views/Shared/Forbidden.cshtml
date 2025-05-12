@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Access Denied";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-center mt-5 pt-5">
+    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828479.png" width="100" class="mb-4" />
+    <h1 class="display-4 text-warning fw-bold">403</h1>
+    <h4 class="mb-3">Access Denied</h4>
+    <p>You do not have permission to view this page.</p>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-warning mt-3 px-4">Return Home</a>
+</div>

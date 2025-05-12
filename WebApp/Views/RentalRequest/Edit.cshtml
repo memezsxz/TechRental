@@ -1,72 +1,173 @@
 ﻿@model Database.Core.Domain.RentalRequest
 
+@* -------------------------------------------------------------------------------------
+    Page: Edit.cshtml
+    Purpose:
+        This page allows editing an existing rental request.
+
+    Permissions:
+        - Customers can only update the Notes field *if* status is still Pending (StatusId == 1).
+        - Admins and Managers can edit: StartDate, ReturnDate, StatusId, and Notes.
+
+    Features:
+        - Displays customer information as read-only fields
+        - Uses Flatpickr for start and return date selection
+        - Prevents selecting already reserved dates (from ViewBag)
+        - Dynamically calculates number of rental days and total cost
+        - Uses shared JS logic via rental-request.js
+        - Pre-fills start and return dates with current Model values
+   -------------------------------------------------------------------------------------- *@
+
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Rental Request";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var totalDays = (Model.ReturnDate.Date - Model.StartDate.Date).Days + 1;
+    var rentalFee = Model.RentalPerDay.GetValueOrDefault();
+    var totalCost = totalDays * rentalFee;
 }
 
-<h1>Edit</h1>
+<h2 class="text-center mb-5 page-title">EDIT RENTAL REQUEST #@Model.Id</h2>
 
-<h4>RentalRequest</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="EquipmentId" class="control-label"></label>
-                <select asp-for="EquipmentId" class="form-control" asp-items="ViewBag.EquipmentId"></select>
-                <span asp-validation-for="EquipmentId" class="text-danger"></span>
+@if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+{
+    <!-- CUSTOMER INFO (Read-Only) -->
+    <div class="container mb-5 pb-4 border-bottom">
+        <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>First Name</label>
+                <input class="form-control" value="@Model.Customer?.FirstName" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="CustomerId" class="control-label"></label>
-                <select asp-for="CustomerId" class="form-control" asp-items="ViewBag.CustomerId"></select>
-                <span asp-validation-for="CustomerId" class="text-danger"></span>
+            <div class="col-md-6">
+                <label>Last Name</label>
+                <input class="form-control" value="@Model.Customer?.LastName" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="StartDate" class="control-label"></label>
-                <input asp-for="StartDate" class="form-control" />
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>Phone Number</label>
+                <input class="form-control" value="@Model.Customer?.PhoneNumber" readonly />
+            </div>
+            <div class="col-md-6">
+                <label>Email</label>
+                <input class="form-control" value="@Model.Customer?.Email" readonly />
+            </div>
+        </div>
+    </div>
+}
+
+<!-- REQUEST INFO -->
+<div class="container mb-5">
+    <h4 class="mb-4 text-success fw-semibold">Request Info</h4>
+
+    <form asp-action="Edit">
+        <!-- Hidden Fields -->
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="EquipmentId" />
+        <input type="hidden" asp-for="CustomerId" />
+        <input type="hidden" asp-for="CreatedAt" />
+        <input type="hidden" asp-for="UpdatedAt" />
+
+        <!-- Equipment Info & Status -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>Equipment Title</label>
+                <input class="form-control" value="@Model.Equipment?.Name" readonly />
+            </div>
+            <div class="col-md-6">
+                <label asp-for="StatusId">Status</label>
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <select asp-for="StatusId" class="form-control" asp-items="ViewBag.StatusId"></select>
+                    <span asp-validation-for="StatusId" class="text-danger"></span>
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.Status?.StatusName" readonly />
+                }
+            </div>
+        </div>
+
+        <!-- Start & Return Date -->
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label asp-for="StartDate">Pick up Date</label>
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <input asp-for="StartDate" class="form-control" id="startDate" />
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.StartDate.ToString("yyyy-MM-dd")" readonly />
+                    <input type="hidden" class="d-none"  id="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" />
+
+                }
                 <span asp-validation-for="StartDate" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="ReturnDate" class="control-label"></label>
-                <input asp-for="ReturnDate" class="form-control" />
+            <div class="col-md-6">
+                <label asp-for="ReturnDate">Return Date</label>
+                @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                {
+                    <input asp-for="ReturnDate" class="form-control" id="returnDate" />
+                }
+                else
+                {
+                    <input class="form-control" value="@Model.ReturnDate.ToString("yyyy-MM-dd")" readonly />
+                    <input type="hidden" class="d-none" id="returnDate" value="@Model.ReturnDate.ToString("yyyy-MM-dd")" />
+
+                }
                 <span asp-validation-for="ReturnDate" class="text-danger"></span>
             </div>
-            <div class="form-group">
-                <label asp-for="RentalPerDay" class="control-label"></label>
-                <input asp-for="RentalPerDay" class="form-control" />
-                <span asp-validation-for="RentalPerDay" class="text-danger"></span>
+        </div>
+
+        <!-- Calculated Rental Duration & Cost -->
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label>Number of Days</label>
+                <input id="numberOfDays" class="form-control" value="@totalDays" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="StatusId" class="control-label"></label>
-                <select asp-for="StatusId" class="form-control" asp-items="ViewBag.StatusId"></select>
-                <span asp-validation-for="StatusId" class="text-danger"></span>
+            <div class="col-md-4">
+                <label>Rental Fee (BD/Day)</label>
+                <input class="form-control" value="@Model.RentalPerDay.GetValueOrDefault(0).ToString("0.00")" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="Notes" class="control-label"></label>
-                <input asp-for="Notes" class="form-control" />
-                <span asp-validation-for="Notes" class="text-danger"></span>
+            <div class="col-md-4">
+                <label>Total Cost (BD)</label>
+                <input id="totalCost" class="form-control" value="@totalCost" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+        </div>
+
+        <!-- Optional Notes -->
+        <div class="form-group mb-4">
+            <label asp-for="Notes">Notes</label>
+            @if ((User.IsInRole("Customer") && Model.StatusId == 1) || User.IsInRole("Admin") || User.IsInRole("Manager"))
+            {
+                <textarea asp-for="Notes" class="form-control" rows="3"></textarea>
+            }
+            else
+            {
+                <textarea class="form-control" readonly>@Model.Notes</textarea>
+            }
+            <span asp-validation-for="Notes" class="text-danger"></span>
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-center gap-3 mt-5">
+            <input type="submit" value="Save Changes" class="btn btn-success px-4" />
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">Cancel</a>
+        </div>
+    </form>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
+<!-- Reserved Dates passed to JS -->
+<script id="reservedDatesData" type="application/json">
+    @Html.Raw(System.Text.Json.JsonSerializer.Serialize((List<string>)ViewBag.UnavailableDates))
+</script>
 
+<!-- Pass daily rental rate to JS -->
+<input type="hidden" id="rentalPerDay" value="@Model.RentalPerDay.GetValueOrDefault(0).ToString("0.00")" />
+
+@section Scripts {
+    <!-- Shared logic: flatpickr setup, validation, dynamic cost -->
+    <script src="~/js/rental-request.js"></script>
+}

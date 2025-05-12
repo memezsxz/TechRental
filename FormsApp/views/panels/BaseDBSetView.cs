@@ -11,10 +11,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
-using Database;
+using System.Windows.Forms.VisualStyles;
 using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence;
+using Database.Search;
 using FormsApp.views.controls;
 using FormsApp.views.dialogs;
 using Microsoft.EntityFrameworkCore;
@@ -26,17 +27,48 @@ namespace FormsApp.views.panels;
 
 public partial class BaseDBSetView : UserControl
 {
+
     #region Fields
 
+    /// <summary>
+    /// The UnitOfWork instance responsible for coordinating database transactions and repositories.
+    /// </summary>
     private UnitOfWork _context = new UnitOfWork();
+
+    /// <summary>
+    /// The type of entity currently being managed (e.g., Equipment, RentalRequest, etc.).
+    /// Used for dynamic UI and repository operations.
+    /// </summary>
     private Type currentType;
+
+    /// <summary>
+    /// The current filter/search control being used to display and apply filters on the data.
+    /// </summary>
     private BaseSearchControl currentControl;
+
+    /// <summary>
+    /// The total number of pages available based on the current filter and page size.
+    /// Used for pagination navigation logic.
+    /// </summary>
     private int totalPages = 0;
+
+    /// <summary>
+    /// Flag indicating whether the current user is allowed to add new records of the selected entity type.
+    /// </summary>
     private bool allowAdd = false;
+
+    /// <summary>
+    /// Flag indicating whether the current user is allowed to edit existing records of the selected entity type.
+    /// </summary>
     private bool allowEdit = false;
+
+    /// <summary>
+    /// Flag indicating whether the current user is allowed to delete records of the selected entity type.
+    /// </summary>
     private bool allowDelete = false;
 
     #endregion
+
 
     #region Constructor
 
@@ -105,33 +137,7 @@ public partial class BaseDBSetView : UserControl
         // Ensure the sender is a Button
         if (sender is not Button btn) return;
 
-        int borderRadius = 10; // Radius for rounded corners
-        int borderWidth = 1; // Width of the red border
-
-        // Create a red pen for drawing the border
-        using Pen redPen = new Pen(Color.Red, borderWidth)
-        {
-            Alignment = System.Drawing.Drawing2D.PenAlignment.Inset // Ensure border is inside control bounds
-        };
-
-        // Create a path for the rounded rectangle
-        System.Drawing.Drawing2D.GraphicsPath path = new System.Drawing.Drawing2D.GraphicsPath();
-        Rectangle rect = new Rectangle(0, 0, btn.Width - 1, btn.Height - 1);
-        int arcSize = borderRadius * 2;
-
-        // Add arcs for each corner of the rectangle
-        path.AddArc(rect.X, rect.Y, arcSize, arcSize, 180, 90); // Top-left
-        path.AddArc(rect.Right - arcSize, rect.Y, arcSize, arcSize, 270, 90); // Top-right
-        path.AddArc(rect.Right - arcSize, rect.Bottom - arcSize, arcSize, arcSize, 0, 90); // Bottom-right
-        path.AddArc(rect.X, rect.Bottom - arcSize, arcSize, arcSize, 90, 90); // Bottom-left
-
-        path.CloseFigure(); // Close the figure to complete the rounded rectangle
-
-        // Enable smooth drawing for better quality
-        e.Graphics.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-
-        // Draw the border
-        e.Graphics.DrawPath(redPen, path);
+        Global.DrawRoundedBorder(btn, e, Color.Red);
     }
 
     /// <summary>
@@ -181,23 +187,19 @@ public partial class BaseDBSetView : UserControl
         cbColumn.SelectedIndex = 0;
     }
 
-    private void dgvEquipment_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
-    {
-        //new view_edit_inventory().ShowDialog();
-    }
-
     private void btnAdd_Click(object sender, EventArgs e)
     {
+        OpenManageForm(BaseViewEditDeleteForm.ViewType.ADD);
     }
 
     private void btnEdit_Click(object sender, EventArgs e)
     {
-        new ManageEquipment(BaseViewEditDeleteForm.ViewType.EDIT, 2).ShowDialog();
-
+        OpenManageForm(allowEdit ? BaseViewEditDeleteForm.ViewType.EDIT : BaseViewEditDeleteForm.ViewType.VIEW);
     }
 
     private void btnDelete_Click(object sender, EventArgs e)
     {
+        OpenManageForm(BaseViewEditDeleteForm.ViewType.DELETE);
     }
 
     #endregion
@@ -212,18 +214,25 @@ public partial class BaseDBSetView : UserControl
     private void LoadColumnDropdown()
     {
         // Attempt to retrieve column metadata from the repository
-        var columns = GetColumnsFromRepository();
-        if (columns == null) return;
+        try
+        {
+            var columns = GetColumnsFromRepository();
+            if (columns == null) return;
 
-        // Merge the "None" default option with actual columns and format the keys
-        var formattedColumns = FormatColumnNames(
-            new Dictionary<string, string> { { "None", "" } }
-                .Concat(columns)
-                .ToDictionary(kv => kv.Key, kv => kv.Value)
-        );
+            // Merge the "None" default option with actual columns and format the keys
+            var formattedColumns = FormatColumnNames(
+                new Dictionary<string, string> { { "None", "" } }
+                    .Concat(columns)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value)
+            );
 
-        // Bind the formatted columns to the ComboBox
-        BindColumnDropdown(formattedColumns);
+            // Bind the formatted columns to the ComboBox
+            BindColumnDropdown(formattedColumns);
+        }
+        catch (Exception ex)
+        {
+            HandleErrors(ex);
+        }
     }
 
     /// <summary>
@@ -307,7 +316,7 @@ public partial class BaseDBSetView : UserControl
         totalPages = val.TotalPages;
         lblTotal.Text = $"Total Records: {val.TotalRecords}";
         lblPagPage.Text = $"Page {currentControl.PageNumber} of {totalPages}";
-        dgvEquipment.DataSource = val.Data;
+        dvgItems.DataSource = val.Data;
     }
 
     /// <summary>
@@ -357,10 +366,84 @@ public partial class BaseDBSetView : UserControl
         }
         catch (Exception ex)
         {
-            Global.DisplayReportErrorDialog(ex);
+            HandleErrors(ex);
             return null;
         }
 
+    }
+
+    /// <summary>
+    /// Opens the appropriate management form (Add/Edit/View/Delete) based on the current entity type and requested action.
+    /// If the action requires an item to be selected (i.e., not Add), it validates selection and passes the ID to the form.
+    /// </summary>
+    /// <param name="type">The type of form operation to perform.</param>
+    private void OpenManageForm(BaseViewEditDeleteForm.ViewType type)
+    {
+        int? id = null;
+
+        // For Edit, View, or Delete actions, ensure a row is selected
+        if (type != BaseViewEditDeleteForm.ViewType.ADD)
+        {
+            id = GetSelectedRowId();
+            if (id == null)
+            {
+                MessageBox.Show("Please select an item to perform this action.");
+                return;
+            }
+        }
+
+        BaseViewEditDeleteForm form = null;
+
+        try
+        {
+            // Determine which form to open based on the entity type
+            if (currentType == typeof(Equipment))
+            {
+                form = new ManageEquipment(type, id);
+            }
+            else if (currentType == typeof(RentalRequest))
+            {
+                form = new ManageRental(ManageRental.ItemType.Request, type, id);
+            }
+            else if (currentType == typeof(RentalRecord))
+            {
+                form = new ManageRental(ManageRental.ItemType.Record, type, id);
+            }
+            else if (currentType == typeof(Category))
+            {
+                form = new ManageCategory(type, id);
+            }
+            else if (currentType == typeof(User))
+            {
+                form = new ManageUser(type, id);
+            }
+            else if (currentType == typeof(AuditLog))
+            {
+                form = new ManageAuditTrails(type, id);
+            }
+            else if (currentType == typeof(SystemErrorLog))
+            {
+                form = new ManageErrors(type, id);
+            }
+
+            if (form != null)
+            {
+                // Reapply the filter/search after any changes from the form
+                form.OnSuccessfulComplete += () => currentControl.Apply();
+
+                // Perform delete immediately or show form for other actions
+                if (type == BaseViewEditDeleteForm.ViewType.DELETE)
+                    form.Delete();
+                else
+                    form.ShowDialog();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle error during form instantiation or operation
+            Global.DisplayReportErrorDialog(ex);
+            form?.Close();
+        }
     }
 
     #endregion
@@ -376,32 +459,30 @@ public partial class BaseDBSetView : UserControl
     /// </returns>
     private Dictionary<string, string>? GetColumnsFromRepository()
     {
-        // Try to get the appropriate repository for the current entity viewType
-        object repo = Helpers.GetRepositoryForType(currentType);
-        if (repo == null)
-        {
-            Global.DisplayReportErrorDialog(new InvalidOperationException(
-                $"No repository found for viewType '{currentType.Name}'."));
-            return null;
-        }
 
-        // Check if the repository implements the required metadata method
-        MethodInfo? getColumnsMethod = repo.GetType().GetMethod("GetEntityColumnsWithTypes");
-        if (getColumnsMethod == null)
-        {
-            Global.DisplayReportErrorDialog(new MissingMethodException(
-                $"Repository for {currentType.Name} does not implement GetEntityColumnsWithTypes."));
-            return null;
-        }
 
         // Attempt to invoke the metadata method and return the result
         try
         {
+            // Try to get the appropriate repository for the current entity viewType
+            object repo = Helpers.GetRepositoryForType(currentType);
+            if (repo == null)
+            {
+                throw new InvalidOperationException($"No repository found for viewType '{currentType.Name}'.");
+            }
+
+            // Check if the repository implements the required metadata method
+            MethodInfo? getColumnsMethod = repo.GetType().GetMethod("GetEntityColumnsWithTypes");
+            if (getColumnsMethod == null)
+            {
+                throw new MissingMethodException(
+                    $"Repository for {currentType.Name} does not implement GetEntityColumnsWithTypes.");
+            }
             return getColumnsMethod.Invoke(repo, null) as Dictionary<string, string>;
         }
         catch (Exception ex)
         {
-            Global.DisplayReportErrorDialog(ex);
+            HandleErrors(ex);
             return null;
         }
     }
@@ -434,6 +515,7 @@ public partial class BaseDBSetView : UserControl
     {
         // New dictionary to hold the formatted column names
         Dictionary<string, string> newColumns = new Dictionary<string, string>();
+        var numericTypes = new HashSet<string> { "Byte", "SByte", "Int16", "UInt16", "Int32", "UInt32", "Int64", "UInt64" };
 
         foreach (var column in columns)
         {
@@ -446,7 +528,7 @@ public partial class BaseDBSetView : UserControl
                 formattedKey = "Id";
             }
             // If the column ends with "Id" (likely a foreign key), remove the " Id" part after splitting
-            else if (column.Key.EndsWith("Id"))
+            else if (column.Key.EndsWith("Id") && !numericTypes.Contains(column.Value))
             {
                 formattedKey = formattedKey.Replace(" Id", "");
             }
@@ -458,5 +540,51 @@ public partial class BaseDBSetView : UserControl
         return newColumns;
     }
 
+    /// <summary>
+    /// Gets the ID of the currently selected row in the DataGridView.
+    /// </summary>
+    /// <returns>The row's ID if valid; otherwise, null.</returns>
+    private int? GetSelectedRowId()
+    {
+        // Ensure a row is selected
+        if (dvgItems.CurrentRow == null || dvgItems.CurrentRow.Index < 0)
+            return null;
+
+        try
+        {
+            // Try to extract the ID from the first column
+            var value = dvgItems.CurrentRow.Cells[0].Value;
+            return value != null ? Convert.ToInt32(value) : null;
+        }
+        catch
+        {
+            // Return null if value is not convertible to int
+            return null;
+        }
+    }
+
+    #endregion
+
+    #region Error Handling
+
+    /// <summary>
+    /// Centralized error handling for UI operations in this control.
+    /// It shows an error dialog, removes the control from its parent, and disposes it.
+    /// </summary>
+    /// <param name="ex">The exception that occurred.</param>
+    private void HandleErrors(Exception ex)
+    {
+        // Display the error dialog (without showing raw error to the user)
+        Global.DisplayReportErrorDialog(ex);
+
+        // Remove this control from its parent container if possible
+        if (this.Parent != null)
+        {
+            this.Parent.Controls.Remove(this);
+        }
+
+        // Dispose of this control to free up resources
+        this.Dispose();
+    }
     #endregion
 }
