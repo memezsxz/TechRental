@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
+using Identity;
 
 namespace WebApp.Controllers
 {
@@ -26,6 +27,15 @@ namespace WebApp.Controllers
         /// <returns>View with the filtered list of feedback entries</returns>
         public async Task<IActionResult> Index(int id, string status = "Unhidden")
         {
+            if (!User.Identity.IsAuthenticated) {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin) || !User.IsInRole(RoleConstants.Manager)) {
+                return View("Forbidden");
+
+            }
+
             // Pass equipment ID and current status to the view
             ViewBag.EquipmentId = id;
             ViewBag.Status = status;
@@ -54,6 +64,18 @@ namespace WebApp.Controllers
         /// <returns>View for creating a new feedback record</returns>
         public IActionResult Create()
         {
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin) || !User.IsInRole(RoleConstants.Manager))
+            {
+                return View("Forbidden");
+
+            }
+
             // Populate dropdowns for Equipment and Users
             ViewData["EquipmentId"] = new SelectList(_context.Equipment, "Id", "Name");
             ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email");
@@ -84,6 +106,18 @@ namespace WebApp.Controllers
         /// <returns>Redirect to Index on success, or redisplay form with errors, or error view on exception</returns>
         public async Task<IActionResult> Create([Bind("Id,Note,Rate,TimeDate,UserId,EquipmentId,IsHidden,CreatedAt,UpdatedAt")] Feedback feedback)
         {
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin) || !User.IsInRole(RoleConstants.Manager))
+            {
+                return View("Forbidden");
+
+            }
+
             // If form data is invalid, repopulate dropdowns and return the form
             if (!ModelState.IsValid)
             {
@@ -132,6 +166,18 @@ namespace WebApp.Controllers
         /// <returns>Redirect to Feedback Index with status preserved</returns>
         public async Task<IActionResult> Edit(int id)
         {
+
+
+            if (!User.Identity.IsAuthenticated)
+            {
+                return View("Unauthorized");
+            }
+
+            if (!User.IsInRole(RoleConstants.Admin) || !User.IsInRole(RoleConstants.Manager))
+            {
+                return View("Forbidden");
+
+            }
             // Find the feedback by ID
             var feedback = await _context.Feedbacks.FindAsync(id);
 
