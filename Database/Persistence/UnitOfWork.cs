@@ -97,7 +97,9 @@ namespace Database.Persistence
         public int SaveChanges()
         {
             TrackChanges();
+            TrackNotifications();
             return _context.SaveChanges();
+            return 1;
         }
 
 
@@ -137,6 +139,38 @@ namespace Database.Persistence
 
             //Console.WriteLine($"Audit logs collected: {auditLogs.Count}");
 
+        }
+
+        private void TrackNotifications()
+        {
+            var notifications = new List<Notification>();
+
+            var repoProps = GetType()
+                .GetProperties(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
+                .Where(p =>
+                    typeof(INotifiable).IsAssignableFrom(p.PropertyType) &&
+                    p.GetValue(this) is not null);
+
+            foreach (var prop in repoProps)
+            {
+                if (prop.GetValue(this) is INotifiable notifiableRepo)
+                {
+                    var notes = notifiableRepo.GetPendingNotifications();
+                    if (notes != null)
+                        notifications.AddRange(notes);
+                }
+            }
+
+            foreach (var note in notifications)
+            {
+                _context.Set<Notification>().Add(note);
+                Console.WriteLine(note.UserId);
+                Console.WriteLine(note.IsRead);
+                Console.WriteLine(note.MessageContent);
+                Console.WriteLine(note.NotificationTypeId);
+            }
+
+            Console.WriteLine($"Notifications generated: {notifications.Count}");
         }
 
         public void Dispose()

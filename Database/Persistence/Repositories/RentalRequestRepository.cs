@@ -10,6 +10,12 @@ namespace Database.Persistence.Repositories
 {
     internal class RentalRequestRepository : Repository<RentalRequest>, IRentalRequestRepository
     {
+        private static readonly List<(int requestStatusId, string messageTemplate, int notificationTypeId)> StatusNotifications = new()
+        {
+            (2, "Rental request #{0} has been approved.", 1) ,  // 1 = Approved
+            (3, "Rental request #{0} has been rejected.", 2) ,  // 3 = Rejected
+            (4, "Rental request #{0} has been canceled.", 5) ,  // 4 = Cancelled
+        };
         public RentalRequestRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
@@ -42,7 +48,7 @@ namespace Database.Persistence.Repositories
 
         #region View Models
 
-        public async Task<ManagerDashboardStats> GetWeeklyDashboardStatsAsync()
+        public async Task<WeeklyStats> GetWeeklyDashboardStatsAsync()
         {
             DateTime today = DateTime.Today;
             int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
@@ -57,7 +63,7 @@ namespace Database.Persistence.Repositories
 
             var weeklyRecords = weeklyRequests.SelectMany(r => r.RentalRecords).ToList();
 
-            return new ManagerDashboardStats
+            return new WeeklyStats
             {
                 TodaysPickups = weeklyRecords.Count(r => r.PickupDate.Date == today),
                 TotalRentals = weeklyRecords.Count,
@@ -106,7 +112,8 @@ namespace Database.Persistence.Repositories
 
         #region Audit Trails
 
-        public (bool needsLog, int id, string dataBeforeAction, string dataAfterAction) GenerateLogDetails(RentalRequest item)
+        public (bool needsLog, int id, string dataBeforeAction, string dataAfterAction) GenerateLogDetails(
+            RentalRequest item)
         {
             Console.WriteLine("here1");
             var entry = RentalDBContext.Entry(item);
@@ -155,6 +162,39 @@ namespace Database.Persistence.Repositories
                 nameof(RentalRequest.Status) => true,
                 _ => base.ShouldIgnoreProperty(propertyName)
             };
+        }
+
+        public IEnumerable<Notification> GetPendingNotifications()
+        {
+            var entries = context.ChangeTracker.Entries<RentalRequest>()
+                .Where(e => e.State == EntityState.Modified);
+
+            foreach (var entry in entries)
+            {
+                var currentStatusId = entry.Property("StatusId").CurrentValue as int?;
+                var originalStatusId = entry.Property("StatusId").OriginalValue as int?;
+                var customerId = entry.Property("CustomerId").CurrentValue as int?;
+                var requestId = entry.Property("Id").CurrentValue?.ToString() ?? "?";
+
+                // Find matching tuple in list
+                var config = StatusNotifications.FirstOrDefault(n => n.requestStatusId == currentStatusId);
+
+                // Only proceed if status changed and match found
+                if (currentStatusId != originalStatusId && config != default)
+                {
+                    var (statusId, template, typeId) = config;
+
+                    yield return new Notification
+                    {
+                        UserId = customerId,
+                        MessageContent = string.Format(template, requestId),
+                        NotificationTypeId = typeId,
+                        IsRead = false,
+                        CreatedAt = DateTime.Now,
+                        UpdatedAt = DateTime.Now
+                    };
+                }
+            }
         }
     }
 }

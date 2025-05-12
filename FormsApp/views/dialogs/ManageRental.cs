@@ -159,9 +159,9 @@ namespace FormsApp.views.dialogs
                 // record data
                 tbRecId.Text = record.Id.ToString();
                 dtpRecPickupDate.Value = record.PickupDate;
-                tbRecPrice.Text = request.RentalPerDay.Value.ToString("C");
-                tbRecDeposit.Text = record.Deposit.Value.ToString("C");
-                tbRecExtraCharge.Text = record.ExtraCharges.Value.ToString("C");
+                tbRecPrice.Text = request.RentalPerDay?.ToString("C") ?? "$0.00";
+                tbRecDeposit.Text = record.Deposit?.ToString("C") ?? "$0.00";
+                tbRecExtraCharge.Text = record.ExtraCharges?.ToString("C") ?? "$0.00";
                 tbRecExtraChargeDescreption.Text = record.ExtraChargeDescription;
 
                 // fee data
@@ -478,11 +478,11 @@ namespace FormsApp.views.dialogs
 
         private void tbRecExtraCharge_TextChanged(object sender, EventArgs e)
         {
-            ValidateExtraCharge();
+         if (tbRecExtraCharge.Enabled)   ValidateExtraCharge();
         }
         private void tbRecExtraChargeDescreption_TextChanged(object sender, EventArgs e)
         {
-            ValidateExtraCharge();
+            if (tbRecExtraChargeDescreption.Enabled) ValidateExtraCharge();
 
         }
         #endregion

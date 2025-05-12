@@ -229,6 +229,7 @@ public partial class BaseDBSetView : UserControl
         }
         catch (Exception ex)
         {
+            Console.WriteLine(ex.Message);
             Console.WriteLine("Do nothing");
         }
     }

@@ -59,7 +59,7 @@ namespace FormsApp.views.panels
         /// </summary>
         private async Task LoadStats()
         {
-            ManagerDashboardStats stats = await _unitOfWork.RentalRequests.GetWeeklyDashboardStatsAsync();
+            WeeklyStats stats = await _unitOfWork.RentalRequests.GetWeeklyDashboardStatsAsync();
 
             lblTodaysPickups.Text = $"Today's Pickups: {stats.TodaysPickups}";
             lblTotalRentals.Text = $"Total Rentals: {stats.TotalRentals}";
@@ -68,9 +68,6 @@ namespace FormsApp.views.panels
             lblOverdue.Text = $"Overdue Rentals: {stats.OverdueRentals}";
             lblDamaged.Text = $"Damaged Equipment: {stats.DamagedReturns}";
         }
-
-
-
         #endregion
     }
 }

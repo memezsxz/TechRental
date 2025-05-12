@@ -154,7 +154,7 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
     public virtual IEnumerable<AuditLog> GetAuditLogsFromTrackedChanges()
     {
         var entries = context.ChangeTracker.Entries<TEntity>()
-            .Where(e => e.State != EntityState.Unchanged && e.State != EntityState.Detached);
+            .Where(e => e.State != EntityState.Unchanged && e.State != EntityState.Detached && e.State != EntityState.Added);
 
         //Console.WriteLine($"Count from get in repo {entries.Count()}");
 
