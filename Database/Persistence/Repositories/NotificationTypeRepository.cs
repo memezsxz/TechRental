@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class NotificationTypeRepository : Repository<NotificationType>, INotificationTypeRepository
     {
-        public NotificationTypeRepository(RentalDBContext context) : base(context)
+        public NotificationTypeRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

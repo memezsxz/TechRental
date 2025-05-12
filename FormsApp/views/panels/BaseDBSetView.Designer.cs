@@ -349,10 +349,10 @@
             tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
             tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
-            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 150F));
-            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
-            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
             tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 200F));
+            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
+            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 100F));
+            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 250F));
             tableLayoutPanel3.Controls.Add(label1, 1, 0);
             tableLayoutPanel3.Controls.Add(pnlPrevios, 4, 0);
             tableLayoutPanel3.Controls.Add(pnlNext, 5, 0);
@@ -372,7 +372,7 @@
             label1.AutoSize = true;
             label1.Dock = DockStyle.Fill;
             label1.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label1.Location = new Point(560, 0);
+            label1.Location = new Point(460, 0);
             label1.Name = "label1";
             label1.Padding = new Padding(0, 0, 10, 0);
             label1.Size = new Size(94, 49);
@@ -385,7 +385,7 @@
             pnlPrevios.Anchor = AnchorStyles.Right;
             pnlPrevios.BackgroundImage = (Image)resources.GetObject("pnlPrevios.BackgroundImage");
             pnlPrevios.BackgroundImageLayout = ImageLayout.Zoom;
-            pnlPrevios.Location = new Point(910, 3);
+            pnlPrevios.Location = new Point(860, 3);
             pnlPrevios.Name = "pnlPrevios";
             pnlPrevios.Size = new Size(94, 43);
             pnlPrevios.TabIndex = 8;
@@ -396,7 +396,7 @@
             pnlNext.Anchor = AnchorStyles.Left;
             pnlNext.BackgroundImage = (Image)resources.GetObject("pnlNext.BackgroundImage");
             pnlNext.BackgroundImageLayout = ImageLayout.Zoom;
-            pnlNext.Location = new Point(1010, 3);
+            pnlNext.Location = new Point(960, 3);
             pnlNext.Name = "pnlNext";
             pnlNext.Size = new Size(94, 43);
             pnlNext.TabIndex = 9;
@@ -407,7 +407,7 @@
             lblTotal.Anchor = AnchorStyles.Left;
             lblTotal.AutoSize = true;
             lblTotal.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            lblTotal.Location = new Point(1110, 9);
+            lblTotal.Location = new Point(1060, 9);
             lblTotal.Name = "lblTotal";
             lblTotal.Size = new Size(173, 31);
             lblTotal.TabIndex = 10;
@@ -420,7 +420,7 @@
             cbRecordsNum.DropDownStyle = ComboBoxStyle.DropDownList;
             cbRecordsNum.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             cbRecordsNum.FormattingEnabled = true;
-            cbRecordsNum.Location = new Point(657, 5);
+            cbRecordsNum.Location = new Point(557, 5);
             cbRecordsNum.Margin = new Padding(0, 5, 20, 0);
             cbRecordsNum.Name = "cbRecordsNum";
             cbRecordsNum.Size = new Size(80, 39);
@@ -432,9 +432,9 @@
             lblPagPage.AutoSize = true;
             lblPagPage.Dock = DockStyle.Fill;
             lblPagPage.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            lblPagPage.Location = new Point(760, 0);
+            lblPagPage.Location = new Point(660, 0);
             lblPagPage.Name = "lblPagPage";
-            lblPagPage.Size = new Size(144, 49);
+            lblPagPage.Size = new Size(194, 49);
             lblPagPage.TabIndex = 11;
             lblPagPage.Text = "Page 0 of 0";
             lblPagPage.TextAlign = ContentAlignment.MiddleCenter;

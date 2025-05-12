@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class DocumentRepository : Repository<Document>, IDocumentRepository
     {
-        public DocumentRepository(RentalDBContext context) : base(context)
+        public DocumentRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

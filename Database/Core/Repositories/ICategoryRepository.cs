@@ -9,7 +9,7 @@ using Database.Core.Domain;
 
 namespace Database.Core.Repositories
 {
-    public interface ICategoryRepository : IRepository<Category>, IStatus
+    public interface ICategoryRepository : IRepository<Category>, IStatus, IToBeTracked
     {
         #region Main
 

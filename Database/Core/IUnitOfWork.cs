@@ -7,33 +7,16 @@ using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage;
 
 namespace Database.Core
 {
     public interface IUnitOfWork  : IDisposable
     {
-        //public ICategoryRepository Category { get; }
-        //public IDocumentRepository Document { get; }
-        //public IEquipmentRepository Equipment { get; }
-        //public IEquipmentAvailabilityStatusRepository EquipmentAvailabilityStatus { get; }
-        //public IEquipmentConditionStatusRepository EquipmentConditionStatus { get; }
-        //public IRatingRepository Rating { get; }
-        //public IErrorLogRepository ErrorLog { get; }
-        //public ILogRepository Log { get; }
-        //public INotificationRepository Notification { get; }
-        //public INotificationTypeRepository NotificationType { get; }
-        //public IPaymentRepository Payment { get; }
-        //public IPaymentMethodRepository PaymentMethod { get; }
-        //public IPaymentStatusRepository PaymentStatus { get; }
-        //public IRentalRecordRepository RentalRecord { get; }
-        //public IRentalRequestRepository RentalRequest { get; }
-        //public IRentalRequestStatusRepository RentalRequestStatus { get; }
-        //public IReturnConditionStatusRepository ReturnConditionStatus { get; }
-        //public IUserRepository User { get; }
-        //public IUserRoleRepository UserRole { get; }
+        int? UserId { get; set; }
 
-        public  IAuditLogRepository AuditLogs { get; } //
+        public IAuditLogRepository AuditLogs { get; }
         public ICategoryRepository Categories { get;}
         public  IDocumentRepository Documents { get;  }
         public  IEquipmentRepository Equipment { get;  }

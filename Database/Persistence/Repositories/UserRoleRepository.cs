@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class UserRoleRepository : Repository<UserRole>, IUserRoleRepository
     {
-        public UserRoleRepository(RentalDBContext context) : base(context)
+        public UserRoleRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

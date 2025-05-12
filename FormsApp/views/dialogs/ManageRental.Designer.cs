@@ -429,7 +429,6 @@
             gbEquipment.TabIndex = 69;
             gbEquipment.TabStop = false;
             gbEquipment.Text = "Equipment Info";
-            gbEquipment.Paint += groupBox_Paint;
             // 
             // cbEqIsActive
             // 

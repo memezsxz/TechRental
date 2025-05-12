@@ -8,7 +8,7 @@ namespace Database.Persistence.Repositories
 {
     internal class UserRepository : Repository<User>, IUserRepository
     {
-        public UserRepository(RentalDBContext context) : base(context)
+        public UserRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

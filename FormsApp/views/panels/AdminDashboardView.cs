@@ -13,6 +13,7 @@ namespace FormsApp.views.panels
         #region Fields
         private Label lblNoSalesMessage;
         private Label lblNoQuarterMessage;
+        private Label lblImageMessage;
 
         private readonly IUnitOfWork _unitOfWork = new UnitOfWork();
 
@@ -60,11 +61,23 @@ namespace FormsApp.views.panels
                 ForeColor = Color.Gray,
                 Visible = false
             };
+
             // Add it to the same parent container as the chart
             chartQuarterEarnings.Parent.Controls.Add(lblNoQuarterMessage);
             chartQuarterEarnings.BringToFront(); // ensure it's not hidden behind anything
 
+            lblImageMessage = new Label
+            {
+                Text = "Could not load Image",
+                TextAlign = ContentAlignment.MiddleCenter,
+                Dock = DockStyle.Fill,
+                Font = new Font("Segoe UI", 12, FontStyle.Bold),
+                ForeColor = Color.Gray,
+                Visible = false
+            };
 
+            pnlTopImage.Controls.Add(lblImageMessage);
+            lblImageMessage.BringToFront();
         }
 
         #endregion
@@ -121,6 +134,20 @@ namespace FormsApp.views.panels
 
 
 
+        /// <summary>
+        /// Loads stats and update the UI.
+        /// </summary>
+        private async Task LoadWeeklyStats()
+        {
+            WeeklyStats stats = await _unitOfWork.RentalRequests.GetWeeklyDashboardStatsAsync();
+
+            lblTodaysPickups.Text = $"Today's Pickups: {stats.TodaysPickups}";
+            lblTotalRentals.Text = $"Total Rentals: {stats.TotalRentals}";
+            lblOngoing.Text = $"Ongoing Rentals: {stats.OngoingRentals}";
+            lblCompleted.Text = $"Completed Rentals: {stats.CompletedRentals}";
+            lblOverdue.Text = $"Overdue Rentals: {stats.OverdueRentals}";
+            lblDamaged.Text = $"Damaged Equipment: {stats.DamagedReturns}";
+        }
 
 
         #region Data Loading
@@ -132,7 +159,7 @@ namespace FormsApp.views.panels
         {
             await LoadStats();
             await LoadCategoriesChart();
-
+            await LoadWeeklyStats();
             await LoadQuarterData();
         }
 
@@ -143,6 +170,7 @@ namespace FormsApp.views.panels
         {
 
             top5EquipmentStats = await _unitOfWork.Equipment.GetTop5RentedEquipmentStatsAsync();
+            currentTopIndex = -1;
             HandleTopEquipmentsSwitching(pnlTopNext, null);
         }
 
@@ -211,28 +239,9 @@ namespace FormsApp.views.panels
         /// </summary>
         private async Task LoadAndDisplayTopItemImage(TopRentedEquipmentStats stats)
         {
-            try
-            {
-                if (!stats.ImageGuid.HasValue) return;
-          
-                var image = await Global.GetImage(stats.ImageGuid.Value, stats.ImageFormat);
+            Global.LoadImage(stats.ImageGuid, stats.ImageFormat, pnlTopImage, lblImageMessage);
 
-                if (image == null) return;
-
-                pnlTopImage.Controls.Clear();
-                pnlTopImage.Controls.Add(new PictureBox
-                {
-                    Dock = DockStyle.Fill,
-                    SizeMode = PictureBoxSizeMode.StretchImage,
-                    Image = new Bitmap(image)
-                });
-
-                pnlTopImage.Invalidate();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Image loading error: {ex.Message}");
-            }
+            lblImageMessage.Visible = pnlTopImage.BackgroundImage == null;
         }
 
 

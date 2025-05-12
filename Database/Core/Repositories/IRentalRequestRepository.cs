@@ -3,10 +3,9 @@ using Database.ViewModels;
 
 namespace Database.Core.Repositories
 {
-    public interface IRentalRequestRepository : IRepository<RentalRequest>
+    public interface IRentalRequestRepository : IRepository<RentalRequest>, IToBeTracked, INotifiable
     {
         public RentalRequest GetWithRecordDetails(int id);
-        Task<ManagerDashboardStats> GetWeeklyDashboardStatsAsync();
-
+        Task<WeeklyStats> GetWeeklyDashboardStatsAsync();
     }
 }

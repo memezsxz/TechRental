@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class FeedbackRepository : Repository<Feedback>, IFeedbackRepository
     {
-        public FeedbackRepository(RentalDBContext context) : base(context)
+        public FeedbackRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

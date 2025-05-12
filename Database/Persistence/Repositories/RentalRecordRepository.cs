@@ -2,12 +2,14 @@ using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using System.Text.Json;
 
 namespace Database.Persistence.Repositories
 {
     internal class RentalRecordRepository : Repository<RentalRecord>, IRentalRecordRepository
     {
-        public RentalRecordRepository(RentalDBContext context) : base(context)
+        public RentalRecordRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 
@@ -133,6 +135,53 @@ namespace Database.Persistence.Repositories
         }
 
         #endregion
+
+        protected override bool ShouldIgnoreProperty(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(RentalRecord.Feedbacks) => true,
+                nameof(RentalRecord.Payments) => true,
+                nameof(RentalRecord.RentalRequest) => true,
+                nameof(RentalRecord.ReturnCondition) => true,
+                nameof(RentalRecord.UpdatedAt) => true,
+                nameof(RentalRecord.CreatedAt) => true,
+                _ => base.ShouldIgnoreProperty(propertyName)
+            };
+        }
+        public IEnumerable<Notification> GetPendingNotifications()
+        {
+            var entries = context.ChangeTracker.Entries<RentalRecord>()
+                .Where(e => e.State == EntityState.Modified);
+
+            foreach (var entry in entries)
+            {
+                var originalReturnDate = entry.Property("ActualReturnDate").OriginalValue as DateTime?;
+                var currentReturnDate = entry.Property("ActualReturnDate").CurrentValue as DateTime?;
+                var recordId = entry.Property("Id").CurrentValue?.ToString() ?? "?";
+
+                // Check: changed from null to a real value
+                if (originalReturnDate == null && currentReturnDate != null)
+                {
+                    var rentalRequestId = entry.Property("RentalRequestId").CurrentValue as int?;
+                    var rentalRequest = context.RentalRequests.Find(rentalRequestId);
+                    var userId = rentalRequest?.CustomerId;
+
+                    if (userId != null)
+                    {
+                        yield return new Notification
+                        {
+                            UserId = userId,
+                            NotificationTypeId = 4, // Return confirmed
+                            MessageContent = $"Return for rental #{rentalRequestId} has been confirmed.",
+                            IsRead = false,
+                            CreatedAt = DateTime.Now,
+                            UpdatedAt = DateTime.Now
+                        };
+                    }
+                }
+            }
+        }
 
     }
 }

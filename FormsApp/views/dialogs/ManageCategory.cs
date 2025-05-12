@@ -114,6 +114,7 @@ namespace FormsApp.views.dialogs
                 context.Categories.Add,
                 context.Categories.Update,
                 item,
+                item.Id,
                 "Category"
             );
         }
@@ -122,6 +123,7 @@ namespace FormsApp.views.dialogs
         {
             item.Name = lblName.Text.Trim();
             item.Description = tbDescription.Text.Trim();
+            item.UpdatedAt = DateTime.Now;
         }
         #endregion
 
@@ -161,5 +163,9 @@ namespace FormsApp.views.dialogs
             lblDescreptionError.Visible = false;
         }
         #endregion
+
+
+  
+
     }
 }

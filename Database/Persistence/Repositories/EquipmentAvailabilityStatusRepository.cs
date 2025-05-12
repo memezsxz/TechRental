@@ -11,7 +11,7 @@ namespace Database.Persistence.Repositories
 {
     internal class EquipmentAvailabilityStatusRepository : Repository<EquipmentAvailabilityStatus>, IEquipmentAvailabilityStatusRepository
     {
-        public EquipmentAvailabilityStatusRepository(RentalDBContext context) : base(context)
+        public EquipmentAvailabilityStatusRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 

@@ -34,8 +34,8 @@ namespace FormsApp.views.dialogs
             LoadRoleDropDownList();
         }
 
-        
-     
+
+
         #endregion
 
         #region View Preparation
@@ -80,7 +80,7 @@ namespace FormsApp.views.dialogs
         }
 
         #endregion
-        
+
         #region Data Loaders
         protected override bool FetchItem()
         {
@@ -110,19 +110,19 @@ namespace FormsApp.views.dialogs
             MessageBox.Show("Cannot Delete user.");
             Dispose();
 
-        //public override void Delete()
-        //{
-        //    StandardDelete<User>(
-        //        context.Users.Get,
-        //        context.Users.IsReferenced,
-        //        item => item.IsActive = false,
-        //        context.Users.Remove,
-        //        "User"
-        //    );
-        //}
+            //public override void Delete()
+            //{
+            //    StandardDelete<User>(
+            //        context.Users.Get,
+            //        context.Users.IsReferenced,
+            //        item => item.IsActive = false,
+            //        context.Users.Remove,
+            //        "User"
+            //    );
+            //}
 
         }
-  
+
         protected override async Task SaveItem()
         {
             MessageBox.Show("Cannot edit user.");

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Database.ViewModels
 {
-    public class ManagerDashboardStats
+    public class WeeklyStats
     {
         public int TodaysPickups { get; set; }
         public int TotalRentals { get; set; }

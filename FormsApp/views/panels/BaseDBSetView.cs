@@ -11,6 +11,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 using Database;
 using Database.Core.Domain;
 using Database.Core.Repositories;
@@ -229,7 +230,8 @@ public partial class BaseDBSetView : UserControl
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Do nothing");
+            Global.DisplayReportErrorDialog(ex);
+            form?.Close();
         }
     }
 
@@ -245,18 +247,25 @@ public partial class BaseDBSetView : UserControl
     private void LoadColumnDropdown()
     {
         // Attempt to retrieve column metadata from the repository
-        var columns = GetColumnsFromRepository();
-        if (columns == null) return;
+        try
+        {
+            var columns = GetColumnsFromRepository();
+            if (columns == null) return;
 
-        // Merge the "None" default option with actual columns and format the keys
-        var formattedColumns = FormatColumnNames(
-            new Dictionary<string, string> { { "None", "" } }
-                .Concat(columns)
-                .ToDictionary(kv => kv.Key, kv => kv.Value)
-        );
+            // Merge the "None" default option with actual columns and format the keys
+            var formattedColumns = FormatColumnNames(
+                new Dictionary<string, string> { { "None", "" } }
+                    .Concat(columns)
+                    .ToDictionary(kv => kv.Key, kv => kv.Value)
+            );
 
-        // Bind the formatted columns to the ComboBox
-        BindColumnDropdown(formattedColumns);
+            // Bind the formatted columns to the ComboBox
+            BindColumnDropdown(formattedColumns);
+        }
+        catch (Exception ex)
+        {
+            HandleErrors(ex);
+        }
     }
 
     /// <summary>
@@ -390,7 +399,7 @@ public partial class BaseDBSetView : UserControl
         }
         catch (Exception ex)
         {
-            Global.DisplayReportErrorDialog(ex);
+            HandleErrors(ex);
             return null;
         }
 
@@ -409,32 +418,30 @@ public partial class BaseDBSetView : UserControl
     /// </returns>
     private Dictionary<string, string>? GetColumnsFromRepository()
     {
-        // Try to get the appropriate repository for the current entity viewType
-        object repo = Helpers.GetRepositoryForType(currentType);
-        if (repo == null)
-        {
-            Global.DisplayReportErrorDialog(new InvalidOperationException(
-                $"No repository found for viewType '{currentType.Name}'."));
-            return null;
-        }
 
-        // Check if the repository implements the required metadata method
-        MethodInfo? getColumnsMethod = repo.GetType().GetMethod("GetEntityColumnsWithTypes");
-        if (getColumnsMethod == null)
-        {
-            Global.DisplayReportErrorDialog(new MissingMethodException(
-                $"Repository for {currentType.Name} does not implement GetEntityColumnsWithTypes."));
-            return null;
-        }
 
         // Attempt to invoke the metadata method and return the result
         try
         {
+            // Try to get the appropriate repository for the current entity viewType
+            object repo = Helpers.GetRepositoryForType(currentType);
+            if (repo == null)
+            {
+                throw new InvalidOperationException($"No repository found for viewType '{currentType.Name}'.");
+            }
+
+            // Check if the repository implements the required metadata method
+            MethodInfo? getColumnsMethod = repo.GetType().GetMethod("GetEntityColumnsWithTypes");
+            if (getColumnsMethod == null)
+            {
+                throw new MissingMethodException(
+                    $"Repository for {currentType.Name} does not implement GetEntityColumnsWithTypes.");
+            }
             return getColumnsMethod.Invoke(repo, null) as Dictionary<string, string>;
         }
         catch (Exception ex)
         {
-            Global.DisplayReportErrorDialog(ex);
+            HandleErrors(ex);
             return null;
         }
     }
@@ -495,7 +502,16 @@ public partial class BaseDBSetView : UserControl
     #endregion
 
 
+    private void HandleErrors(Exception ex)
+    {
+        Global.DisplayReportErrorDialog(ex);
+        if (this.Parent != null)
+        {
+            this.Parent.Controls.Remove(this);
+        }
 
+        this.Dispose();
+    }
     #region New
 
     private int? GetSelectedRowId()

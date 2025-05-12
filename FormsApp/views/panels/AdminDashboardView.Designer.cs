@@ -29,12 +29,12 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AdminDashboardView));
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
             label1 = new Label();
             panel1 = new Panel();
             tableLayoutPanel1 = new TableLayoutPanel();
@@ -45,6 +45,7 @@
             flowLayoutPanel5 = new FlowLayoutPanel();
             pnlQuarterNext = new Panel();
             label15 = new Label();
+            chartQuarterEarnings = new System.Windows.Forms.DataVisualization.Charting.Chart();
             tableLayoutPanel7 = new TableLayoutPanel();
             label14 = new Label();
             chartCategories = new System.Windows.Forms.DataVisualization.Charting.Chart();
@@ -73,14 +74,33 @@
             label6 = new Label();
             lblTopTotalRental = new Label();
             tableLayoutPanel2 = new TableLayoutPanel();
-            label2 = new Label();
-            flowLayoutPanel1 = new FlowLayoutPanel();
-            button1 = new Button();
-            dataGridView1 = new DataGridView();
+            panel12 = new Panel();
+            tableLayoutPanel15 = new TableLayoutPanel();
+            panel13 = new Panel();
+            lblDamaged = new Label();
+            panel10 = new Panel();
+            tableLayoutPanel14 = new TableLayoutPanel();
+            panel11 = new Panel();
+            lblOverdue = new Label();
+            panel8 = new Panel();
+            tableLayoutPanel13 = new TableLayoutPanel();
+            panel9 = new Panel();
+            lblCompleted = new Label();
+            panel6 = new Panel();
+            tableLayoutPanel12 = new TableLayoutPanel();
+            panel7 = new Panel();
+            lblOngoing = new Label();
+            panel4 = new Panel();
+            tableLayoutPanel11 = new TableLayoutPanel();
+            panel5 = new Panel();
+            lblTotalRentals = new Label();
+            panel2 = new Panel();
+            tableLayoutPanel10 = new TableLayoutPanel();
+            panel3 = new Panel();
+            lblTodaysPickups = new Label();
             tableLayoutPanel9 = new TableLayoutPanel();
             flowLayoutPanel6 = new FlowLayoutPanel();
             pnlRefresh = new Panel();
-            chartQuarterEarnings = new System.Windows.Forms.DataVisualization.Charting.Chart();
             panel1.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
             tableLayoutPanel8.SuspendLayout();
@@ -90,6 +110,7 @@
             splitContainer5.SuspendLayout();
             flowLayoutPanel4.SuspendLayout();
             flowLayoutPanel5.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)chartQuarterEarnings).BeginInit();
             tableLayoutPanel7.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)chartCategories).BeginInit();
             tableLayoutPanel3.SuspendLayout();
@@ -115,11 +136,20 @@
             tableLayoutPanel5.SuspendLayout();
             tableLayoutPanel6.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
-            flowLayoutPanel1.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).BeginInit();
+            panel12.SuspendLayout();
+            tableLayoutPanel15.SuspendLayout();
+            panel10.SuspendLayout();
+            tableLayoutPanel14.SuspendLayout();
+            panel8.SuspendLayout();
+            tableLayoutPanel13.SuspendLayout();
+            panel6.SuspendLayout();
+            tableLayoutPanel12.SuspendLayout();
+            panel4.SuspendLayout();
+            tableLayoutPanel11.SuspendLayout();
+            panel2.SuspendLayout();
+            tableLayoutPanel10.SuspendLayout();
             tableLayoutPanel9.SuspendLayout();
             flowLayoutPanel6.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)chartQuarterEarnings).BeginInit();
             SuspendLayout();
             // 
             // label1
@@ -250,6 +280,23 @@
             label15.Text = "Earnings";
             label15.TextAlign = ContentAlignment.TopCenter;
             // 
+            // chartQuarterEarnings
+            // 
+            chartArea1.Name = "ChartArea1";
+            chartQuarterEarnings.ChartAreas.Add(chartArea1);
+            chartQuarterEarnings.Dock = DockStyle.Fill;
+            legend1.Name = "Legend1";
+            chartQuarterEarnings.Legends.Add(legend1);
+            chartQuarterEarnings.Location = new Point(3, 73);
+            chartQuarterEarnings.Name = "chartQuarterEarnings";
+            series1.ChartArea = "ChartArea1";
+            series1.Legend = "Legend1";
+            series1.Name = "Series1";
+            chartQuarterEarnings.Series.Add(series1);
+            chartQuarterEarnings.Size = new Size(597, 269);
+            chartQuarterEarnings.TabIndex = 1;
+            chartQuarterEarnings.Text = "chart1";
+            // 
             // tableLayoutPanel7
             // 
             tableLayoutPanel7.ColumnCount = 1;
@@ -282,17 +329,17 @@
             // 
             // chartCategories
             // 
-            chartArea3.Name = "ChartArea1";
-            chartCategories.ChartAreas.Add(chartArea3);
+            chartArea2.Name = "ChartArea1";
+            chartCategories.ChartAreas.Add(chartArea2);
             chartCategories.Dock = DockStyle.Fill;
-            legend3.Name = "Legend1";
-            chartCategories.Legends.Add(legend3);
+            legend2.Name = "Legend1";
+            chartCategories.Legends.Add(legend2);
             chartCategories.Location = new Point(3, 82);
             chartCategories.Name = "chartCategories";
-            series3.ChartArea = "ChartArea1";
-            series3.Legend = "Legend1";
-            series3.Name = "Series1";
-            chartCategories.Series.Add(series3);
+            series2.ChartArea = "ChartArea1";
+            series2.Legend = "Legend1";
+            series2.Name = "Series1";
+            chartCategories.Series.Add(series2);
             chartCategories.Size = new Size(597, 313);
             chartCategories.TabIndex = 1;
             chartCategories.Text = "fggh";
@@ -441,11 +488,12 @@
             // lblTopNumber
             // 
             lblTopNumber.AutoSize = true;
+            lblTopNumber.Dock = DockStyle.Fill;
             lblTopNumber.Font = new Font("Segoe UI Black", 15.9018412F, FontStyle.Bold, GraphicsUnit.Point);
             lblTopNumber.ForeColor = Color.FromArgb(49, 129, 80);
             lblTopNumber.Location = new Point(3, 0);
             lblTopNumber.Name = "lblTopNumber";
-            lblTopNumber.Size = new Size(59, 48);
+            lblTopNumber.Size = new Size(183, 84);
             lblTopNumber.TabIndex = 2;
             lblTopNumber.Text = "#1";
             lblTopNumber.TextAlign = ContentAlignment.MiddleCenter;
@@ -611,11 +659,12 @@
             // label6
             // 
             label6.AutoSize = true;
+            label6.Dock = DockStyle.Fill;
             label6.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             label6.Location = new Point(0, 0);
             label6.Margin = new Padding(0);
             label6.Name = "label6";
-            label6.Size = new Size(148, 31);
+            label6.Size = new Size(294, 52);
             label6.TabIndex = 0;
             label6.Text = "Total Rentals:";
             label6.TextAlign = ContentAlignment.MiddleRight;
@@ -635,65 +684,333 @@
             // 
             // tableLayoutPanel2
             // 
-            tableLayoutPanel2.ColumnCount = 1;
-            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            tableLayoutPanel2.Controls.Add(label2, 0, 0);
-            tableLayoutPanel2.Controls.Add(flowLayoutPanel1, 0, 2);
-            tableLayoutPanel2.Controls.Add(dataGridView1, 0, 1);
+            tableLayoutPanel2.ColumnCount = 2;
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel2.Controls.Add(panel12, 1, 2);
+            tableLayoutPanel2.Controls.Add(panel10, 0, 2);
+            tableLayoutPanel2.Controls.Add(panel8, 1, 1);
+            tableLayoutPanel2.Controls.Add(panel6, 0, 1);
+            tableLayoutPanel2.Controls.Add(panel4, 1, 0);
+            tableLayoutPanel2.Controls.Add(panel2, 0, 0);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(20, 10);
             tableLayoutPanel2.Margin = new Padding(20, 10, 20, 10);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
             tableLayoutPanel2.RowCount = 3;
-            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 17.8217831F));
-            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 69.30693F));
-            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 12.8712873F));
-            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Percent, 33.3333321F));
             tableLayoutPanel2.Size = new Size(794, 398);
             tableLayoutPanel2.TabIndex = 0;
             // 
-            // label2
+            // panel12
             // 
-            label2.AutoSize = true;
-            label2.Dock = DockStyle.Fill;
-            label2.Font = new Font("Segoe UI", 19F, FontStyle.Bold, GraphicsUnit.Point);
-            label2.Location = new Point(0, 0);
-            label2.Margin = new Padding(0);
-            label2.Name = "label2";
-            label2.Size = new Size(794, 70);
-            label2.TabIndex = 0;
-            label2.Text = "Latest Problems";
+            panel12.Controls.Add(tableLayoutPanel15);
+            panel12.Dock = DockStyle.Fill;
+            panel12.Location = new Point(407, 274);
+            panel12.Margin = new Padding(10);
+            panel12.Name = "panel12";
+            panel12.Padding = new Padding(10);
+            panel12.Size = new Size(377, 114);
+            panel12.TabIndex = 5;
             // 
-            // flowLayoutPanel1
+            // tableLayoutPanel15
             // 
-            flowLayoutPanel1.Controls.Add(button1);
-            flowLayoutPanel1.Dock = DockStyle.Fill;
-            flowLayoutPanel1.FlowDirection = FlowDirection.RightToLeft;
-            flowLayoutPanel1.Location = new Point(3, 348);
-            flowLayoutPanel1.Name = "flowLayoutPanel1";
-            flowLayoutPanel1.Size = new Size(788, 47);
-            flowLayoutPanel1.TabIndex = 1;
+            tableLayoutPanel15.BackColor = Color.FromArgb(200, 228, 211);
+            tableLayoutPanel15.ColumnCount = 2;
+            tableLayoutPanel15.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel15.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
+            tableLayoutPanel15.Controls.Add(panel13, 0, 0);
+            tableLayoutPanel15.Controls.Add(lblDamaged, 1, 0);
+            tableLayoutPanel15.Dock = DockStyle.Fill;
+            tableLayoutPanel15.Location = new Point(10, 10);
+            tableLayoutPanel15.Margin = new Padding(10);
+            tableLayoutPanel15.Name = "tableLayoutPanel15";
+            tableLayoutPanel15.Padding = new Padding(10);
+            tableLayoutPanel15.RowCount = 1;
+            tableLayoutPanel15.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel15.Size = new Size(357, 94);
+            tableLayoutPanel15.TabIndex = 0;
             // 
-            // button1
+            // panel13
             // 
-            button1.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            button1.Location = new Point(658, 3);
-            button1.Name = "button1";
-            button1.Size = new Size(127, 39);
-            button1.TabIndex = 2;
-            button1.Text = "Go To";
-            button1.UseVisualStyleBackColor = true;
+            panel13.BackgroundImage = (Image)resources.GetObject("panel13.BackgroundImage");
+            panel13.BackgroundImageLayout = ImageLayout.Zoom;
+            panel13.Dock = DockStyle.Fill;
+            panel13.Location = new Point(13, 13);
+            panel13.Name = "panel13";
+            panel13.Size = new Size(61, 68);
+            panel13.TabIndex = 0;
             // 
-            // dataGridView1
+            // lblDamaged
             // 
-            dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            dataGridView1.Dock = DockStyle.Fill;
-            dataGridView1.Location = new Point(3, 73);
-            dataGridView1.Name = "dataGridView1";
-            dataGridView1.RowHeadersWidth = 70;
-            dataGridView1.RowTemplate.Height = 36;
-            dataGridView1.Size = new Size(788, 269);
-            dataGridView1.TabIndex = 1;
+            lblDamaged.Dock = DockStyle.Fill;
+            lblDamaged.Font = new Font("Segoe UI", 8.834356F, FontStyle.Bold, GraphicsUnit.Point);
+            lblDamaged.Location = new Point(87, 10);
+            lblDamaged.Margin = new Padding(10, 0, 0, 0);
+            lblDamaged.Name = "lblDamaged";
+            lblDamaged.Size = new Size(260, 74);
+            lblDamaged.TabIndex = 1;
+            lblDamaged.Text = "Damaged Equipment: 10";
+            lblDamaged.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // panel10
+            // 
+            panel10.Controls.Add(tableLayoutPanel14);
+            panel10.Dock = DockStyle.Fill;
+            panel10.Location = new Point(10, 274);
+            panel10.Margin = new Padding(10);
+            panel10.Name = "panel10";
+            panel10.Padding = new Padding(10);
+            panel10.Size = new Size(377, 114);
+            panel10.TabIndex = 4;
+            // 
+            // tableLayoutPanel14
+            // 
+            tableLayoutPanel14.BackColor = Color.FromArgb(200, 228, 211);
+            tableLayoutPanel14.ColumnCount = 2;
+            tableLayoutPanel14.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel14.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
+            tableLayoutPanel14.Controls.Add(panel11, 0, 0);
+            tableLayoutPanel14.Controls.Add(lblOverdue, 1, 0);
+            tableLayoutPanel14.Dock = DockStyle.Fill;
+            tableLayoutPanel14.Location = new Point(10, 10);
+            tableLayoutPanel14.Margin = new Padding(10);
+            tableLayoutPanel14.Name = "tableLayoutPanel14";
+            tableLayoutPanel14.Padding = new Padding(10);
+            tableLayoutPanel14.RowCount = 1;
+            tableLayoutPanel14.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel14.Size = new Size(357, 94);
+            tableLayoutPanel14.TabIndex = 0;
+            // 
+            // panel11
+            // 
+            panel11.BackgroundImage = (Image)resources.GetObject("panel11.BackgroundImage");
+            panel11.BackgroundImageLayout = ImageLayout.Zoom;
+            panel11.Dock = DockStyle.Fill;
+            panel11.Location = new Point(13, 13);
+            panel11.Name = "panel11";
+            panel11.Size = new Size(61, 68);
+            panel11.TabIndex = 0;
+            // 
+            // lblOverdue
+            // 
+            lblOverdue.Dock = DockStyle.Fill;
+            lblOverdue.Font = new Font("Segoe UI", 8.834356F, FontStyle.Bold, GraphicsUnit.Point);
+            lblOverdue.Location = new Point(87, 10);
+            lblOverdue.Margin = new Padding(10, 0, 0, 0);
+            lblOverdue.Name = "lblOverdue";
+            lblOverdue.Size = new Size(260, 74);
+            lblOverdue.TabIndex = 1;
+            lblOverdue.Text = "Overdue Rentals: 10";
+            lblOverdue.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // panel8
+            // 
+            panel8.Controls.Add(tableLayoutPanel13);
+            panel8.Dock = DockStyle.Fill;
+            panel8.Location = new Point(407, 142);
+            panel8.Margin = new Padding(10);
+            panel8.Name = "panel8";
+            panel8.Padding = new Padding(10);
+            panel8.Size = new Size(377, 112);
+            panel8.TabIndex = 3;
+            // 
+            // tableLayoutPanel13
+            // 
+            tableLayoutPanel13.BackColor = Color.FromArgb(200, 228, 211);
+            tableLayoutPanel13.ColumnCount = 2;
+            tableLayoutPanel13.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel13.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
+            tableLayoutPanel13.Controls.Add(panel9, 0, 0);
+            tableLayoutPanel13.Controls.Add(lblCompleted, 1, 0);
+            tableLayoutPanel13.Dock = DockStyle.Fill;
+            tableLayoutPanel13.Location = new Point(10, 10);
+            tableLayoutPanel13.Margin = new Padding(10);
+            tableLayoutPanel13.Name = "tableLayoutPanel13";
+            tableLayoutPanel13.Padding = new Padding(10);
+            tableLayoutPanel13.RowCount = 1;
+            tableLayoutPanel13.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel13.Size = new Size(357, 92);
+            tableLayoutPanel13.TabIndex = 0;
+            // 
+            // panel9
+            // 
+            panel9.BackgroundImage = (Image)resources.GetObject("panel9.BackgroundImage");
+            panel9.BackgroundImageLayout = ImageLayout.Zoom;
+            panel9.Dock = DockStyle.Fill;
+            panel9.Location = new Point(13, 13);
+            panel9.Name = "panel9";
+            panel9.Size = new Size(61, 66);
+            panel9.TabIndex = 0;
+            // 
+            // lblCompleted
+            // 
+            lblCompleted.Dock = DockStyle.Fill;
+            lblCompleted.Font = new Font("Segoe UI", 8.834356F, FontStyle.Bold, GraphicsUnit.Point);
+            lblCompleted.Location = new Point(87, 10);
+            lblCompleted.Margin = new Padding(10, 0, 0, 0);
+            lblCompleted.Name = "lblCompleted";
+            lblCompleted.Size = new Size(260, 72);
+            lblCompleted.TabIndex = 1;
+            lblCompleted.Text = "Compleated Rentals: 10";
+            lblCompleted.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // panel6
+            // 
+            panel6.Controls.Add(tableLayoutPanel12);
+            panel6.Dock = DockStyle.Fill;
+            panel6.Location = new Point(10, 142);
+            panel6.Margin = new Padding(10);
+            panel6.Name = "panel6";
+            panel6.Padding = new Padding(10);
+            panel6.Size = new Size(377, 112);
+            panel6.TabIndex = 2;
+            // 
+            // tableLayoutPanel12
+            // 
+            tableLayoutPanel12.BackColor = Color.FromArgb(200, 228, 211);
+            tableLayoutPanel12.ColumnCount = 2;
+            tableLayoutPanel12.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel12.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
+            tableLayoutPanel12.Controls.Add(panel7, 0, 0);
+            tableLayoutPanel12.Controls.Add(lblOngoing, 1, 0);
+            tableLayoutPanel12.Dock = DockStyle.Fill;
+            tableLayoutPanel12.Location = new Point(10, 10);
+            tableLayoutPanel12.Margin = new Padding(10);
+            tableLayoutPanel12.Name = "tableLayoutPanel12";
+            tableLayoutPanel12.Padding = new Padding(10);
+            tableLayoutPanel12.RowCount = 1;
+            tableLayoutPanel12.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel12.Size = new Size(357, 92);
+            tableLayoutPanel12.TabIndex = 0;
+            // 
+            // panel7
+            // 
+            panel7.BackgroundImage = (Image)resources.GetObject("panel7.BackgroundImage");
+            panel7.BackgroundImageLayout = ImageLayout.Zoom;
+            panel7.Dock = DockStyle.Fill;
+            panel7.Location = new Point(13, 13);
+            panel7.Name = "panel7";
+            panel7.Size = new Size(61, 66);
+            panel7.TabIndex = 0;
+            // 
+            // lblOngoing
+            // 
+            lblOngoing.Dock = DockStyle.Fill;
+            lblOngoing.Font = new Font("Segoe UI", 8.834356F, FontStyle.Bold, GraphicsUnit.Point);
+            lblOngoing.Location = new Point(87, 10);
+            lblOngoing.Margin = new Padding(10, 0, 0, 0);
+            lblOngoing.Name = "lblOngoing";
+            lblOngoing.Size = new Size(260, 72);
+            lblOngoing.TabIndex = 1;
+            lblOngoing.Text = "Ongoing Rentals: 0";
+            lblOngoing.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // panel4
+            // 
+            panel4.Controls.Add(tableLayoutPanel11);
+            panel4.Dock = DockStyle.Fill;
+            panel4.Location = new Point(407, 10);
+            panel4.Margin = new Padding(10);
+            panel4.Name = "panel4";
+            panel4.Padding = new Padding(10);
+            panel4.Size = new Size(377, 112);
+            panel4.TabIndex = 1;
+            // 
+            // tableLayoutPanel11
+            // 
+            tableLayoutPanel11.BackColor = Color.FromArgb(200, 228, 211);
+            tableLayoutPanel11.ColumnCount = 2;
+            tableLayoutPanel11.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel11.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
+            tableLayoutPanel11.Controls.Add(panel5, 0, 0);
+            tableLayoutPanel11.Controls.Add(lblTotalRentals, 1, 0);
+            tableLayoutPanel11.Dock = DockStyle.Fill;
+            tableLayoutPanel11.Location = new Point(10, 10);
+            tableLayoutPanel11.Margin = new Padding(10);
+            tableLayoutPanel11.Name = "tableLayoutPanel11";
+            tableLayoutPanel11.Padding = new Padding(10);
+            tableLayoutPanel11.RowCount = 1;
+            tableLayoutPanel11.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel11.Size = new Size(357, 92);
+            tableLayoutPanel11.TabIndex = 0;
+            // 
+            // panel5
+            // 
+            panel5.BackgroundImage = (Image)resources.GetObject("panel5.BackgroundImage");
+            panel5.BackgroundImageLayout = ImageLayout.Zoom;
+            panel5.Dock = DockStyle.Fill;
+            panel5.Location = new Point(13, 13);
+            panel5.Name = "panel5";
+            panel5.Size = new Size(61, 66);
+            panel5.TabIndex = 0;
+            // 
+            // lblTotalRentals
+            // 
+            lblTotalRentals.Dock = DockStyle.Fill;
+            lblTotalRentals.Font = new Font("Segoe UI", 8.834356F, FontStyle.Bold, GraphicsUnit.Point);
+            lblTotalRentals.Location = new Point(87, 10);
+            lblTotalRentals.Margin = new Padding(10, 0, 0, 0);
+            lblTotalRentals.Name = "lblTotalRentals";
+            lblTotalRentals.Size = new Size(260, 72);
+            lblTotalRentals.TabIndex = 1;
+            lblTotalRentals.Text = "Total Rentals: 10";
+            lblTotalRentals.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // panel2
+            // 
+            panel2.Controls.Add(tableLayoutPanel10);
+            panel2.Dock = DockStyle.Fill;
+            panel2.Location = new Point(10, 10);
+            panel2.Margin = new Padding(10);
+            panel2.Name = "panel2";
+            panel2.Padding = new Padding(10);
+            panel2.Size = new Size(377, 112);
+            panel2.TabIndex = 0;
+            // 
+            // tableLayoutPanel10
+            // 
+            tableLayoutPanel10.BackColor = Color.FromArgb(200, 228, 211);
+            tableLayoutPanel10.ColumnCount = 2;
+            tableLayoutPanel10.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
+            tableLayoutPanel10.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 80F));
+            tableLayoutPanel10.Controls.Add(panel3, 0, 0);
+            tableLayoutPanel10.Controls.Add(lblTodaysPickups, 1, 0);
+            tableLayoutPanel10.Dock = DockStyle.Fill;
+            tableLayoutPanel10.Location = new Point(10, 10);
+            tableLayoutPanel10.Margin = new Padding(10);
+            tableLayoutPanel10.Name = "tableLayoutPanel10";
+            tableLayoutPanel10.Padding = new Padding(10);
+            tableLayoutPanel10.RowCount = 1;
+            tableLayoutPanel10.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            tableLayoutPanel10.Size = new Size(357, 92);
+            tableLayoutPanel10.TabIndex = 0;
+            // 
+            // panel3
+            // 
+            panel3.BackgroundImage = (Image)resources.GetObject("panel3.BackgroundImage");
+            panel3.BackgroundImageLayout = ImageLayout.Zoom;
+            panel3.Dock = DockStyle.Fill;
+            panel3.Location = new Point(13, 13);
+            panel3.Name = "panel3";
+            panel3.Size = new Size(61, 66);
+            panel3.TabIndex = 0;
+            // 
+            // lblTodaysPickups
+            // 
+            lblTodaysPickups.Dock = DockStyle.Fill;
+            lblTodaysPickups.Font = new Font("Segoe UI", 8.834356F, FontStyle.Bold, GraphicsUnit.Point);
+            lblTodaysPickups.Location = new Point(87, 10);
+            lblTodaysPickups.Margin = new Padding(10, 0, 0, 0);
+            lblTodaysPickups.Name = "lblTodaysPickups";
+            lblTodaysPickups.Size = new Size(260, 72);
+            lblTodaysPickups.TabIndex = 1;
+            lblTodaysPickups.Text = "Today's Pickups: 10";
+            lblTodaysPickups.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // tableLayoutPanel9
             // 
@@ -735,23 +1052,6 @@
             pnlRefresh.TabIndex = 11;
             pnlRefresh.Click += pnlRefresh_Click;
             // 
-            // chartQuarterEarnings
-            // 
-            chartArea4.Name = "ChartArea1";
-            chartQuarterEarnings.ChartAreas.Add(chartArea4);
-            chartQuarterEarnings.Dock = DockStyle.Fill;
-            legend4.Name = "Legend1";
-            chartQuarterEarnings.Legends.Add(legend4);
-            chartQuarterEarnings.Location = new Point(3, 73);
-            chartQuarterEarnings.Name = "chartQuarterEarnings";
-            series4.ChartArea = "ChartArea1";
-            series4.Legend = "Legend1";
-            series4.Name = "Series1";
-            chartQuarterEarnings.Series.Add(series4);
-            chartQuarterEarnings.Size = new Size(597, 269);
-            chartQuarterEarnings.TabIndex = 1;
-            chartQuarterEarnings.Text = "chart1";
-            // 
             // AdminDashboardView
             // 
             AutoScaleDimensions = new SizeF(11F, 28F);
@@ -772,6 +1072,7 @@
             splitContainer5.ResumeLayout(false);
             flowLayoutPanel4.ResumeLayout(false);
             flowLayoutPanel5.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)chartQuarterEarnings).EndInit();
             tableLayoutPanel7.ResumeLayout(false);
             tableLayoutPanel7.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)chartCategories).EndInit();
@@ -802,13 +1103,21 @@
             tableLayoutPanel6.ResumeLayout(false);
             tableLayoutPanel6.PerformLayout();
             tableLayoutPanel2.ResumeLayout(false);
-            tableLayoutPanel2.PerformLayout();
-            flowLayoutPanel1.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)dataGridView1).EndInit();
+            panel12.ResumeLayout(false);
+            tableLayoutPanel15.ResumeLayout(false);
+            panel10.ResumeLayout(false);
+            tableLayoutPanel14.ResumeLayout(false);
+            panel8.ResumeLayout(false);
+            tableLayoutPanel13.ResumeLayout(false);
+            panel6.ResumeLayout(false);
+            tableLayoutPanel12.ResumeLayout(false);
+            panel4.ResumeLayout(false);
+            tableLayoutPanel11.ResumeLayout(false);
+            panel2.ResumeLayout(false);
+            tableLayoutPanel10.ResumeLayout(false);
             tableLayoutPanel9.ResumeLayout(false);
             tableLayoutPanel9.PerformLayout();
             flowLayoutPanel6.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)chartQuarterEarnings).EndInit();
             ResumeLayout(false);
         }
 
@@ -852,13 +1161,33 @@
         private Label label6;
         private Label lblTopTotalRental;
         private TableLayoutPanel tableLayoutPanel2;
-        private Label label2;
-        private FlowLayoutPanel flowLayoutPanel1;
-        private Button button1;
-        private DataGridView dataGridView1;
         private FlowLayoutPanel flowLayoutPanel6;
         private Panel pnlRefresh;
         private Panel pnlTopImage;
         private System.Windows.Forms.DataVisualization.Charting.Chart chartQuarterEarnings;
+        private Panel panel2;
+        private TableLayoutPanel tableLayoutPanel10;
+        private Panel panel3;
+        private Panel panel12;
+        private TableLayoutPanel tableLayoutPanel15;
+        private Panel panel13;
+        private Label lblDamaged;
+        private Panel panel10;
+        private TableLayoutPanel tableLayoutPanel14;
+        private Panel panel11;
+        private Label lblOverdue;
+        private Panel panel8;
+        private TableLayoutPanel tableLayoutPanel13;
+        private Panel panel9;
+        private Label lblCompleted;
+        private Panel panel6;
+        private TableLayoutPanel tableLayoutPanel12;
+        private Panel panel7;
+        private Label lblOngoing;
+        private Panel panel4;
+        private TableLayoutPanel tableLayoutPanel11;
+        private Panel panel5;
+        private Label lblTotalRentals;
+        private Label lblTodaysPickups;
     }
 }

@@ -187,7 +187,9 @@ namespace FormsApp.views.dialogs
                 context.Equipment.Add,
                 context.Equipment.Update,
                 item,
-                "Equipment"
+                item.Id,
+                "Equipment",
+                Global.userID
             );
         }
 
@@ -202,7 +204,7 @@ namespace FormsApp.views.dialogs
 
             item.Description = tbDescription.Text.Trim();
             item.IsActive = cbIsActive.Checked;
-
+            item.UpdatedAt = DateTime.Now;
             // image is uploaded and verified in validation when calling UploadImage
         }
 
@@ -362,5 +364,7 @@ namespace FormsApp.views.dialogs
         }
 
         #endregion
+
+
     }
 }

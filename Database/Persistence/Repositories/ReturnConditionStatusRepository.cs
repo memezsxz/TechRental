@@ -5,7 +5,7 @@ namespace Database.Persistence.Repositories
 {
     internal class ReturnConditionStatusRepository : Repository<ReturnConditionStatus>, IReturnConditionStatusRepository
     {
-        public ReturnConditionStatusRepository(RentalDBContext context) : base(context)
+        public ReturnConditionStatusRepository(RentalDBContext context, int? userId) : base(context, userId)
         {
         }
 
