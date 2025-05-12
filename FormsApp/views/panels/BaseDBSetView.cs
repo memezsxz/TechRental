@@ -12,10 +12,10 @@ using System.Reflection;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using Database;
 using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence;
+using Database.Search;
 using FormsApp.views.controls;
 using FormsApp.views.dialogs;
 using Microsoft.EntityFrameworkCore;
@@ -27,17 +27,48 @@ namespace FormsApp.views.panels;
 
 public partial class BaseDBSetView : UserControl
 {
+
     #region Fields
 
+    /// <summary>
+    /// The UnitOfWork instance responsible for coordinating database transactions and repositories.
+    /// </summary>
     private UnitOfWork _context = new UnitOfWork();
+
+    /// <summary>
+    /// The type of entity currently being managed (e.g., Equipment, RentalRequest, etc.).
+    /// Used for dynamic UI and repository operations.
+    /// </summary>
     private Type currentType;
+
+    /// <summary>
+    /// The current filter/search control being used to display and apply filters on the data.
+    /// </summary>
     private BaseSearchControl currentControl;
+
+    /// <summary>
+    /// The total number of pages available based on the current filter and page size.
+    /// Used for pagination navigation logic.
+    /// </summary>
     private int totalPages = 0;
+
+    /// <summary>
+    /// Flag indicating whether the current user is allowed to add new records of the selected entity type.
+    /// </summary>
     private bool allowAdd = false;
+
+    /// <summary>
+    /// Flag indicating whether the current user is allowed to edit existing records of the selected entity type.
+    /// </summary>
     private bool allowEdit = false;
+
+    /// <summary>
+    /// Flag indicating whether the current user is allowed to delete records of the selected entity type.
+    /// </summary>
     private bool allowDelete = false;
 
     #endregion
+
 
     #region Constructor
 
@@ -169,70 +200,6 @@ public partial class BaseDBSetView : UserControl
     private void btnDelete_Click(object sender, EventArgs e)
     {
         OpenManageForm(BaseViewEditDeleteForm.ViewType.DELETE);
-    }
-
-
-    private void OpenManageForm(BaseViewEditDeleteForm.ViewType type)
-    {
-        int? id = null;
-
-        if (type != BaseViewEditDeleteForm.ViewType.ADD)
-        {
-            id = GetSelectedRowId();
-            if (id == null)
-            {
-                MessageBox.Show("Please select an item to preform this action.");
-                return;
-            }
-        }
-
-        BaseViewEditDeleteForm form = null;
-
-        try
-        {
-            if (currentType == typeof(Equipment))
-            {
-                form = new ManageEquipment(type, id);
-
-            }
-            else if (currentType == typeof(RentalRequest))
-            {
-                form = new ManageRental(ManageRental.ItemType.Request, type, id);
-            }
-            else if (currentType == typeof(RentalRecord))
-            {
-                form = new ManageRental(ManageRental.ItemType.Record, type, id);
-            }
-            else if (currentType == typeof(Category))
-            {
-                form = new ManageCategory(type, id);
-            }
-            else if (currentType == typeof(User))
-            {
-                form = new ManageUser(type, id);
-            }
-            else if (currentType == typeof(AuditLog))
-            {
-                form = new ManageAuditTrails(type, id);
-            }
-            else if (currentType == typeof(SystemErrorLog))
-            {
-                form = new ManageErrors(type, id);
-            }
-
-            if (form != null)
-            {
-                form.OnSuccessfulComplete += () => currentControl.Apply();
-
-                if (type == BaseViewEditDeleteForm.ViewType.DELETE) form.Delete();
-                else form.ShowDialog();
-            }
-        }
-        catch (Exception ex)
-        {
-            Global.DisplayReportErrorDialog(ex);
-            form?.Close();
-        }
     }
 
     #endregion
@@ -405,6 +372,80 @@ public partial class BaseDBSetView : UserControl
 
     }
 
+    /// <summary>
+    /// Opens the appropriate management form (Add/Edit/View/Delete) based on the current entity type and requested action.
+    /// If the action requires an item to be selected (i.e., not Add), it validates selection and passes the ID to the form.
+    /// </summary>
+    /// <param name="type">The type of form operation to perform.</param>
+    private void OpenManageForm(BaseViewEditDeleteForm.ViewType type)
+    {
+        int? id = null;
+
+        // For Edit, View, or Delete actions, ensure a row is selected
+        if (type != BaseViewEditDeleteForm.ViewType.ADD)
+        {
+            id = GetSelectedRowId();
+            if (id == null)
+            {
+                MessageBox.Show("Please select an item to perform this action.");
+                return;
+            }
+        }
+
+        BaseViewEditDeleteForm form = null;
+
+        try
+        {
+            // Determine which form to open based on the entity type
+            if (currentType == typeof(Equipment))
+            {
+                form = new ManageEquipment(type, id);
+            }
+            else if (currentType == typeof(RentalRequest))
+            {
+                form = new ManageRental(ManageRental.ItemType.Request, type, id);
+            }
+            else if (currentType == typeof(RentalRecord))
+            {
+                form = new ManageRental(ManageRental.ItemType.Record, type, id);
+            }
+            else if (currentType == typeof(Category))
+            {
+                form = new ManageCategory(type, id);
+            }
+            else if (currentType == typeof(User))
+            {
+                form = new ManageUser(type, id);
+            }
+            else if (currentType == typeof(AuditLog))
+            {
+                form = new ManageAuditTrails(type, id);
+            }
+            else if (currentType == typeof(SystemErrorLog))
+            {
+                form = new ManageErrors(type, id);
+            }
+
+            if (form != null)
+            {
+                // Reapply the filter/search after any changes from the form
+                form.OnSuccessfulComplete += () => currentControl.Apply();
+
+                // Perform delete immediately or show form for other actions
+                if (type == BaseViewEditDeleteForm.ViewType.DELETE)
+                    form.Delete();
+                else
+                    form.ShowDialog();
+            }
+        }
+        catch (Exception ex)
+        {
+            // Handle error during form instantiation or operation
+            Global.DisplayReportErrorDialog(ex);
+            form?.Close();
+        }
+    }
+
     #endregion
 
     #region Data Access
@@ -499,37 +540,51 @@ public partial class BaseDBSetView : UserControl
         return newColumns;
     }
 
-    #endregion
-
-
-    private void HandleErrors(Exception ex)
-    {
-        Global.DisplayReportErrorDialog(ex);
-        if (this.Parent != null)
-        {
-            this.Parent.Controls.Remove(this);
-        }
-
-        this.Dispose();
-    }
-    #region New
-
+    /// <summary>
+    /// Gets the ID of the currently selected row in the DataGridView.
+    /// </summary>
+    /// <returns>The row's ID if valid; otherwise, null.</returns>
     private int? GetSelectedRowId()
     {
+        // Ensure a row is selected
         if (dvgItems.CurrentRow == null || dvgItems.CurrentRow.Index < 0)
             return null;
 
         try
         {
+            // Try to extract the ID from the first column
             var value = dvgItems.CurrentRow.Cells[0].Value;
             return value != null ? Convert.ToInt32(value) : null;
         }
         catch
         {
+            // Return null if value is not convertible to int
             return null;
         }
     }
 
+    #endregion
 
+    #region Error Handling
+
+    /// <summary>
+    /// Centralized error handling for UI operations in this control.
+    /// It shows an error dialog, removes the control from its parent, and disposes it.
+    /// </summary>
+    /// <param name="ex">The exception that occurred.</param>
+    private void HandleErrors(Exception ex)
+    {
+        // Display the error dialog (without showing raw error to the user)
+        Global.DisplayReportErrorDialog(ex);
+
+        // Remove this control from its parent container if possible
+        if (this.Parent != null)
+        {
+            this.Parent.Controls.Remove(this);
+        }
+
+        // Dispose of this control to free up resources
+        this.Dispose();
+    }
     #endregion
 }

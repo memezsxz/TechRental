@@ -9,43 +9,62 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Database.Persistence.Repositories
 {
+    /// <summary>
+    /// Repository implementation for managing Category entities.
+    /// </summary>
     internal class CategoryRepository : Repository<Category>, ICategoryRepository
     {
-        public CategoryRepository(RentalDBContext context, int? userId) : base(context, userId)
+        #region Constructor
+
+        public CategoryRepository(RentalDBContext context, int? userId)
+            : base(context, userId)
         {
         }
 
-        public RentalDBContext RentalDBContext
-        {
-            get { return context as RentalDBContext; }
-        }
+        #endregion
 
+        #region Context Accessor
 
-        #region Async
+        /// <summary>
+        /// Gets the current database context cast to <see cref="RentalDBContext"/>.
+        /// </summary>
+        public RentalDBContext RentalDBContext => context as RentalDBContext;
+
+        #endregion
+
+        #region ICategoryRepository Implementation
+
+        /// <inheritdoc/>
         public bool IsReferenced(int id)
         {
             return RentalDBContext.Equipment.Any(e => e.CategoryId == id);
         }
 
+        /// <inheritdoc/>
         public async Task<bool> ExistsAsync(int id)
         {
             return await RentalDBContext.Categories.AnyAsync(c => c != null && c.Id == id);
         }
 
-
         #endregion
 
-        #region IStatus
+        #region IStatus Implementation (ICategoryRepository)
 
+        /// <inheritdoc/>
         public Dictionary<int, string> GetAllByName()
         {
             return RentalDBContext.Categories
                 .ToDictionary(c => c.Id, c => c.Name);
         }
 
+        #endregion
+
+        #region View Projection
+
+        /// <inheritdoc/>
         public override IQueryable<object> SelectViewColumns(IQueryable query)
         {
-            query = query.Cast<Category>().Select(c => new 
+            query = query.Cast<Category>().Select(c => new
             {
                 Id = c.Id,
                 Name = c.Name,
@@ -56,6 +75,10 @@ namespace Database.Persistence.Repositories
         }
 
         #endregion
+
+        #region Metadata Overrides
+
+        /// <inheritdoc/>
         protected override bool ShouldIgnoreProperty(string propertyName)
         {
             return propertyName switch
@@ -65,5 +88,7 @@ namespace Database.Persistence.Repositories
                 _ => base.ShouldIgnoreProperty(propertyName)
             };
         }
+
+        #endregion
     }
 }

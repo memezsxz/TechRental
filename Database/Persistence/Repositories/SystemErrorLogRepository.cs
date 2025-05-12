@@ -3,40 +3,53 @@ using Database.Core.Repositories;
 
 namespace Database.Persistence.Repositories
 {
+    /// <summary>
+    /// Repository implementation for managing SystemErrorLog entities.
+    /// </summary>
     internal class SystemErrorLogRepository : Repository<SystemErrorLog>, ISystemErrorLogRepository
     {
-        public SystemErrorLogRepository(RentalDBContext context, int? userId) : base(context, userId)
+        #region Constructor
+
+        public SystemErrorLogRepository(RentalDBContext context, int? userId)
+            : base(context, userId)
         {
         }
 
-        public RentalDBContext RentalDBContext
-        {
-            get { return context as RentalDBContext; }
-        }
+        #endregion
 
-        #region Search
+        #region Context Accessor
 
+        /// <summary>
+        /// Gets the current database context cast to <see cref="RentalDBContext"/>.
+        /// </summary>
+        public RentalDBContext RentalDBContext => context as RentalDBContext;
+
+        #endregion
+
+        #region Metadata Overrides
+
+        /// <inheritdoc/>
         public override Dictionary<string, string> GetEntityColumnsWithTypes()
         {
             var d = base.GetEntityColumnsWithTypes();
 
-            if (d.ContainsKey("UserId")) d["UserId"] = "Int32";
-            
+            if (d.ContainsKey("UserId"))
+                d["UserId"] = "Int32";
+
             return d;
         }
 
+        /// <inheritdoc/>
         public override IQueryable<object> SelectViewColumns(IQueryable query)
         {
-            query = query.Cast<SystemErrorLog>().Select(e => new
+            return query.Cast<SystemErrorLog>().Select(e => new
             {
                 Id = e.Id,
                 UserId = e.UserId,
                 ErrorSource = e.ErrorSource,
                 SourceProcedure = e.SourceProcedure,
                 Timestamp = e.Timestamp,
-            });
-
-            return query.Cast<object>();
+            }).Cast<object>();
         }
 
         #endregion

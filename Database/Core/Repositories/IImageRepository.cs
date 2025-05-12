@@ -9,6 +9,11 @@ using Database.Core.Domain;
 
 namespace Database.Core.Repositories
 {
+    /// <summary>
+    /// Repository interface for managing <see cref="Image"/> entities.
+    /// Inherits standard CRUD operations from <see cref="IRepository{T}"/>.
+    /// </summary>
+
     public interface IImageRepository : IRepository<Image>
     {
     }

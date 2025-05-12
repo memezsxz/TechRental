@@ -3,27 +3,32 @@ using Database.Core.Repositories;
 
 namespace Database.Persistence.Repositories
 {
+    /// <summary>
+    /// Repository implementation for managing AuditLog entities.
+    /// </summary>
     internal class AuditLogRepository : Repository<AuditLog>, IAuditLogRepository
     {
-        public AuditLogRepository(RentalDBContext context, int? userId) : base(context, userId)
+        #region Constructor
+
+        public AuditLogRepository(RentalDBContext context, int? userId)
+            : base(context, userId)
         {
         }
 
-        public RentalDBContext RentalDBContext
-        {
-            get { return context as RentalDBContext; }
-        }
+        #endregion
 
+        #region Context Accessor
 
-        public override Dictionary<string, string> GetEntityColumnsWithTypes()
-        {
-            var d = base.GetEntityColumnsWithTypes();
-            //d.Remove("DataBeforeAction");
-            //d.Remove("DataAfterAction");
-            if (d.ContainsKey("UserId")) d["UserId"] = "Int32";
-            return d;
-        }
+        /// <summary>
+        /// Gets the current database context cast to <see cref="RentalDBContext"/>.
+        /// </summary>
+        public RentalDBContext RentalDBContext => context as RentalDBContext;
 
+        #endregion
+
+        #region View Projection
+
+        /// <inheritdoc/>
         public override IQueryable<object> SelectViewColumns(IQueryable query)
         {
             query = query.Cast<AuditLog>().Select(a => new
@@ -40,5 +45,22 @@ namespace Database.Persistence.Repositories
             return query.Cast<object>();
         }
 
+        #endregion
+
+        #region Metadata Overrides
+
+        /// <inheritdoc/>
+        public override Dictionary<string, string> GetEntityColumnsWithTypes()
+        {
+            var d = base.GetEntityColumnsWithTypes();
+
+            // Explicitly set the type for UserId
+            if (d.ContainsKey("UserId"))
+                d["UserId"] = "Int32";
+
+            return d;
+        }
+
+        #endregion 
     }
 }

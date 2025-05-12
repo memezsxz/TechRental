@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence;
+using Database.Search;
 using Microsoft.EntityFrameworkCore;
 
 namespace Database.Persistence.Repositories;

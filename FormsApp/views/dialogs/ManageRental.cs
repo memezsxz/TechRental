@@ -299,63 +299,8 @@ namespace FormsApp.views.dialogs
         #region Save/Delete Logic
         public override void Delete()
         {
-            //if (id == null)
-            //{
-            //    MessageBox.Show("Cannot delete id null");
-            //Dispose();
-
-            //    return;
-            //}
-
-            //item = context.Equipment.GetEquipmentWithImage(id.Value);
-
-            //if (item == null)
-            //{
-            //    MessageBox.Show($"Equipment with the id {id.Value} not found");
-            //                    Dispose();
-            //return;
-            //}
-
-            //if (context.Equipment.IsReferenced(id.Value))
-            //{
-            //    var result = MessageBox.Show($"This equipment is in use. Do you want to mark it as inactive instead?", "Equipment in use", MessageBoxButtons.YesNo);
-
-            //    if (result == DialogResult.Yes)
-            //    {
-            //        try
-            //        {
-            //            item.IsActive = false;
-            //            context.Equipment.Update(item);
-            //            context.SaveChanges();
-            //            RaiseSuccessfulComplete();
-            //        }
-            //        catch (Exception e)
-            //        {
-            //            Global.DisplayReportErrorDialog(e);
-            //            RaiseFailedComplete();
-            //        }
-            //    }
-            //                    Dispose();
-
-            //    return;
-            //}
-
-            //try
-            //{
-            //    context.Equipment.Remove(item);
-            //    context.SaveChanges();
-            //    RaiseSuccessfulComplete();
-            //Dispose();
-
-            //}
-            //catch (Exception e)
-            //{
-            //    Global.DisplayReportErrorDialog(e);
-            //    RaiseFailedComplete();
-            //Dispose();
-
-            //}
-
+            MessageBox.Show("Cannot Delete a rental.");
+            Dispose();
         }
 
 
@@ -461,12 +406,6 @@ namespace FormsApp.views.dialogs
         #region Event Handlers
         private void groupBox_Paint(object sender, PaintEventArgs e)
         {
-            // no border
-            //GroupBox box = (GroupBox)sender;
-            //e.Graphics.Clear(SystemColors.Control);
-            //e.Graphics.DrawString(box.Text, box.Font, new SolidBrush(Global.DarkGreen), 0, 0);
-
-
             GroupBox box = sender as GroupBox;
             DrawGroupBox(box, e.Graphics, Global.DarkGreen, Global.Green);
         }

@@ -11,25 +11,65 @@ namespace FormsApp.views.panels
     public partial class AdminDashboardView : UserControl
     {
         #region Fields
+
+        /// <summary>
+        /// Label displayed when there are no weekly sales to show in the category chart.
+        /// </summary>
         private Label lblNoSalesMessage;
+
+        /// <summary>
+        /// Label displayed when there is no data available for the selected quarter.
+        /// </summary>
         private Label lblNoQuarterMessage;
+
+        /// <summary>
+        /// Label displayed when an image fails to load in the top equipment section.
+        /// </summary>
         private Label lblImageMessage;
 
+        /// <summary>
+        /// Unit of Work instance used for database access and retrieval of dashboard data.
+        /// </summary>
         private readonly IUnitOfWork _unitOfWork = new UnitOfWork();
 
+        /// <summary>
+        /// Holds statistics for the top 5 most rented equipment items.
+        /// This data is displayed in the top equipment section of the dashboard.
+        /// </summary>
         private List<TopRentedEquipmentStats> top5EquipmentStats = new List<TopRentedEquipmentStats>();
 
-        int currentYear = DateTime.Now.Year;
-        //int currentYear = 2021;
+        /// <summary>
+        /// The current year, used to filter and display statistics related to that year.
+        /// </summary>
+        private int currentYear = DateTime.Now.Year;
+        // private int currentYear = 2021; // Use for static testing purposes if needed
 
+        /// <summary>
+        /// The index of the currently displayed top rented equipment item in the carousel.
+        /// </summary>
         private int currentTopIndex = -1;
 
+        /// <summary>
+        /// The current quarter of the year, derived from the current date.
+        /// Used to determine how many quarters of data are available.
+        /// </summary>
         private int currentQuarter = (DateTime.Now.Month - 1) / 3 + 1;
-        //private int currentQuarter = 4;
+        // private int currentQuarter = 4; // Use for static testing purposes if needed
+
+        /// <summary>
+        /// Tracks the quarter currently selected for earnings chart display.
+        /// -1 indicates no quarter selected yet.
+        /// </summary>
         private int currentSelectedQuarter = -1;
 
+        /// <summary>
+        /// Stores earnings data grouped by quarter for the current year.
+        /// Used to populate the earnings bar chart.
+        /// </summary>
         private List<QuarterEarnings> QuarterData = new();
+
         #endregion
+
 
         #region Constructor
         /// <summary>
@@ -259,8 +299,15 @@ namespace FormsApp.views.panels
         #region Chart Rendering
 
         /// <summary>
-        /// Prepares the base chart configuration and handles empty data fallback.
+        /// Configures the initial state of the provided chart by clearing previous content,
+        /// setting visibility, and optionally displaying a fallback message if no data is available.
         /// </summary>
+        /// <param name="chart">The chart control to be configured.</param>
+        /// <param name="noDataLabel">The label to show when no data is available.</param>
+        /// <param name="title">The title of the chart.</param>
+        /// <param name="hasData">Indicates whether data exists to populate the chart.</param>
+        /// <param name="emptyMessage">Optional message shown if no data exists.</param>
+        /// <returns>True if data is available and the chart should be rendered; false otherwise.</returns>
         private bool PrepareChart(
             Chart chart,
             Label noDataLabel,
@@ -268,10 +315,13 @@ namespace FormsApp.views.panels
             bool hasData,
             string emptyMessage = "No data available")
         {
+            // Clear existing content
             chart.Series.Clear();
             chart.ChartAreas.Clear();
             chart.Titles.Clear();
             chart.Legends.Clear();
+
+            // Toggle visibility based on whether we have data
             chart.Visible = hasData;
             noDataLabel.Visible = !hasData;
 
@@ -281,14 +331,20 @@ namespace FormsApp.views.panels
                 return false;
             }
 
+            // Add a title and default legend if data is present
             chart.Titles.Add(title);
             chart.Legends.Add(new Legend());
             return true;
         }
 
         /// <summary>
-        /// Renders a pie chart using category-count data.
+        /// Renders a pie chart showing category-wise distribution of rentals.
         /// </summary>
+        /// <param name="chart">The chart control where the pie chart will be rendered.</param>
+        /// <param name="noDataLabel">Label shown if no data is available.</param>
+        /// <param name="chartTitle">Title to be displayed on the chart.</param>
+        /// <param name="data">Dictionary containing category names and their rental counts.</param>
+        /// <param name="seriesName">Name of the data series (defaults to "Data").</param>
         private void RenderPieChart(
             Chart chart,
             Label noDataLabel,
@@ -296,54 +352,75 @@ namespace FormsApp.views.panels
             Dictionary<string, int> data,
             string seriesName = "Data")
         {
+            // Skip rendering if no data
             if (!PrepareChart(chart, noDataLabel, chartTitle, data.Any()))
                 return;
 
+            // Create a new chart area specifically for pie chart
             var chartArea = new ChartArea("PieArea");
             chart.ChartAreas.Add(chartArea);
 
+            // Create and configure the data series
             var series = new Series(seriesName)
             {
                 ChartType = SeriesChartType.Pie,
                 IsValueShownAsLabel = true
             };
 
+            // Improve readability of pie labels
             series["PieLabelStyle"] = "Outside";
             series["PieLineColor"] = "Black";
 
+            // Add each data point to the pie chart
             foreach (var (label, value) in data)
             {
                 series.Points.AddXY(label, value);
             }
 
+            // Add the series to the chart and refresh
             chart.Series.Add(series);
             chart.Invalidate();
         }
 
         /// <summary>
-        /// Renders a bar chart representing earnings per month.
+        /// Renders a bar chart displaying earnings per month for a given quarter.
         /// </summary>
+        /// <param name="chart">The chart control where the bar chart will be displayed.</param>
+        /// <param name="noDataLabel">Label to show if no earnings data is available.</param>
+        /// <param name="title">Title of the chart (e.g., "Quarter 1 Earnings").</param>
+        /// <param name="data">A list of monthly earnings records.</param>
         private void RenderBarChart(
             Chart chart,
             Label noDataLabel,
             string title,
             List<MonthlyEarnings> data)
         {
+            // Skip rendering if no data
             if (!PrepareChart(chart, noDataLabel, title, data.Any(), "No earnings for this quarter"))
                 return;
 
+            // Remove existing legends for a clean look
             chart.Legends.Clear();
 
-            var chartArea = new ChartArea("MainArea");
-            chartArea.AxisX.Title = "Month";
-            chartArea.AxisY.Title = "Earnings";
-            chartArea.AxisX.Interval = 1;
-            chartArea.AxisX.MajorGrid.Enabled = false;
-            chartArea.AxisY.MajorGrid.LineColor = Color.LightGray;
-            chartArea.AxisY.Minimum = 0;
-
+            // Create and configure the chart area
+            var chartArea = new ChartArea("MainArea")
+            {
+                AxisX =
+                {
+                    Title = "Month",
+                    Interval = 1,
+                    MajorGrid = { Enabled = false }
+                },
+                AxisY =
+                {
+                    Title = "Earnings",
+                    Minimum = 0,
+                    MajorGrid = { LineColor = Color.LightGray }
+                }
+            };
             chart.ChartAreas.Add(chartArea);
 
+            // Create and configure the data series
             var series = new Series("Quarter Earnings")
             {
                 ChartType = SeriesChartType.Column,
@@ -351,6 +428,7 @@ namespace FormsApp.views.panels
                 IsXValueIndexed = true
             };
 
+            // Add data points to the series
             foreach (var entry in data)
             {
                 var point = new DataPoint
@@ -361,6 +439,7 @@ namespace FormsApp.views.panels
                 series.Points.Add(point);
             }
 
+            // Add series to chart and refresh
             chart.Series.Add(series);
             chart.Invalidate();
         }

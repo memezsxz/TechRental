@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Database.Core.Domain;
 using Database.Persistence;
+using Database.Search;
 
 namespace Database.Core.Repositories
 {

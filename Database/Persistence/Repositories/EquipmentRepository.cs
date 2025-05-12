@@ -1,85 +1,62 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.ViewModels;
 using Microsoft.EntityFrameworkCore;
-using System.Text.Json;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
 namespace Database.Persistence.Repositories
 {
+    /// <summary>
+    /// Repository implementation for managing <see cref="Equipment"/> entities.
+    /// Includes image lookup, detailed navigation includes, and usage analytics.
+    /// </summary>
     internal class EquipmentRepository : Repository<Equipment>, IEquipmentRepository
     {
-        public EquipmentRepository(RentalDBContext context, int? userId ) : base(context, userId)
+        #region Constructor
+
+        public EquipmentRepository(RentalDBContext context, int? userId)
+            : base(context, userId)
         {
         }
 
-        public RentalDBContext RentalDBContext
-        {
-            get { return context as RentalDBContext; }
-        }
+        #endregion
+
+        #region Context Accessor
+
+        /// <summary>
+        /// Gets the current database context cast to <see cref="RentalDBContext"/>.
+        /// </summary>
+        public RentalDBContext RentalDBContext => context as RentalDBContext;
+
+        #endregion
+
+        #region IEquipmentRepository Implementation
+
+        /// <inheritdoc/>
         public bool IsReferenced(int id)
         {
             return RentalDBContext.RentalRequests.Any(r => r.EquipmentId == id);
         }
 
-        #region Async
-
-
-
-        public async Task<bool> IsReferencedAsync(int id)
+        /// <inheritdoc/>
+        public Equipment? GetEquipmentWithImage(int id)
         {
-            return await RentalDBContext.RentalRequests.AnyAsync(r => r.EquipmentId == id);
-        }
-
-        private IQueryable<Equipment> GetWithDetails()
-        {
-            return RentalDBContext.Equipment
-                .Include(e => e.AvailabilityStatus)
-                .Include(e => e.Category)
-                .Include(e => e.ConditionStatus)
-                .Include(e => e.Image);
-        }
-        public async Task<IEnumerable<Equipment>> GetAllWithDetailsAsync()
-        {
-            return await GetWithDetails().ToListAsync();
-        }
-
-        public async Task<Equipment?> GetByIdWithDetailsAsync(int id)
-        {
-            return await GetWithDetails().FirstOrDefaultAsync(e => e.Id == id);
-        }
-
-        public async Task<Equipment?> GetEquipmentWithImageAsync(int id)
-        {
-            return await RentalDBContext.Equipment
-                .Include(e => e.Image)
-                .FirstOrDefaultAsync(e => e.Id == id);
-        }
-
-
-        public  Equipment? GetEquipmentWithImage(int id)
-        {
-            return  RentalDBContext.Equipment
-                .Include(e => e.Image)
+            return GetWithDetails()
                 .FirstOrDefault(e => e.Id == id);
         }
-        public async Task<bool> EquipmentExistsAsync(int id)
-        {
-            return await RentalDBContext.Equipment.AnyAsync(e => e.Id == id);
-        }
 
-        #endregion
-
+        /// <inheritdoc/>
         public async Task<List<TopRentedEquipmentStats>> GetTop5RentedEquipmentStatsAsync()
         {
-
+            // Get the top 5 equipment IDs based on rental count
             var top5EquipmentIds = await context.RentalRecords
                 .Where(r => r.RentalRequest != null && r.RentalRequest.EquipmentId != null)
                 .GroupBy(r => r.RentalRequest.EquipmentId.Value)
@@ -88,90 +65,120 @@ namespace Database.Persistence.Repositories
                 .Select(g => g.Key)
                 .ToListAsync();
 
+            // Query the full equipment records and project statistics
             return await context.Equipment
-                .Where(e => top5EquipmentIds.Contains(e.Id))
-                .Select(e => new TopRentedEquipmentStats
-                {
-                    EquipmentId = e.Id,
-                    Name = e.Name,
+         // Only include equipment that is in the top 5 most rented
+         .Where(e => top5EquipmentIds.Contains(e.Id))
 
-                    TotalRentals = e.RentalRequests
-                        .SelectMany(rq => rq.RentalRecords)
-                        .Count(),
+         // Project the selected equipment into TopRentedEquipmentStats view model
+         .Select(e => new TopRentedEquipmentStats
+         {
+             // Equipment ID
+             EquipmentId = e.Id,
 
-                    TotalRevenue = e.RentalRequests
-                        .SelectMany(rq => rq.RentalRecords)
-                        .Sum(rr => (decimal?)rr.TotalCost) ?? 0,
+             // Equipment name
+             Name = e.Name,
 
-                    AvgRentalDuration = e.RentalRequests
-                        .SelectMany(rq => rq.RentalRecords)
-                        .Any(rr => rr.PickupDate != null && rr.ActualReturnDate != null)
-                        ? (float)(e.RentalRequests
-                            .SelectMany(rq => rq.RentalRecords)
-                            .Where(rr => rr.PickupDate != null && rr.ActualReturnDate != null)
-                            .Average(rr => (int?)EF.Functions.DateDiffDay(rr.PickupDate, rr.ActualReturnDate.Value)) ?? 0)
-                        : 0f,
+             // Count of rental records associated with this equipment
+             TotalRentals = e.RentalRequests
+                 .SelectMany(rq => rq.RentalRecords) // flatten requests to records
+                 .Count(),
 
-                    Rating = e.Feedbacks
-                        .Any(f => !f.IsHidden.HasValue || !f.IsHidden.Value)
-                        ? (float)(e.Feedbacks
-                            .Where(f => !f.IsHidden.HasValue || !f.IsHidden.Value)
-                            .Average(f => (decimal?)f.Rate) ?? 0)
-                        : 0f,
-                    ImageGuid = e.Image.Guid ?? null,
-                    ImageFormat = e.Image.ImageType
-                })
-                .ToListAsync();
+             // Sum of all total costs from associated rental records
+             TotalRevenue = e.RentalRequests
+                 .SelectMany(rq => rq.RentalRecords)
+                 .Sum(rr => (decimal?)rr.TotalCost) ?? 0, // fallback to 0 if null
 
-            //var top5EquipmentIds = await RentalDBContext.RentalRecords
-            //    .Where(r => r.RentalRequest != null && r.RentalRequest.EquipmentId != null)
-            //    .GroupBy(r => r.RentalRequest.EquipmentId.Value)
-            //    .OrderByDescending(g => g.Count())
-            //    .Take(5)
-            //    .Select(g => g.Key)
-            //    .ToListAsync();
+             // Average number of rental days for records that have both pickup and return dates
+             AvgRentalDuration = e.RentalRequests
+                 .SelectMany(rq => rq.RentalRecords)
+                 .Any(rr => rr.PickupDate != null && rr.ActualReturnDate != null)
+                 ? (float)(
+                     e.RentalRequests
+                         .SelectMany(rq => rq.RentalRecords)
+                         .Where(rr => rr.PickupDate != null && rr.ActualReturnDate != null)
+                         .Average(rr => (int?)EF.Functions.DateDiffDay(rr.PickupDate, rr.ActualReturnDate.Value)) ?? 0)
+                 : 0f,
 
-            //return await RentalDBContext.Equipment
-            //    .Where(e => top5EquipmentIds.Contains(e.Id))
-            //    .Select(e => new TopRentedEquipmentStats
-            //    {
-            //        EquipmentId = e.Id,
-            //        Name = e.Name,
-            //        TotalRentals = e.RentalRequests.SelectMany(rq => rq.RentalRecords).Count(),
-            //        TotalRevenue = e.RentalRequests.SelectMany(rq => rq.RentalRecords).Sum(rr => (decimal?)rr.TotalCost) ?? 0,
-            //        AvgRentalDuration = e.RentalRequests.SelectMany(rq => rq.RentalRecords).Any(rr => rr.PickupDate != null && rr.ActualReturnDate != null)
-            //            ? (float)(e.RentalRequests.SelectMany(rq => rq.RentalRecords).Where(rr => rr.PickupDate != null && rr.ActualReturnDate != null).Average(rr => (int?)EF.Functions.DateDiffDay(rr.PickupDate, rr.ActualReturnDate.Value)) ?? 0)
-            //            : 0f,
-            //        Rating = e.Feedbacks.Any(f => !f.IsHidden.HasValue || !f.IsHidden.Value)
-            //            ? (float)(e.Feedbacks.Where(f => !f.IsHidden.HasValue || !f.IsHidden.Value).Average(f => (decimal?)f.Rate) ?? 0)
-            //            : 0f,
-            //        ImageGuid = e.Image.Guid,
-            //        ImageFormat = e.Image.ImageType
-            //    })
-            //    .ToListAsync();
+             // Average rating from visible (non-hidden) feedback records
+             Rating = e.Feedbacks
+                 .Any(f => !f.IsHidden.HasValue || !f.IsHidden.Value) // check if any visible feedback exists
+                 ? (float)(
+                     e.Feedbacks
+                         .Where(f => !f.IsHidden.HasValue || !f.IsHidden.Value)
+                         .Average(f => (decimal?)f.Rate) ?? 0)
+                 : 0f,
+
+             // Image metadata: GUID (nullable) and MIME type
+             ImageGuid = e.Image.Guid ?? null,
+             ImageFormat = e.Image.ImageType
+         })
+
+         // Execute the query asynchronously and return the results as a list
+         .ToListAsync();
+
         }
 
+        #endregion
 
-        #region IStatus
+        #region IStatus Implementation (IEquipmentRepository)
 
+        /// <inheritdoc/>
         public Dictionary<int, string> GetAllByName()
         {
             return context.Equipment.ToDictionary(e => e.Id, e => e.Name);
         }
 
+        #endregion
 
+        #region Internal Helpers
+
+        /// <summary>
+        /// Returns an IQueryable that includes navigation properties for Equipment.
+        /// </summary>
+        private IQueryable<Equipment> GetWithDetails()
+        {
+            return RentalDBContext.Equipment
+                .Include(e => e.AvailabilityStatus)
+                .Include(e => e.Category)
+                .Include(e => e.ConditionStatus)
+                .Include(e => e.Image);
+        }
 
         #endregion
 
-        #region Search
+        #region Metadata Overrides
 
+        /// <inheritdoc/>
         public override Dictionary<string, string> GetEntityColumnsWithTypes()
         {
             var d = base.GetEntityColumnsWithTypes();
-            d.Remove("Image");
+            d.Remove("Image"); // Exclude navigation property
             return d;
         }
 
+        /// <inheritdoc/>
+        protected override bool ShouldIgnoreProperty(string propertyName)
+        {
+            return propertyName switch
+            {
+                nameof(Equipment.CreatedAt) => true,
+                nameof(Equipment.UpdatedAt) => true,
+                nameof(Equipment.AvailabilityStatus) => true,
+                nameof(Equipment.Category) => true,
+                nameof(Equipment.ConditionStatus) => true,
+                nameof(Equipment.Feedbacks) => true,
+                nameof(Equipment.Image) => true,
+                nameof(Equipment.RentalRequests) => true,
+                _ => base.ShouldIgnoreProperty(propertyName)
+            };
+        }
+
+        #endregion
+
+        #region View Projection
+
+        /// <inheritdoc/>
         public override IQueryable<object> SelectViewColumns(IQueryable query)
         {
             query = query.Cast<Equipment>().Select(e => new
@@ -188,22 +195,6 @@ namespace Database.Persistence.Repositories
             return query.Cast<object>();
         }
 
-
         #endregion
-        protected override bool ShouldIgnoreProperty(string propertyName)
-        {
-            return propertyName switch
-            {
-                nameof(Equipment.UpdatedAt) => true,
-                nameof(Equipment.CreatedAt) => true,
-                nameof(Equipment.AvailabilityStatus) => true,
-                nameof(Equipment.Category) => true,
-                nameof(Equipment.ConditionStatus) => true,
-                nameof(Equipment.Feedbacks) => true,
-                nameof(Equipment.Image) => true,
-                nameof(Equipment.RentalRequests) => true,
-                _ => base.ShouldIgnoreProperty(propertyName)
-            };
-        }
     }
 }

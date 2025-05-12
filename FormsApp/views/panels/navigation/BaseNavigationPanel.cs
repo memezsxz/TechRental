@@ -62,20 +62,21 @@ namespace FormsApp.views.panels
         }
 
         /// <summary>
-        /// Defines mappings between labels and their corresponding entity types and permission sets.
+        /// Dynamically builds the sidebar navigation by mapping labels to entity types and permissions.
+        /// Adds role-specific navigation options between fixed top and bottom rows.
         /// </summary>
         private void InitializeTabMap()
         {
             _tabTypeMap = new();
 
-            // 1. Remember current profile control and its row index
+            // Remove the profile control temporarily so we can insert role-specific rows cleanly
             pnlPanel.Controls.Remove(tlpProfile);
             pnlPanel.RowStyles.RemoveAt(3);
-            pnlPanel.RowCount--; // temporarily remove it
+            pnlPanel.RowCount--;
 
-            int insertAt = 2; // Insert role-specific labels starting at row 2
+            int insertAt = 2; // Start inserting custom labels at row 2 (after branding and dashboard)
 
-            // 2. Insert role-specific labels
+            // Add a label for each entity with permissions from Global.TabTypeMap
             foreach (var kvp in Global.TabTypeMap)
             {
                 var entityType = kvp.Key;
@@ -96,45 +97,59 @@ namespace FormsApp.views.panels
                     Cursor = Cursors.Hand
                 };
 
+                // Insert a new row and add the label
                 pnlPanel.RowStyles.Insert(insertAt, new RowStyle(SizeType.Percent, 1));
                 pnlPanel.RowCount++;
                 pnlPanel.Controls.Add(label, 0, insertAt);
 
+                // Map label to entity and vice versa
                 _tabTypeMap[label] = (entityType, allowAdd, allowEdit, allowDelete);
                 _entityToLabel[entityType] = label;
 
                 insertAt++;
             }
 
-            // 3. Re-add the profile control to the last row
+            // Re-add the profile control at the last row
             pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
             pnlPanel.RowCount++;
             pnlPanel.Controls.Add(tlpProfile, 0, pnlPanel.RowCount - 1);
         }
 
 
-
+        /// <summary>
+        /// Dynamically adjusts the heights of the navigation panel rows based on current row count.
+        /// Ensures the first (brand) and last (profile) rows are fixed at 10%, with the rest distributed evenly.
+        /// </summary>
         private void AdjustRowHeights()
         {
             int totalRows = pnlPanel.RowCount;
 
-            if (totalRows < 3) return; // Need at least 3 rows to apply this logic
+            if (totalRows < 3) return; // Ensure there are enough rows to format
 
             pnlPanel.RowStyles.Clear();
 
-            pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10)); // First row (brand)
+            // Fixed height for branding
+            pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
 
+            // Distribute the middle rows (navigation options)
             int dynamicRowCount = totalRows - 2;
             float dynamicHeight = 80f / dynamicRowCount;
 
             for (int i = 0; i < dynamicRowCount; i++)
             {
-                pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, dynamicHeight)); // Middle rows (nav)
+                pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, dynamicHeight));
             }
 
-            pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10)); // Last row (profile/notification)
+            // Fixed height for profile/notification
+            pnlPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 10));
         }
 
+        /// <summary>
+        /// Converts an entity type to a friendly display name for navigation.
+        /// Special cases are mapped to more readable labels; otherwise, the type name is returned as-is.
+        /// </summary>
+        /// <param name="type">The entity type to convert.</param>
+        /// <returns>A human-readable name for the navigation label.</returns>
         private static string GetDisplayName(Type type)
         {
             return type.Name switch
@@ -143,11 +158,9 @@ namespace FormsApp.views.panels
                 nameof(SystemErrorLog) => "System Errors",
                 nameof(RentalRequest) => "Rental Requests",
                 nameof(RentalRecord) => "Rental Records",
-                _ => type.Name
+                _ => type.Name // Fallback to raw type name if no custom mapping exists
             };
         }
-
-
 
         /// <summary>
         /// Subscribes all mapped labels to the click event that will load their respective views.
