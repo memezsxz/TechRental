@@ -6,7 +6,6 @@ using Database.Persistence;
 using Helper;
 using Identity;
 using Microsoft.AspNetCore.Authorization;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 using Microsoft.AspNetCore.Identity;
 
 
@@ -126,49 +125,34 @@ namespace WebApp.Controllers
         // GET: RentalRecords/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            //do not allow the Unuthenticated users to enter this
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
-
-            if (id == null || _context.RentalRecords == null)
-            {
-                return NotFound();
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
+            if (id == null || _context.RentalRecords == null) return View("NotFound"); // HTTP 404
 
             var rentalRecord = await _context.RentalRecords
                 .Include(r => r.RentalRequest)
-                .ThenInclude(r => r.Customer)
+                    .ThenInclude(r => r.Customer)
+                .Include(r => r.RentalRequest)
+                    .ThenInclude(r => r.Equipment)
                 .Include(r => r.ReturnCondition)
+                .Include(r => r.Payments)
+                    .ThenInclude(p => p.PaymentMethod)
+                .Include(r => r.Payments)
+                    .ThenInclude(p => p.PaymentStatus)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (rentalRecord == null)
-            {
-                return NotFound();
-            }
-
+            if (rentalRecord == null) return View("NotFound"); // HTTP 404
 
             if (User.IsInRole(RoleConstants.Customer))
             {
-
                 var loggedInEmail = User.Identity.Name;
-                if (rentalRecord.RentalRequest.Customer.Email != loggedInEmail)
-                {
-                    return View("Forbidden"); //Authenticated but not allowed
-
-                }
-
-
+                if (rentalRecord.RentalRequest.Customer.Email != loggedInEmail) return View("Forbidden"); // HTTP 403 Forbidden
             }
 
-            // Retrieve the uploaded agreement file from Document table (if available)
             var document = await _context.Documents
                 .FirstOrDefaultAsync(d => d.RentalId == rentalRecord.RentalRequestId);
 
             ViewBag.DocumentId = document?.Id;
             ViewBag.Mode = rentalRecord.ActualReturnDate == null ? "transaction" : "return";
-            ViewBag.RentalRequest = rentalRecord.RentalRequest;
 
             return View(rentalRecord);
         }
@@ -179,10 +163,7 @@ namespace WebApp.Controllers
         {
 
             //do not allow the Unuthenticated users to enter this
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
 
             var request = _context.RentalRequests
                 .Include(r => r.Customer)
@@ -190,7 +171,7 @@ namespace WebApp.Controllers
                 .Include(r => r.Status)
                 .FirstOrDefault(r => r.Id == rentalRequestId);
 
-            if (request == null) return NotFound();
+            if (request == null) return View("NotFound"); // HTTP 404
 
             var days = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
             var dailyRate = request.RentalPerDay ?? 0;
@@ -200,6 +181,8 @@ namespace WebApp.Controllers
 
             ViewBag.Mode = "transaction";
             ViewBag.RentalRequest = request;
+            ViewBag.PaymentMethodId = new SelectList(_context.PaymentMethods, "Id", "MethodName", 3); // default to Cash
+            ViewBag.PaymentStatusId = new SelectList(_context.PaymentStatuses, "Id", "StatusName", 2); // default to Paid
 
             var record = new RentalRecord
             {
@@ -222,18 +205,14 @@ namespace WebApp.Controllers
         {
 
             //do not allow the Unuthenticated users to enter this
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
-
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
 
             var request = await _context.RentalRequests
                 .Include(r => r.Customer)
                 .Include(r => r.Equipment)
                 .FirstOrDefaultAsync(r => r.Id == rentalRecord.RentalRequestId);
 
-            if (request == null) return NotFound();
+            if (request == null) return View("NotFound"); // HTTP 404
 
             if (ModelState.IsValid)
             {
@@ -253,6 +232,18 @@ namespace WebApp.Controllers
 
                 // Step 2: Save rental record first to get its ID
                 _context.RentalRecords.Add(rentalRecord);
+                await _context.SaveChangesAsync();
+
+                var payment = new Payment
+                {
+                    RentalRecordId = rentalRecord.Id,
+                    Amount = rentalRecord.TotalCost ?? 0,
+                    PaymentMethodId = int.Parse(Request.Form["PaymentMethodId"]),
+                    PaymentStatusId = 2, // Paid
+                    PaymentDate = DateTime.Now
+                };
+
+                _context.Payments.Add(payment);
                 await _context.SaveChangesAsync();
 
                 var Agreement = Request.Form.Files["Agreement"];
@@ -281,7 +272,7 @@ namespace WebApp.Controllers
 
                 TempData["MessageText"] = "Rental transaction created successfully.";
                 TempData["MessageType"] = "success";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(Index), new { status = "transaction" });
             }
 
             // Repopulate form
@@ -295,24 +286,32 @@ namespace WebApp.Controllers
         {
 
             //do not allow the Unuthenticated users to enter this
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
 
             var record = await _context.RentalRecords
-                 .Include(r => r.RentalRequest)
+                .Include(r => r.RentalRequest)
                     .ThenInclude(r => r.Customer)
-                 .Include(r => r.RentalRequest)
+                .Include(r => r.RentalRequest)
                     .ThenInclude(r => r.Equipment)
+                .Include(r => r.Payments)
+                    .ThenInclude(p => p.PaymentMethod)
+                .Include(r => r.Payments)
+                    .ThenInclude(p => p.PaymentStatus)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (record == null) return NotFound();
+            if (record == null) return View("NotFound"); // HTTP 404
 
             ViewBag.Mode = "return"; // Important for conditional rendering in the shared view
             ViewBag.RentalRequest = record.RentalRequest;
             ViewBag.ReturnConditionId = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName");
+            ViewBag.PaymentMethodId = new SelectList(_context.PaymentMethods, "Id", "MethodName", 3); // default to Cash
+            ViewBag.PaymentStatusId = new SelectList(_context.PaymentStatuses, "Id", "StatusName", 2); // default to Paid
 
+            // Retrieve the uploaded agreement file from Document table (if available)
+            var document = await _context.Documents
+                .FirstOrDefaultAsync(d => d.RentalId == record.RentalRequestId);
+
+            ViewBag.DocumentId = document?.Id;
             return View("Create", record); // Use the same Create view
         }
 
@@ -322,15 +321,11 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> CompleteReturn(int id, RentalRecord updated)
         {
-
             //do not allow the Unuthenticated users to enter this
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
 
             var record = await _context.RentalRecords.FindAsync(id);
-            if (record == null) return NotFound();
+            if (record == null) return View("NotFound");
 
             // Only update return-related fields
             record.ActualReturnDate = updated.ActualReturnDate;
@@ -341,84 +336,117 @@ namespace WebApp.Controllers
             record.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
+            NotificationManager.CreateAsync(_context, record.RentalRequest.CustomerId.Value, 4, "return", record.Id);
+            return RedirectToAction(nameof(Index), new { status ="return" });
         }
 
 
         // GET: RentalRecords/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-
-
             //do not allow the Unuthenticated users to enter this
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
+            if (id == null) return View("NotFound"); // HTTP 404
 
+            var rentalRecord = await _context.RentalRecords
+                .Include(r => r.RentalRequest)
+                    .ThenInclude(r => r.Customer)
+                .Include(r => r.RentalRequest)
+                    .ThenInclude(r => r.Equipment)
+                .Include(r => r.ReturnCondition)
+                .Include(r => r.Payments)
+                    .ThenInclude(p => p.PaymentMethod)
+                .Include(r => r.Payments)
+                    .ThenInclude(p => p.PaymentStatus)
+                .FirstOrDefaultAsync(m => m.Id == id);
+            
+            if (rentalRecord == null) return View("NotFound"); // HTTP 404
 
-            if (id == null || _context.RentalRecords == null)
-            {
-                return NotFound();
-            }
+            var document = await _context.Documents
+                .FirstOrDefaultAsync(d => d.RentalId == rentalRecord.RentalRequestId);
 
-            var rentalRecord = await _context.RentalRecords.FindAsync(id);
-            if (rentalRecord == null)
-            {
-                return NotFound();
-            }
-            ViewData["RentalRequestId"] = new SelectList(_context.RentalRequests, "Id", "Id", rentalRecord.RentalRequestId);
-            ViewData["ReturnConditionId"] = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName", rentalRecord.ReturnConditionId);
+            ViewBag.DocumentId = document?.Id;
+
             return View(rentalRecord);
         }
 
         // POST: RentalRecords/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, RentalRecord rentalRecord)
         {
-
-
-            //do not allow the Unuthenticated users to enter this
-            if (!User.Identity.IsAuthenticated)
-            {
-                return Unauthorized();
-            }
-
-            if (id != rentalRecord.Id)
-            {
-                return NotFound();
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
+            if (id != rentalRecord.Id) return View("NotFound"); // HTTP 404
 
             if (ModelState.IsValid)
             {
                 try
                 {
-                    _context.Update(rentalRecord);
-                    await _context.SaveChangesAsync();
+                    var Agreement = Request.Form.Files["Agreement"];
+
+                    // Handle uploaded agreement
+                    if (Agreement != null && Agreement.Length > 0)
+                    {
+                        // Delete existing agreement (if exists)
+                        var existingDoc = await _context.Documents.FirstOrDefaultAsync(d => d.RentalId == rentalRecord.RentalRequestId);
+                        if (existingDoc != null)
+                        {
+                            await PdfManager.DeletePdfFromDatabaseAndS3(_context, existingDoc.Id);
+                        }
+
+                        // Save new one
+                        using var stream = Agreement.OpenReadStream();
+                        var uploadSuccess = await PdfManager.UploadPdfAndSaveToDatabase(_context, stream, Agreement.FileName, Agreement.ContentType, rentalRecord.RentalRequestId.Value);
+
+                        if (!uploadSuccess)
+                        {
+                            TempData["MessageText"] = "PDF upload failed.";
+                            TempData["MessageType"] = "warning";
+                        }
+
+                    }
+
+                    TempData["MessageText"] = "Transaction Record updated successfully.";
+                    TempData["MessageType"] = "success";
+                    return RedirectToAction("Details", new { id = rentalRecord.Id });
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!RentalRecordExists(rentalRecord.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    return View("InternalServerError"); // HTTP 500
                 }
-                return RedirectToAction(nameof(Index));
             }
-            ViewData["RentalRequestId"] = new SelectList(_context.RentalRequests, "Id", "Id", rentalRecord.RentalRequestId);
-            ViewData["ReturnConditionId"] = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName", rentalRecord.ReturnConditionId);
-            return View(rentalRecord);
+
+            return RedirectToAction("Details", new { id = rentalRecord.Id });
         }
 
-        private bool RentalRecordExists(int id)
+        public async Task<IActionResult> DeleteAgreement(int rentalId)
         {
-            return (_context.RentalRecords?.Any(e => e.Id == id)).GetValueOrDefault();
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
+
+            var document = await _context.Documents.FirstOrDefaultAsync(d => d.RentalId == rentalId);
+            if (document == null)
+            {
+                TempData["MessageText"] = "No agreement found to delete.";
+                TempData["MessageType"] = "warning";
+                return RedirectToAction("Details", new { id = rentalId });
+            }
+
+            var result = await PdfManager.DeletePdfFromDatabaseAndS3(_context, document.Id);
+
+            if (result)
+            {
+                TempData["MessageText"] = "Agreement deleted successfully.";
+                TempData["MessageType"] = "success";
+            }
+            else
+            {
+                TempData["MessageText"] = "Failed to delete agreement.";
+                TempData["MessageType"] = "error";
+            }
+
+            var record = await _context.RentalRecords.FirstOrDefaultAsync(r => r.RentalRequestId == rentalId);
+
+            return RedirectToAction("Details", new { id = record.Id });
         }
     }
 }

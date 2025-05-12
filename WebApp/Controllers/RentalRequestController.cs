@@ -379,6 +379,22 @@ namespace WebApp.Controllers
                 existing.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
 
+                int notificationType = 0; 
+                if (rentalRequest.StatusId == 2)
+                {
+                    notificationType = 1;
+                }
+                else if (rentalRequest.StatusId == 3)
+                {
+                    notificationType = 2;
+                }
+                else if (rentalRequest.StatusId == 4)
+                {
+                    notificationType = 5;
+                }
+
+                NotificationManager.CreateAsync(_context, rentalRequest.CustomerId.Value, notificationType, "request", rentalRequest.Id);
+
                 TempData["MessageText"] = "Rental updated successfully.";
                 TempData["MessageType"] = "success";
 

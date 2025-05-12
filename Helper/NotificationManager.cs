@@ -4,13 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 public class NotificationManager
 {
-    private readonly RentalDBContext _context;
-
-    public NotificationManager(RentalDBContext context)
-    {
-        _context = context;
-    }
-
     /// <summary>
     /// Creates a notification for a specific user and record.
     /// Automatically resolves the equipment name from request or return record.
@@ -19,7 +12,7 @@ public class NotificationManager
     /// <param name="notificationTypeId">The ID of the notification type</param>
     /// <param name="recordType">Either "request" or "return"</param>
     /// <param name="recordId">The ID of the related request or return record</param>
-    public async Task CreateAsync(int userId, int notificationTypeId, string recordType, int recordId)
+    public async static Task CreateAsync(RentalDBContext _context,int userId, int notificationTypeId, string recordType, int recordId)
     {
         string message;
         string equipmentName = "";
