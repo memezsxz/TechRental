@@ -31,7 +31,7 @@ namespace WebApp.Controllers
                 return View("Unauthorized");
             }
 
-            if (!User.IsInRole(RoleConstants.Admin) || !User.IsInRole(RoleConstants.Manager)) {
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) {
                 return View("Forbidden");
 
             }
@@ -70,7 +70,8 @@ namespace WebApp.Controllers
                 return View("Unauthorized");
             }
 
-            if (!User.IsInRole(RoleConstants.Admin) || !User.IsInRole(RoleConstants.Manager))
+
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
             {
                 return View("Forbidden");
 
@@ -112,7 +113,8 @@ namespace WebApp.Controllers
                 return View("Unauthorized");
             }
 
-            if (!User.IsInRole(RoleConstants.Admin) || !User.IsInRole(RoleConstants.Manager))
+
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
             {
                 return View("Forbidden");
 
@@ -173,7 +175,7 @@ namespace WebApp.Controllers
                 return View("Unauthorized");
             }
 
-            if (!User.IsInRole(RoleConstants.Admin) || !User.IsInRole(RoleConstants.Manager))
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
             {
                 return View("Forbidden");
 
