@@ -59,21 +59,30 @@ namespace FormsApp
 
             didClick = true;
 
-            bool signInResults = await VerifyUserNamePassword(email, password, lblLoginError);
-            if (signInResults) //if user is verified
+            try
             {
-                //do something.. i.e. navigate to next forms
-                Home home = new Home();
-                home.Owner = this;
-                this.Hide();
-                home.Show();
+                bool signInResults = await VerifyUserNamePassword(email, password, lblLoginError);
+                if (signInResults)
+                {
+                    Home home = new Home();
+                    home.Owner = this;
+                    this.Hide();
+                    home.Show();
+                }
+                else
+                {
+                    lblLoginError.Visible = true;
+                }
             }
-            else
+            catch (Exception ex)
             {
-                lblLoginError.Visible = true;
+                Global.DisplayReportErrorDialog(ex);
             }
-            pbLoading.Visible = false;
-            didClick = false;
+            finally
+            {
+                pbLoading.Visible = false;
+                didClick = false;
+            }
         }
 
         public async Task<bool> VerifyUserNamePassword(string userName, string password, Label errorLabel)
@@ -124,6 +133,7 @@ namespace FormsApp
             }
             catch (Exception ex)
             {
+                Global.DisplayReportErrorDialog(ex);
                 lblLoginError.Text = "An error occurred, try again later.";
                 return false;
             }
@@ -199,12 +209,12 @@ namespace FormsApp
         private void Refresh()
         {
             DisableAllErrors();
-            //tbEmail.Text = "";
-            //tbPassword.Text = "";
-            //pbLoading.Visible = false;
-            //tbEmail.Focus();
-            //Global.userID = -1;
-            //Global.userType = null;
+            tbEmail.Text = "";
+            tbPassword.Text = "";
+            pbLoading.Visible = false;
+            tbEmail.Focus();
+            Global.userID = -1;
+            Global.userType = null;
         }
 
         private void Login_VisibleChanged(object sender, EventArgs e)

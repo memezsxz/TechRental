@@ -123,6 +123,7 @@ namespace FormsApp.views.dialogs
         {
             item.Name = lblName.Text.Trim();
             item.Description = tbDescription.Text.Trim();
+            item.UpdatedAt = DateTime.Now;
         }
         #endregion
 

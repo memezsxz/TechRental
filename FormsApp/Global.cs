@@ -111,7 +111,6 @@ namespace FormsApp
 
         public static void DisplayReportErrorDialog(Exception e)
         {
-            Console.WriteLine("From Global: Error: " + e.Message);
 
             var result = MessageBox.Show(
                 "Something went wrong while processing your action.\n\nWould you like to report this error to the support team?",
@@ -122,27 +121,93 @@ namespace FormsApp
 
             if (result != DialogResult.Yes) return;
 
-            UnitOfWork unitOfWork = new UnitOfWork();
-
-            var errorLog = new SystemErrorLog
+            try
             {
-                ErrorMessage = e.Message,
-                ErrorSource = e.Source,
-                SourceProcedure = e.TargetSite?.Name,
-                UserId = unitOfWork.UserId,
-                Timestamp = DateTime.Now
-            };
+                UnitOfWork unitOfWork = new UnitOfWork(userID);
 
-            unitOfWork.SystemErrorLogs.Add(errorLog);
-            unitOfWork.SaveChanges();
+                string sourceProc = FormatStackTraceForSourceProcedure(e);
+                string className = e.TargetSite?.DeclaringType?.Name ?? "";
+                if (!string.IsNullOrWhiteSpace(className)) sourceProc = className + "." + sourceProc;
+                sourceProc = Truncate(sourceProc, 255);
 
-            MessageBox.Show(
-                "Thank you. The error has been reported anonymously and will be reviewed.",
-                "Report Submitted",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information
-            );
+                //Console.WriteLine("From Global: Error: " + e.GetType().Name + " : " + e.Message);
+                //Console.WriteLine("From Global: source: " + e.Source);
+                //Console.WriteLine("From Global: source proceduer: " + sourceProc);
+                //Console.WriteLine("From Global: userid: " + userID);
+
+
+                var errorLog = new SystemErrorLog
+                {
+                    ErrorMessage = Truncate(e.GetType().Name + ": " + e.Message, 255),
+                    ErrorSource = Truncate(e.Source, 255),
+                    SourceProcedure = sourceProc,
+                    UserId = unitOfWork.UserId,
+                    Timestamp = DateTime.Now
+                };
+
+                unitOfWork.SystemErrorLogs.Add(errorLog);
+                unitOfWork.SaveChanges();
+
+                MessageBox.Show(
+                    "Thank you. The error has been reported anonymously and will be reviewed.",
+                    "Report Submitted",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Information
+                );
+
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show("Could not report error, please contact support.", "Error", MessageBoxButtons.OK,
+                    MessageBoxIcon.Error);
+            }
         }
+
+        private static string Truncate(string? input, int maxLength)
+        {
+            if (string.IsNullOrEmpty(input)) return string.Empty;
+            return input.Length <= maxLength ? input : input.Substring(0, maxLength - 3) + "...";
+        }
+
+        private static string FormatStackTraceForSourceProcedure(Exception e)
+        {
+            if (e?.StackTrace == null) return "Unknown";
+
+            var lines = e.StackTrace.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+            var formatted = new List<string>();
+
+            foreach (var line in lines)
+            {
+                // Example: "   at Namespace.Class.Method(Type param) in C:\...\file.cs:line 123"
+                var trimmed = line.Trim();
+
+                if (!trimmed.StartsWith("at ")) continue;
+
+                // Extract method signature
+                var methodPart = trimmed.Substring(3); // remove "at "
+                var lineInfo = "";
+
+                var inIndex = methodPart.IndexOf(" in ");
+                if (inIndex >= 0)
+                {
+                    var pathPart = methodPart.Substring(inIndex + 4);
+                    methodPart = methodPart.Substring(0, inIndex);
+
+                    var lineNumberIndex = pathPart.IndexOf(":line ");
+                    if (lineNumberIndex >= 0)
+                    {
+                        var lineNumber = pathPart.Substring(lineNumberIndex + 6);
+                        lineInfo = $" :: line {lineNumber}";
+                    }
+                }
+
+                var methodOnly = methodPart.Split('.').Last(); // Remove namespace/class
+                formatted.Add(methodOnly + lineInfo);
+            }
+
+            return string.Join(" <- ", formatted);
+        }
+
 
         public static void DrawRoundedBorder(Control control, PaintEventArgs e, Color borderColor, int borderRadius = 10, int borderWidth = 1)
         {

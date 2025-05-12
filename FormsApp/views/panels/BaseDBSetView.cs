@@ -230,7 +230,8 @@ public partial class BaseDBSetView : UserControl
         }
         catch (Exception ex)
         {
-            HandleErrors(ex);
+            Global.DisplayReportErrorDialog(ex);
+            form?.Close();
         }
     }
 
@@ -417,27 +418,25 @@ public partial class BaseDBSetView : UserControl
     /// </returns>
     private Dictionary<string, string>? GetColumnsFromRepository()
     {
-        // Try to get the appropriate repository for the current entity viewType
-        object repo = Helpers.GetRepositoryForType(currentType);
-        if (repo == null)
-        {
-            HandleErrors(new InvalidOperationException(
-                $"No repository found for viewType '{currentType.Name}'."));
-            return null;
-        }
 
-        // Check if the repository implements the required metadata method
-        MethodInfo? getColumnsMethod = repo.GetType().GetMethod("GetEntityColumnsWithTypes");
-        if (getColumnsMethod == null)
-        {
-            HandleErrors(new MissingMethodException(
-                $"Repository for {currentType.Name} does not implement GetEntityColumnsWithTypes."));
-            return null;
-        }
 
         // Attempt to invoke the metadata method and return the result
         try
         {
+            // Try to get the appropriate repository for the current entity viewType
+            object repo = Helpers.GetRepositoryForType(currentType);
+            if (repo == null)
+            {
+                throw new InvalidOperationException($"No repository found for viewType '{currentType.Name}'.");
+            }
+
+            // Check if the repository implements the required metadata method
+            MethodInfo? getColumnsMethod = repo.GetType().GetMethod("GetEntityColumnsWithTypes");
+            if (getColumnsMethod == null)
+            {
+                throw new MissingMethodException(
+                    $"Repository for {currentType.Name} does not implement GetEntityColumnsWithTypes.");
+            }
             return getColumnsMethod.Invoke(repo, null) as Dictionary<string, string>;
         }
         catch (Exception ex)

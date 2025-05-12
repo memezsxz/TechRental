@@ -164,13 +164,13 @@ namespace Database.Persistence
             foreach (var note in notifications)
             {
                 _context.Set<Notification>().Add(note);
-                Console.WriteLine(note.UserId);
-                Console.WriteLine(note.IsRead);
-                Console.WriteLine(note.MessageContent);
-                Console.WriteLine(note.NotificationTypeId);
+                //Console.WriteLine(note.UserId);
+                //Console.WriteLine(note.IsRead);
+                //Console.WriteLine(note.MessageContent);
+                //Console.WriteLine(note.NotificationTypeId);
             }
 
-            Console.WriteLine($"Notifications generated: {notifications.Count}");
+            //Console.WriteLine($"Notifications generated: {notifications.Count}");
         }
 
         public void Dispose()

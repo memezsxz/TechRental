@@ -739,9 +739,10 @@
             // 
             panel13.BackgroundImage = (Image)resources.GetObject("panel13.BackgroundImage");
             panel13.BackgroundImageLayout = ImageLayout.Zoom;
+            panel13.Dock = DockStyle.Fill;
             panel13.Location = new Point(13, 13);
             panel13.Name = "panel13";
-            panel13.Size = new Size(61, 66);
+            panel13.Size = new Size(61, 68);
             panel13.TabIndex = 0;
             // 
             // lblDamaged
@@ -789,9 +790,10 @@
             // 
             panel11.BackgroundImage = (Image)resources.GetObject("panel11.BackgroundImage");
             panel11.BackgroundImageLayout = ImageLayout.Zoom;
+            panel11.Dock = DockStyle.Fill;
             panel11.Location = new Point(13, 13);
             panel11.Name = "panel11";
-            panel11.Size = new Size(61, 66);
+            panel11.Size = new Size(61, 68);
             panel11.TabIndex = 0;
             // 
             // lblOverdue
@@ -839,6 +841,7 @@
             // 
             panel9.BackgroundImage = (Image)resources.GetObject("panel9.BackgroundImage");
             panel9.BackgroundImageLayout = ImageLayout.Zoom;
+            panel9.Dock = DockStyle.Fill;
             panel9.Location = new Point(13, 13);
             panel9.Name = "panel9";
             panel9.Size = new Size(61, 66);
@@ -889,6 +892,7 @@
             // 
             panel7.BackgroundImage = (Image)resources.GetObject("panel7.BackgroundImage");
             panel7.BackgroundImageLayout = ImageLayout.Zoom;
+            panel7.Dock = DockStyle.Fill;
             panel7.Location = new Point(13, 13);
             panel7.Name = "panel7";
             panel7.Size = new Size(61, 66);
@@ -939,6 +943,7 @@
             // 
             panel5.BackgroundImage = (Image)resources.GetObject("panel5.BackgroundImage");
             panel5.BackgroundImageLayout = ImageLayout.Zoom;
+            panel5.Dock = DockStyle.Fill;
             panel5.Location = new Point(13, 13);
             panel5.Name = "panel5";
             panel5.Size = new Size(61, 66);
@@ -989,6 +994,7 @@
             // 
             panel3.BackgroundImage = (Image)resources.GetObject("panel3.BackgroundImage");
             panel3.BackgroundImageLayout = ImageLayout.Zoom;
+            panel3.Dock = DockStyle.Fill;
             panel3.Location = new Point(13, 13);
             panel3.Name = "panel3";
             panel3.Size = new Size(61, 66);

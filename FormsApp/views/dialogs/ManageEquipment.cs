@@ -204,7 +204,7 @@ namespace FormsApp.views.dialogs
 
             item.Description = tbDescription.Text.Trim();
             item.IsActive = cbIsActive.Checked;
-
+            item.UpdatedAt = DateTime.Now;
             // image is uploaded and verified in validation when calling UploadImage
         }
 

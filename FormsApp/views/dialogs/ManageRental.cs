@@ -97,12 +97,12 @@ namespace FormsApp.views.dialogs
             LoadItemInfo();
             lblStartTransaction.Visible = false;
 
-            if (request.Status.StatusName.ToLower() != "pending") //TODO Maryam: make a method to retrive the status
+            if (request.Status?.StatusName.ToLower() != "pending") //TODO Maryam: make a method to retrive the status
             {
                 ddlReqStatus.Enabled = false;
             }
 
-            if (request.Status.StatusName.ToLower() == "approved" && record == null)
+            if (request.Status?.StatusName.ToLower() == "approved" && record == null)
             {
                 lblStartTransaction.Visible = true;
             }
@@ -130,76 +130,83 @@ namespace FormsApp.views.dialogs
         /// </summary>
         private void LoadItemInfo()
         {
-            // request data
-            tbReqId.Text = request.Id.ToString();
-            dtpReqStartDate.Value = request.StartDate;
-            dtpReqEndDate.Value = request.ReturnDate;
-            ddlReqStatus.SelectedValue = request.StatusId;
-            tbReqNotes.Text = request.Notes;
-
-            // customer data
-            var customer = request.Customer;
-            tbCustId.Text = customer.Id.ToString();
-            tbCustName.Text = $"{customer.FirstName} {customer.LastName}";
-            tbCustEmail.Text = customer.Email;
-            tbCustPhoneNumber.Text = customer.PhoneNumber;
-            cbCustIsActive.Checked = customer.IsActive ?? false;
-
-            // equipment data
-            var equipment = request.Equipment;
-            tbEqId.Text = equipment.Id.ToString();
-            tbEqName.Text = equipment.Name;
-            cbEqIsActive.Checked = equipment.IsActive ?? false;
-
-            if (record != null)
+            try
             {
-                gbFee.Visible = true;
-                gbPayment.Visible = true;
+                // request data
+                tbReqId.Text = request.Id.ToString();
+                dtpReqStartDate.Value = request.StartDate;
+                dtpReqEndDate.Value = request.ReturnDate;
+                ddlReqStatus.SelectedValue = request.StatusId;
+                tbReqNotes.Text = request.Notes;
 
-                // record data
-                tbRecId.Text = record.Id.ToString();
-                dtpRecPickupDate.Value = record.PickupDate;
-                tbRecPrice.Text = request.RentalPerDay?.ToString("C") ?? "$0.00";
-                tbRecDeposit.Text = record.Deposit?.ToString("C") ?? "$0.00";
-                tbRecExtraCharge.Text = record.ExtraCharges?.ToString("C") ?? "$0.00";
-                tbRecExtraChargeDescreption.Text = record.ExtraChargeDescription;
+                // customer data
+                var customer = request.Customer;
+                tbCustId.Text = customer.Id.ToString();
+                tbCustName.Text = $"{customer.FirstName} {customer.LastName}";
+                tbCustEmail.Text = customer.Email;
+                tbCustPhoneNumber.Text = customer.PhoneNumber;
+                cbCustIsActive.Checked = customer.IsActive ?? false;
 
-                // fee data
+                // equipment data
+                var equipment = request.Equipment;
+                tbEqId.Text = equipment.Id.ToString();
+                tbEqName.Text = equipment.Name;
+                cbEqIsActive.Checked = equipment.IsActive ?? false;
 
-                var payment = record.Payments.FirstOrDefault();
-
-                if (payment != null)
+                if (record != null)
                 {
-                    tbPatyId.Text = payment.Id.ToString();
-                    tbPayTotal.Text = payment.Amount.ToString("C");
-                    ddlPayMethod.SelectedValue = payment.PaymentMethodId;
-                    ddlPayStatus.SelectedValue = payment.PaymentStatusId;
+                    gbFee.Visible = true;
+                    gbPayment.Visible = true;
 
-                    var paidStatusId = context.PaymentStatuses.GetAllByName().Where(kv => kv.Value.ToLower() == "paid").First().Key;
+                    // record data
+                    tbRecId.Text = record.Id.ToString();
+                    dtpRecPickupDate.Value = record.PickupDate;
+                    tbRecPrice.Text = request.RentalPerDay?.ToString("C") ?? "$0.00";
+                    tbRecDeposit.Text = record.Deposit?.ToString("C") ?? "$0.00";
+                    tbRecExtraCharge.Text = record.ExtraCharges?.ToString("C") ?? "$0.00";
+                    tbRecExtraChargeDescreption.Text = record.ExtraChargeDescription;
 
-                    //if (payment.PaymentStatusId == paidStatusId)
-                    //{
-                    //    dtpRecPickupDate.Enabled = true;
-                    //}
-                    //else
-                    //{
-                    //}
+                    // fee data
+
+                    var payment = record.Payments.FirstOrDefault();
+
+                    if (payment != null)
+                    {
+                        tbPatyId.Text = payment.Id.ToString();
+                        tbPayTotal.Text = payment.Amount.ToString("C");
+                        ddlPayMethod.SelectedValue = payment.PaymentMethodId;
+                        ddlPayStatus.SelectedValue = payment.PaymentStatusId;
+
+                        var paidStatusId = context.PaymentStatuses.GetAllByName().First(kv => kv.Value.ToLower() == "paid").Key;
+
+                        //if (payment.PaymentStatusId == paidStatusId)
+                        //{
+                        //    dtpRecPickupDate.Enabled = true;
+                        //}
+                        //else
+                        //{
+                        //}
+
+                    }
+                    else
+                    {
+                        gbPayment.Visible = false;
+                    }
+
+                    // return data
+
+                    if (record.ActualReturnDate != null)
+                    {
+                        dtpRetDate.Value = record.ActualReturnDate.Value;
+                        tbRetLateFee.Text = record.LateReturnFees.Value.ToString("C");
+                        ddlRetCondetion.SelectedValue = record.ReturnConditionId.Value;
+                    }
 
                 }
-                else
-                {
-                    gbPayment.Visible = false;
-                }
-
-                // return data
-
-                if (record.ActualReturnDate != null)
-                {
-                    dtpRetDate.Value = record.ActualReturnDate.Value;
-                    tbRetLateFee.Text = record.LateReturnFees.Value.ToString("C");
-                    ddlRetCondetion.SelectedValue = record.ReturnConditionId.Value;
-                }
-
+            }
+            catch (Exception e)
+            {
+                throw e;
             }
         }
 
@@ -358,6 +365,7 @@ namespace FormsApp.views.dialogs
             if (record != null)
             {
                 //Console.WriteLine("record");
+                record.UpdatedAt = DateTime.Now;
                 await StandardSave<RentalRecord>(
                     ValidateInput,
                     MapFormToEntity,
@@ -371,6 +379,7 @@ namespace FormsApp.views.dialogs
             }
             else
             {
+                request.UpdatedAt = DateTime.Now;
                 //Console.WriteLine("request");
                 await StandardSave<RentalRequest>(
                     ValidateInput,
@@ -478,7 +487,7 @@ namespace FormsApp.views.dialogs
 
         private void tbRecExtraCharge_TextChanged(object sender, EventArgs e)
         {
-         if (tbRecExtraCharge.Enabled)   ValidateExtraCharge();
+            if (tbRecExtraCharge.Enabled) ValidateExtraCharge();
         }
         private void tbRecExtraChargeDescreption_TextChanged(object sender, EventArgs e)
         {
