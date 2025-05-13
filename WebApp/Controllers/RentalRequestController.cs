@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
 using Identity;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 
 namespace WebApp.Controllers
@@ -283,8 +282,8 @@ namespace WebApp.Controllers
                 return View("Unauthorized"); // Shows HTTP 401 error page
 
             // Prevent Admins and Managers from creating rental requests
-            if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin))
-                return View("Forbidden"); // Shows HTTP 403 error page
+            //if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin))
+            //    return View("Forbidden"); // Shows HTTP 403 error page
 
             
 
@@ -299,9 +298,9 @@ namespace WebApp.Controllers
             if (rentalRequest == null) return View("NotFound");
 
             //make sure only rental requests accessed by the rlated customer 
-            if (rentalRequest.Customer.Email.ToLower() != User.Identity.Name.ToLower()) {
-                return View("Forbidden");
-            }
+            //if (rentalRequest.Customer.Email.ToLower() != User.Identity.Name.ToLower()) {
+            //    return View("Forbidden");
+            //}
 
 
             // POPULATE DROPDOWNS FOR ADMIN/MANAGER EDIT FORM
@@ -321,9 +320,6 @@ namespace WebApp.Controllers
 
 
         // POST: RentalRequest/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        [HttpPost("Edit/{id}")]
-        [ValidateAntiForgeryToken]
         /// <summary>
         /// Handles the POST submission to update a rental request.
         /// The behavior varies depending on the user’s role:
@@ -336,22 +332,18 @@ namespace WebApp.Controllers
         /// <returns>
         /// Redirects to the Details view on success, or re-renders the Edit page with error messages on failure.
         /// </returns>
+        [HttpPost("Edit/{id}")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, RentalRequest rentalRequest)
         {
-
             // Ensure route ID matches the posted model ID to prevent tampering
             if (id != rentalRequest.Id) return View("NotFound");
 
-
             // Ensure user is logged in
-            if (!User.Identity.IsAuthenticated)
-                return View("Unauthorized"); // Shows HTTP 401 error page
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // Shows HTTP 401 error page
 
             // Prevent Admins and Managers from creating rental requests
-            if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin))
-                return View("Forbidden"); // Shows HTTP 403 error page
-
-
+            //if (!User.IsInRole(RoleConstants.Manager) && !User.IsInRole(RoleConstants.Admin)) return View("Forbidden"); // Shows HTTP 403 error page
 
             try
             {
@@ -434,7 +426,7 @@ namespace WebApp.Controllers
                     notificationType = 5;
                 }
 
-                NotificationManager.CreateAsync(_context, rentalRequest.CustomerId.Value, notificationType, "request", rentalRequest.Id);
+                await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId.Value, notificationType, "request", rentalRequest.Id);
 
                 TempData["MessageText"] = "Rental updated successfully.";
                 TempData["MessageType"] = "success";

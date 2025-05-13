@@ -355,7 +355,7 @@ namespace WebApp.Controllers
             record.UpdatedAt = DateTime.Now;
 
             await _context.SaveChangesAsync();
-            NotificationManager.CreateAsync(_context, record.RentalRequest.CustomerId.Value, 4, "return", record.Id);
+            await NotificationManager.CreateAsync(_context, record.RentalRequest.CustomerId.Value, 4, "return", record.Id);
             return RedirectToAction(nameof(Index), new { status ="return" });
         }
 

@@ -5,31 +5,49 @@ using System.IO;
 
 public static class AgreementGenerator
 {
+    /// <summary>
+    /// Generates a professional PDF rental agreement for the provided rental request.
+    /// </summary>
+    /// <param name="request">The RentalRequest object containing customer and equipment information.</param>
+    /// <returns>A MemoryStream containing the generated PDF document.</returns>
+    /// <remarks>
+    /// This agreement includes:
+    /// - Company info
+    /// - Customer details
+    /// - Equipment rental details
+    /// - Terms and conditions
+    /// - Customer acknowledgment and signature section
+    /// </remarks>
     public static MemoryStream GeneratePdf(RentalRequest request)
     {
         var doc = new PdfDocument();
         var page = doc.AddPage();
         var gfx = XGraphics.FromPdfPage(page);
 
+        // Font styles
         var headerFont = new XFont("Verdana", 13, XFontStyle.Bold);
         var sectionFont = new XFont("Verdana", 11, XFontStyle.Bold);
         var labelFont = new XFont("Verdana", 10, XFontStyle.Bold);
         var valueFont = new XFont("Verdana", 10, XFontStyle.Regular);
 
+        // Color brushes
         var greenBrush = new XSolidBrush(XColor.FromArgb(0x3C, 0xAD, 0x68)); // #3CAD68
         var blackBrush = XBrushes.Black;
 
+        // Layout variables
         double margin = 40;
         double y = margin;
         double lineHeight = 18;
         double pageWidth = page.Width;
 
+        // Helper to draw a line of text
         void WriteLine(string text, XFont font, XBrush color = null)
         {
             gfx.DrawString(text, font, color ?? blackBrush, new XPoint(margin, y));
             y += lineHeight;
         }
 
+        // Helper to draw a label and value on the same line
         void WriteLabelValue(string label, string value, bool isSignature = false)
         {
             double labelWidth = gfx.MeasureString(label, labelFont).Width;
@@ -38,6 +56,7 @@ public static class AgreementGenerator
             y += lineHeight;
         }
 
+        // Helper to draw section headings
         void WriteLeftHeading(string title)
         {
             gfx.DrawString(title, sectionFont, greenBrush, new XPoint(margin, y));
@@ -55,6 +74,7 @@ public static class AgreementGenerator
         WriteLabelValue("Phone: ", "+973 17 000 123");
         WriteLabelValue("Email: ", "info@techrental.bh");
 
+        // Customer Info
         y += 10;
         WriteLeftHeading("Customer Information");
         WriteLabelValue("First Name: ", request.Customer?.FirstName ?? "");
@@ -62,6 +82,7 @@ public static class AgreementGenerator
         WriteLabelValue("Email: ", request.Customer?.Email ?? "");
         WriteLabelValue("Phone Number: ", request.Customer?.PhoneNumber ?? "");
 
+        // Equipment Info
         y += 10;
         WriteLeftHeading("Equipment Details");
         WriteLabelValue("Equipment Name: ", request.Equipment?.Name ?? "");
@@ -79,9 +100,9 @@ public static class AgreementGenerator
         WriteLabelValue("Security Deposit: ", $"{deposit:0.000} BHD");
         WriteLabelValue("Total Cost: ", $"{totalCost:0.000} BHD");
 
+        // Terms
         y += 10;
         WriteLeftHeading("Terms & Conditions");
-
         string[] terms = new[]
         {
             "• The equipment shall be used only for its intended purpose and in a safe and responsible",
@@ -101,6 +122,7 @@ public static class AgreementGenerator
         foreach (var line in terms)
             WriteLine(line, valueFont);
 
+        // Signature Section
         y += 10;
         WriteLeftHeading("Acknowledgment");
         WriteLine("I, the undersigned, confirm that I have received the above equipment in good condition and", valueFont);
@@ -109,6 +131,7 @@ public static class AgreementGenerator
         y += lineHeight;
         WriteLabelValue("Customer Signature: ", "______________________", isSignature: true);
 
+        // Output stream
         var stream = new MemoryStream();
         doc.Save(stream, false);
         return stream;
