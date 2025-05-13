@@ -8,6 +8,10 @@
     var totalDays = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
     var totalCost = totalDays * request.RentalPerDay;
     var today = DateTime.Now.ToString("yyyy-MM-ddTHH:mm");
+    var startDateTime = request.StartDate.ToString("yyyy-MM-ddTHH:mm");
+    var returnDateTime = request.ReturnDate.ToString("yyyy-MM-ddTHH:mm");
+    var payment = Model.Payments?.FirstOrDefault();
+    var documentId = ViewBag.DocumentId as int?;
 }
 
 <div class="mb-4 mt-3">
@@ -45,14 +49,20 @@
 <div class="container mb-5 pb-4 border-bottom">
     <h4 class="mb-4 text-success fw-semibold">Transaction Info</h4>
     <div class="row mb-4">
-        <div class="col-md-6">
-            <label>Request ID</label>
-            <input class="form-control" value="@request?.Id" readonly />
-        </div>
+
         @if (mode == "return"){
+            <div class="col-md-6">
+                <label>Request ID</label>
+                <input class="form-control" value="@request?.Id" readonly />
+            </div>
             <div class="col-md-6">
                 <label>Rental Record ID</label>
                 <input class="form-control" value="@Model?.Id" readonly />
+            </div>
+        } else {
+            <div class="col-md-12">
+                <label>Request ID</label>
+                <input class="form-control" value="@request?.Id" readonly />
             </div>
         }
     </div>
@@ -61,10 +71,22 @@
             <label>Equipment Title</label>
             <input class="form-control" value="@request?.Equipment?.Name" readonly />
         </div>
-        <div class="col-md-6">
-            <label>Actual Pickup Date</label>
-            <input class="form-control" value="@Model?.PickupDate.ToString("g")" readonly />
-        </div>
+        @if (mode == "return") {
+            <div class="col-md-6">
+                <label>Actual Pickup Date</label>
+                <input class="form-control" value="@Model?.PickupDate" readonly />
+            </div>
+
+        } else {
+            <div class="col-md-6">
+                <label>Actual Pickup Date</label>
+                <input type="text"
+                       id="actualPickupDate"
+                       name="PickupDate"
+                       class="form-control flatpickr-input"
+                       placeholder="Select pickup date and time" />
+            </div>
+        }
     </div>
     <div class="row mb-4">
         <div class="col-md-4">
@@ -95,41 +117,93 @@
         </div>
     </div>
     <div class="mb-4">
-        @if (mode == "return")
+        @if (mode == "return" && documentId != null)
         {
-            <a href="@Url.Action("DownloadAgreement", "Document", new { rentalRequestId = request.Id })"
-               class="btn btn-outline-primary" target="_blank">View Agreement</a>
+            <a href="@Url.Action("GetPdf", "Document", new { id = documentId})"
+               class="btn btn-success px-4" target="_blank">View Agreement</a>
         }
     </div>
 </div>
+
+<!-- PAYMENT INFO -->
+@if (mode == "return")
+{
+    <div class="container mb-5 pb-4 border-bottom">
+        <h4 class="mb-4 text-success fw-semibold">Payment Info</h4>
+        <div class="row mb-4">
+            <div class="col-md-4">
+                <label>Amount</label>
+                <input class="form-control" value="@payment?.Amount.ToString("0.00")" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>Method</label>
+                <input class="form-control" value="@payment?.PaymentMethod?.MethodName" readonly />
+            </div>
+            <div class="col-md-4">
+                <label>Status</label>
+                <input class="form-control" value="@payment?.PaymentStatus?.StatusName" readonly />
+            </div>
+        </div>
+    </div>
+}
 
 <!-- FORM -->
 <div class="container mb-5">
     <h4 class="mb-4 text-success fw-semibold">Rental @((mode == "return") ? "Return" : "Transaction")</h4>
 
-    <form asp-action="@(mode == "return" ? "CompleteReturn" : "CreateTransaction")"
-          enctype="multipart/form-data"
-          onsubmit="return validateReturnForm()">
+    <form asp-action="@(mode == "return" ? "CompleteReturn" : "CreateTransaction")" enctype="multipart/form-data" onsubmit="return validateReturnForm()">
         <input type="hidden" asp-for="RentalRequestId" value="@request?.Id" />
         <input type="hidden" asp-for="Id" />
 
         @if (mode == "transaction")
-        {
+        {   //class="btn  w-100 mb-3"
             <div class="form-group mb-4">
                 <label>Rental Agreement</label>
                 <div class="d-flex justify-content-between align-items-center">
-                    <a href="@Url.Action("DownloadAgreement", "Document", new { rentalRequestId = request.Id })" class="btn btn-outline-primary" target="_blank">Download Agreement PDF</a>
+                    <a href="@Url.Action("DownloadAgreement", "Document", new { rentalRequestId = request.Id })" class="btn btn-outline-success custom-action-btn px-4" target="_blank">Download Agreement PDF</a>
                     <input type="file" id="agreementUpload" name="Agreement" class="form-control w-50" accept="application/pdf" />
                 </div>
                 <small class="text-danger d-none" id="fileError">Please upload the signed agreement PDF.</small>
             </div>
+
+            <hr />
+            <h5 class="text-success mb-3">Payment Details</h5>
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <label>Amount (BD)</label>
+                    <input type="text" class="form-control" name="Amount" value="@Model?.TotalCost?.ToString("0.00")" readonly />
+                </div>
+                <div class="col-md-4">
+                    <label for="PaymentMethodId">Payment Method</label>
+                    <select name="PaymentMethodId" class="form-select">
+                        @foreach (var method in ViewBag.PaymentMethodId as SelectList)
+                        {
+                            @:<option value="@method.Value" @(method.Value == "3" ? "selected" : null)>@method.Text</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="PaymentStatusId">Payment Status</label>
+                    <select name="PaymentStatusId" class="form-select" disabled>
+                        @foreach (var status in ViewBag.PaymentStatusId as SelectList)
+                        {
+                            @:<option value="@status.Value"  @(status.Value == "2" ? "selected" : null)>@status.Text</option>
+                        }
+                    </select>
+                </div>
+            </div>
         }
         else
         {
+            <!-- Return Mode Inputs (Unchanged) -->
             <div class="row mb-4">
                 <div class="col-md-6">
                     <label asp-for="ActualReturnDate">Actual Return Date</label>
-                    <input asp-for="ActualReturnDate" type="datetime-local" class="form-control" value="@today" />
+                    <input type="text"
+                           id="actualReturnDate"
+                           name="ActualReturnDate"
+                           class="form-control flatpickr-input"
+                           placeholder="Select return date and time" />
                     <span asp-validation-for="ActualReturnDate" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
@@ -141,7 +215,7 @@
             <div class="row mb-4">
                 <div class="col-md-6">
                     <label asp-for="LateReturnFees">Late Return Fees</label>
-                    <input asp-for="LateReturnFees" class="form-control" id="lateFee" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" />
+                    <input asp-for="LateReturnFees" class="form-control" id="lateFee" value="0.00" oninput="this.value = this.value.replace(/[^0-9.]/g, '')" />
                     <span asp-validation-for="LateReturnFees" class="text-danger"></span>
                 </div>
                 <div class="col-md-6">
@@ -163,6 +237,7 @@
     </form>
 </div>
 
+<!-- Add min to actual pickup date field -->
 @section Scripts {
     <script>
         function validateReturnForm() {
@@ -237,20 +312,44 @@
             });
         });
 
-        function showFlash(message, type) {
-            const iconMap = {
-                success: "fas fa-check-circle text-success",
-                error: "fas fa-times-circle text-danger",
-                info: "fas fa-info-circle text-primary",
-                warning: "fas fa-exclamation-circle text-warning"
-            };
+            window.addEventListener("DOMContentLoaded", () => {
+        const startDate = new Date("@request.StartDate.ToString("yyyy-MM-ddTHH:mm")");
+        const returnDate = new Date("@request.ReturnDate.ToString("yyyy-MM-ddTHH:mm")");
+        const now = new Date();
 
-            document.getElementById("flashIcon").className = iconMap[type] || "fas fa-info-circle text-secondary";
-            document.getElementById("flashText").textContent = message;
+        // Subtract 1 day from return date
+        const maxDate = new Date(returnDate);
+        maxDate.setDate(maxDate.getDate() - 1);
 
-            const modal = new bootstrap.Modal(document.getElementById("flashMessageModal"));
-            modal.show();
-            setTimeout(() => modal.hide(), 2500);
-        }
+        // Decide default date
+        const defaultDate = now >= startDate ? now : startDate;
+
+        flatpickr("#actualPickupDate", {
+            enableTime: true,
+            dateFormat: "Y-m-d\\TH:i",
+            defaultDate: defaultDate,
+            minDate: startDate,
+            maxDate: maxDate
+        });
+    });
+
+        window.addEventListener("DOMContentLoaded", () => {
+        const returnDateStr = "@request.ReturnDate.ToString("yyyy-MM-ddTHH:mm")";
+        const returnDate = new Date(returnDateStr);
+        const now = new Date();
+
+        // Default to today if today >= returnDate, else returnDate
+        const defaultReturnDate = now >= returnDate ? now : returnDate;
+
+        flatpickr("#actualReturnDate", {
+            enableTime: true,
+            dateFormat: "Y-m-d\\TH:i",
+            defaultDate: defaultReturnDate,
+            minDate: returnDate
+        });
+    });
+
     </script>
 }
+
+

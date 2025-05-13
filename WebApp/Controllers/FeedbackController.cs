@@ -27,14 +27,9 @@ namespace WebApp.Controllers
         /// <returns>View with the filtered list of feedback entries</returns>
         public async Task<IActionResult> Index(int id, string status = "Unhidden")
         {
-            if (!User.Identity.IsAuthenticated) {
-                return View("Unauthorized");
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized");
 
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) {
-                return View("Forbidden");
-
-            }
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden");
 
             // Pass equipment ID and current status to the view
             ViewBag.EquipmentId = id;
@@ -62,27 +57,30 @@ namespace WebApp.Controllers
         /// Accessible by Customers only.
         /// </summary>
         /// <returns>View for creating a new feedback record</returns>
-        public IActionResult Create()
+        public async Task<IActionResult> Create(int rentalRecordId)
         {
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized");
+            if (!User.IsInRole(RoleConstants.Customer)) return View("Forbidden");
 
-            if (!User.Identity.IsAuthenticated)
+            var record = await _context.RentalRecords
+                .Include(r => r.RentalRequest)
+                .ThenInclude(r => r.Customer)
+                .FirstOrDefaultAsync(r => r.Id == rentalRecordId);
+
+            if (record == null) return View("NotFound");
+            if (record.RentalRequest.Customer.Email.ToLower() != User.Identity.Name.ToLower()) return View("Forbidden");
+
+            var feedback = new Feedback
             {
-                return View("Unauthorized");
-            }
+                RentalRecordId = rentalRecordId,
+                UserId = record.RentalRequest.CustomerId,
+                EquipmentId = record.RentalRequest.EquipmentId,
+                TimeDate = DateTime.UtcNow
+            };
 
-
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
-            {
-                return View("Forbidden");
-
-            }
-
-            // Populate dropdowns for Equipment and Users
-            ViewData["EquipmentId"] = new SelectList(_context.Equipment, "Id", "Name");
-            ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email");
-
-            return View();
+            return View(feedback);
         }
+
 
         // POST: Feedback/Create
         [HttpPost]
@@ -105,45 +103,38 @@ namespace WebApp.Controllers
         /// </summary>
         /// <param name="feedback">Feedback model bound from the form</param>
         /// <returns>Redirect to Index on success, or redisplay form with errors, or error view on exception</returns>
-        public async Task<IActionResult> Create([Bind("Id,Note,Rate,TimeDate,UserId,EquipmentId,IsHidden,CreatedAt,UpdatedAt")] Feedback feedback)
+        public async Task<IActionResult> Create(Feedback feedback)
         {
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized");
+            if (!User.IsInRole(RoleConstants.Customer)) return View("Forbidden");
 
-            if (!User.Identity.IsAuthenticated)
-            {
-                return View("Unauthorized");
-            }
-
-
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
-            {
-                return View("Forbidden");
-
-            }
-
-            // If form data is invalid, repopulate dropdowns and return the form
-            if (!ModelState.IsValid)
-            {
-                ViewData["EquipmentId"] = new SelectList(_context.Equipment, "Id", "Name", feedback.EquipmentId);
-                ViewData["UserId"] = new SelectList(_context.Users, "Id", "Email", feedback.UserId);
-                return View(feedback);
-            }
-
+            if (!ModelState.IsValid) return View(feedback);
             try
             {
-                // Save new feedback entry to the database
-                _context.Add(feedback);
+                var record = await _context.RentalRecords
+                    .Include(r => r.RentalRequest)
+                    .ThenInclude(r => r.Customer)
+                    .FirstOrDefaultAsync(r => r.Id == feedback.RentalRecordId);
+
+                if (record == null) return View("NotFound");
+                if (record.RentalRequest.Customer.Email.ToLower() != User.Identity.Name.ToLower()) return View("Forbidden");
+
+                feedback.UserId = record.RentalRequest.CustomerId;
+                feedback.EquipmentId = record.RentalRequest.EquipmentId;
+                feedback.CreatedAt = DateTime.UtcNow;
+                feedback.UpdatedAt = DateTime.UtcNow;
+                feedback.TimeDate = DateTime.UtcNow;
+                feedback.IsHidden = false;
+
+                _context.Feedbacks.Add(feedback);
                 await _context.SaveChangesAsync();
 
-                // Set success message using TempData to show after redirect
                 TempData["MessageText"] = "Feedback submitted successfully.";
                 TempData["MessageType"] = "success";
-
-                // Redirect to Feedback Index page
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction("Details", "RentalRecords", new { id = feedback.RentalRecordId });
             }
             catch
             {
-                // Handle unexpected database or server error
                 return View("InternalServerError");
             }
         }
@@ -168,53 +159,51 @@ namespace WebApp.Controllers
         /// <returns>Redirect to Feedback Index with status preserved</returns>
         public async Task<IActionResult> Edit(int id)
         {
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized");
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden");
 
-
-            if (!User.Identity.IsAuthenticated)
+            try
             {
-                return View("Unauthorized");
-            }
+                // Find the feedback by ID
+                var feedback = await _context.Feedbacks.FindAsync(id);
 
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
-            {
-                return View("Forbidden");
+                // If not found, show error and redirect to index
+                if (feedback == null)
+                {
+                    TempData["MessageType"] = "error";
+                    TempData["MessageText"] = "Feedback not found.";
+                    return RedirectToAction("Index", new
+                    {
+                        id = feedback?.EquipmentId,
+                        status = feedback?.IsHidden == true ? "Hidden" : "Unhidden"
+                    });
+                }
 
-            }
-            // Find the feedback by ID
-            var feedback = await _context.Feedbacks.FindAsync(id);
+                // Toggle visibility (hide/unhide) and update timestamp
+                feedback.IsHidden = !feedback.IsHidden;
+                feedback.UpdatedAt = DateTime.UtcNow;
 
-            // If not found, show error and redirect to index
-            if (feedback == null)
-            {
-                TempData["MessageType"] = "error";
-                TempData["MessageText"] = "Feedback not found.";
+                // Save changes
+                _context.Update(feedback);
+                await _context.SaveChangesAsync();
+
+                // Set success message
+                TempData["MessageType"] = "success";
+                TempData["MessageText"] = feedback.IsHidden == true
+                    ? "Feedback successfully hidden."
+                    : "Feedback successfully unhidden.";
+
+                // Redirect to Feedback Index, preserving current status filter
                 return RedirectToAction("Index", new
                 {
-                    id = feedback?.EquipmentId,
-                    status = feedback?.IsHidden == true ? "Hidden" : "Unhidden"
+                    id = feedback.EquipmentId,
+                    status = feedback.IsHidden == true ? "Hidden" : "Unhidden"
                 });
             }
-
-            // Toggle visibility (hide/unhide) and update timestamp
-            feedback.IsHidden = !feedback.IsHidden;
-            feedback.UpdatedAt = DateTime.UtcNow;
-
-            // Save changes
-            _context.Update(feedback);
-            await _context.SaveChangesAsync();
-
-            // Set success message
-            TempData["MessageType"] = "success";
-            TempData["MessageText"] = feedback.IsHidden == true
-                ? "Feedback successfully hidden."
-                : "Feedback successfully unhidden.";
-
-            // Redirect to Feedback Index, preserving current status filter
-            return RedirectToAction("Index", new
+            catch
             {
-                id = feedback.EquipmentId,
-                status = feedback.IsHidden == true ? "Hidden" : "Unhidden"
-            });
+                return View("InternalServerError");
+            }
         }
     }
 }

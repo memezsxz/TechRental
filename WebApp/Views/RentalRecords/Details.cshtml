@@ -4,45 +4,48 @@
     ViewData["Title"] = "Rental Record Details";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
-    var request = ViewBag.RentalRequest as Database.Core.Domain.RentalRequest;
+    var request = Model.RentalRequest as Database.Core.Domain.RentalRequest;
     var mode = ViewBag.Mode as string ?? "transaction";
     var documentId = ViewBag.DocumentId as int?;
+    var payment = Model.Payments?.FirstOrDefault();
 
     var totalDays = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
 }
 
 <div class="mb-4 mt-3">
-    <a asp-action="Index" asp-route-userEmail="@User.Identity.Name" asp-route-status="@mode" class="text-success">&lt; Back</a>
+    <a asp-action="Index" asp-route-status="@mode" class="text-success">&lt; Back</a>
 </div>
 
 <h2 class="text-center mb-5 page-title">
     @(mode == "return" ? "Return Record Details" : "Transaction Details")
 </h2>
 
-<!-- CUSTOMER INFO -->
-<div class="container mb-5 pb-4 border-bottom">
-    <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label>First Name</label>
-            <input class="form-control" value="@request?.Customer?.FirstName" readonly />
+@if (User.IsInRole("Admin") || User.IsInRole("Manager")) {
+    <!-- CUSTOMER INFO -->
+    <div class="container mb-5 pb-4 border-bottom">
+        <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>First Name</label>
+                <input class="form-control" value="@request?.Customer?.FirstName" readonly />
+            </div>
+            <div class="col-md-6">
+                <label>Last Name</label>
+                <input class="form-control" value="@request?.Customer?.LastName" readonly />
+            </div>
         </div>
-        <div class="col-md-6">
-            <label>Last Name</label>
-            <input class="form-control" value="@request?.Customer?.LastName" readonly />
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>Phone Number</label>
+                <input class="form-control" value="@request?.Customer?.PhoneNumber" readonly />
+            </div>
+            <div class="col-md-6">
+                <label>Email</label>
+                <input class="form-control" value="@request?.Customer?.Email" readonly />
+            </div>
         </div>
     </div>
-    <div class="row mb-4">
-        <div class="col-md-6">
-            <label>Phone Number</label>
-            <input class="form-control" value="@request?.Customer?.PhoneNumber" readonly />
-        </div>
-        <div class="col-md-6">
-            <label>Email</label>
-            <input class="form-control" value="@request?.Customer?.Email" readonly />
-        </div>
-    </div>
-</div>
+}
 
 <!-- TRANSACTION INFO -->
 <div class="container mb-5 pb-4 border-bottom">
@@ -106,21 +109,43 @@
     @if (documentId != null)
     {
         <div class="mb-4">
-            <div class="mb-4 d-flex gap-3">
+            <h5 class="text-success fw-semibold mb-3">Rental Agreement</h5>
+            <label class="form-label">You can view or download the signed agreement below:</label>
+            <div class="d-flex gap-3 mt-2">
                 <a href="@Url.Action("GetPdf", "Document", new { id = documentId })"
-                   class="btn btn-outline-success"
+                   class="btn btn-outline-success px-4"
                    target="_blank">
                     View Agreement
                 </a>
 
                 <a href="@Url.Action("DownloadPdf", "Document", new { id = documentId })"
-                   class="btn btn-outline-success">
+                   class="btn btn-outline-success px-4">
                     Download Agreement
                 </a>
             </div>
         </div>
     }
 </div>
+
+
+<div class="container mb-5 pb-4 border-bottom">
+    <h4 class="mb-4 text-success fw-semibold">Payment Info</h4>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label>Amount</label>
+            <input class="form-control" value="@payment?.Amount.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Method</label>
+            <input class="form-control" value="@payment?.PaymentMethod?.MethodName" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Status</label>
+            <input class="form-control" value="@payment?.PaymentStatus?.StatusName" readonly />
+        </div>
+    </div>
+</div>
+
 
 
 <!-- RETURN DETAILS -->
@@ -167,12 +192,22 @@
             </div>
         </div>
     </div>
+
+    @if (User.IsInRole("Customer")) {
+        <div class="d-flex justify-content-center gap-3 mt-5">
+            <a asp-controller="Feedback" asp-action="Create" asp-route-rentalRecordId="@Model.Id" class="btn btn-outline-success px-4">Add FeedBack</a>
+        </div>
+    }
 }
 else
 {
-    <div class="d-flex justify-content-center mt-5">
-        <a asp-action="CompleteReturn" asp-route-id="@Model.Id" class="btn btn-outline-success px-4">
-            Complete Return Record
-        </a>
-    </div>
+    @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+    {
+        <div class="d-flex justify-content-center gap-3 mt-5">
+            <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">Edit</a>
+            <a asp-action="CompleteReturn" asp-route-id="@Model.Id" class="btn btn-outline-success px-4">
+                Complete Return Record
+            </a>
+        </div>
+    }
 }

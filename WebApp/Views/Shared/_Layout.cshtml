@@ -254,17 +254,6 @@
             @RenderBody()
         </main>
 
-
-        <!-- Flash Message Modal (Auto close) -->
-        <div class="modal fade" id="flashMessageModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content text-center p-4">
-                    <i id="flashIcon" class="mb-3" style="font-size: 2rem;"></i>
-                    <p id="flashText" class="mb-0"></p>
-                </div>
-            </div>
-        </div>
-
         <!-- Confirmation Modal -->
         <div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -282,12 +271,26 @@
         <!-- TempData bindings -->
         <input type="hidden" id="tempDataMessage" value="@(TempData["MessageText"] ?? "")" />
         <input type="hidden" id="tempDataMessageType" value="@(TempData["MessageType"] ?? "")" />
+
+        <!-- Flash Message Modal -->
+        <div class="modal fade" id="flashMessageModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-center p-4">
+                    <div class="modal-body">
+                        <i id="flashIcon" class="fas fa-info-circle fa-2x mb-3"></i>
+                        <p id="flashText" class="mb-0 fs-5 fw-semibold"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+
 
     <!-- shared JS file -->
     <script src="~/js/site-scripts.js" asp-append-version="true"></script>
     <script src="~/js/ToolBarJavaScript.js" asp-append-version="true"></script>
-
+    <script src="~/js/feedback.js" asp-append-version="true"></script>
 
     <footer class="border-top footer text-muted">
         <div class="container">

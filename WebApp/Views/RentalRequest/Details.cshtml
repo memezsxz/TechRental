@@ -119,7 +119,7 @@
     <div class="d-flex justify-content-center gap-3 mt-5">
 
         <!--  Edit button: Allowed for Admins, Managers, or Customers (if Pending) -->
-        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || (Model.StatusId == 1))
+        @if (Model.StatusId == 1)
         {
             <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">Edit</a>
         }
@@ -127,12 +127,20 @@
         <!--  Create Transaction button: Visible only if rental is approved and no transaction yet -->
         @if (Model.StatusId == 2 && !(ViewBag.HasTransaction ?? false) && (User.IsInRole("Admin") || User.IsInRole("Manager")))
         {
-            <a asp-controller="RentalRecords"
-               asp-action="CreateTransaction"
-               asp-route-rentalRequestId="@Model.Id"
-               class="btn btn-success px-4">
-                Create Transaction
-            </a>
+            @if (Model.ReturnDate > DateTime.Now)
+            {
+                <a asp-controller="RentalRecords"
+                   asp-action="CreateTransaction"
+                   asp-route-rentalRequestId="@Model.Id"
+                   class="btn btn-success px-4">
+                    Create Transaction
+                </a>
+            } else {
+                <button type="button" class="btn btn-success px-4"
+                        onclick="showFlash('Cannot create transaction: return date has passed.', 'warning')">
+                    Create Transaction
+                </button>
+            }
         }
 
         <!--  View Rental Record button: Shown only if transaction exists -->
@@ -141,7 +149,7 @@
             <a asp-controller="RentalRecords"
                asp-action="Details"
                asp-route-id="@ViewBag.TransactionId"
-               class="btn btn-outline-primary px-4">
+               class="btn btn-success px-4">
                 View Rental Record
             </a>
         }

@@ -1,9 +1,9 @@
-﻿// 🔹 Parse reserved dates from JSON embedded in the HTML <script> tag
+﻿//  Parse reserved dates from JSON embedded in the HTML <script> tag
 // Example source: <script id="reservedDatesData" type="application/json">["2025-06-10", "2025-06-15"]</script>
 const reservedDates = JSON.parse(document.getElementById("reservedDatesData").textContent.trim());
 
 /**
- * 🔹 Checks if a given date (JS Date object) is within the reserved dates
+ *  Checks if a given date (JS Date object) is within the reserved dates
  * @param {Date} date
  * @returns {boolean} - true if date is in reserved list
  */
@@ -87,7 +87,7 @@ const returnPicker = flatpickr("#returnDate", {
             dayElem.classList.add("reserved-day");
         }
 
-        // ⛔ Highlight same-day return as a conflict
+        //  Highlight same-day return as a conflict
         if (selectedStartIso && iso === selectedStartIso) {
             dayElem.classList.add("conflict-day");
             dayElem.setAttribute("title", "Return date cannot be the same as start date.");

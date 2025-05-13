@@ -1,92 +1,176 @@
 ﻿@model Database.Core.Domain.RentalRecord
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Rental Transaction";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var request = Model.RentalRequest as Database.Core.Domain.RentalRequest;
+    var documentId = ViewBag.DocumentId as int?;
+    var payment = Model.Payments?.FirstOrDefault();
+    var totalDays = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
 }
 
-<h1>Edit</h1>
+<br />
+<br />
 
-<h4>RentalRecord</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="RentalRequestId" class="control-label"></label>
-                <select asp-for="RentalRequestId" class="form-control" asp-items="ViewBag.RentalRequestId"></select>
-                <span asp-validation-for="RentalRequestId" class="text-danger"></span>
+
+<h2 class="text-center mb-5 page-title">Edit Rental Transaction</h2>
+    <!-- CUSTOMER INFO -->
+    <div class="container mb-5 pb-4 border-bottom">
+        <h4 class="mb-4 text-success fw-semibold">Customer Info</h4>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>First Name</label>
+                <input class="form-control" value="@request?.Customer?.FirstName" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="EquipmentName" class="control-label"></label>
-                <input asp-for="EquipmentName" class="form-control" />
-                <span asp-validation-for="EquipmentName" class="text-danger"></span>
+            <div class="col-md-6">
+                <label>Last Name</label>
+                <input class="form-control" value="@request?.Customer?.LastName" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="PickupDate" class="control-label"></label>
-                <input asp-for="PickupDate" class="form-control" />
-                <span asp-validation-for="PickupDate" class="text-danger"></span>
+        </div>
+        <div class="row mb-4">
+            <div class="col-md-6">
+                <label>Phone Number</label>
+                <input class="form-control" value="@request?.Customer?.PhoneNumber" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="ActualReturnDate" class="control-label"></label>
-                <input asp-for="ActualReturnDate" class="form-control" />
-                <span asp-validation-for="ActualReturnDate" class="text-danger"></span>
+            <div class="col-md-6">
+                <label>Email</label>
+                <input class="form-control" value="@request?.Customer?.Email" readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="ReturnConditionId" class="control-label"></label>
-                <select asp-for="ReturnConditionId" class="form-control" asp-items="ViewBag.ReturnConditionId"></select>
-                <span asp-validation-for="ReturnConditionId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Deposit" class="control-label"></label>
-                <input asp-for="Deposit" class="form-control" />
-                <span asp-validation-for="Deposit" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="LateReturnFees" class="control-label"></label>
-                <input asp-for="LateReturnFees" class="form-control" />
-                <span asp-validation-for="LateReturnFees" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ExtraCharges" class="control-label"></label>
-                <input asp-for="ExtraCharges" class="form-control" />
-                <span asp-validation-for="ExtraCharges" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ExtraChargeDescription" class="control-label"></label>
-                <input asp-for="ExtraChargeDescription" class="form-control" />
-                <span asp-validation-for="ExtraChargeDescription" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TotalCost" class="control-label"></label>
-                <input asp-for="TotalCost" class="form-control" />
-                <span asp-validation-for="TotalCost" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="RentalFee" class="control-label"></label>
-                <input asp-for="RentalFee" class="form-control" />
-                <span asp-validation-for="RentalFee" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="CreatedAt" class="control-label"></label>
-                <input asp-for="CreatedAt" class="form-control" />
-                <span asp-validation-for="CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="UpdatedAt" class="control-label"></label>
-                <input asp-for="UpdatedAt" class="form-control" />
-                <span asp-validation-for="UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+        </div>
+    </div>
+
+<!-- TRANSACTION INFO -->
+<div class="container mb-5 pb-4 border-bottom">
+    <h4 class="mb-4 text-success fw-semibold">Transaction Info</h4>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Request ID</label>
+            <input class="form-control" value="@request?.Id" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Rental Record ID</label>
+            <input class="form-control" value="@Model.Id" readonly />
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-6">
+            <label>Equipment Title</label>
+            <input class="form-control" value="@Model.EquipmentName" readonly />
+        </div>
+        <div class="col-md-6">
+            <label>Actual Pickup Date</label>
+            <input class="form-control" value="@Model.PickupDate.ToString("g")" readonly />
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label>Start Date</label>
+            <input class="form-control" value="@request?.StartDate.ToString("g")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Return Date</label>
+            <input class="form-control" value="@request?.ReturnDate.ToString("g")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Number of Days</label>
+            <input class="form-control" value="@totalDays" readonly />
+        </div>
+    </div>
+
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label>Deposit</label>
+            <input class="form-control" value="@Model.Deposit?.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Rental Fee (BD)</label>
+            <input class="form-control" value="@Model.RentalFee?.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Total Cost (BD)</label>
+            <input class="form-control" value="@Model.TotalCost?.ToString("0.00")" readonly />
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
+<div class="container mb-5 pb-4 border-bottom">
+    <h4 class="mb-4 text-success fw-semibold">Payment Info</h4>
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <label>Amount</label>
+            <input class="form-control" value="@payment?.Amount.ToString("0.00")" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Method</label>
+            <input class="form-control" value="@payment?.PaymentMethod?.MethodName" readonly />
+        </div>
+        <div class="col-md-4">
+            <label>Status</label>
+            <input class="form-control" value="@payment?.PaymentStatus?.StatusName" readonly />
+        </div>
+    </div>
 </div>
 
+<!-- AGREEMENT MANAGEMENT SECTION -->
+<div class="container mb-5">
+    <h4 class="mb-4 text-success fw-semibold">Rental Agreement</h4>
+    <form asp-action="Edit" enctype="multipart/form-data">
+        <input type="hidden" asp-for="Id" />
+        <input type="hidden" asp-for="RentalRequestId" value="@request?.Id" />
+
+        @if (documentId != null)
+        {
+            <div class="mb-3">
+                <label class="form-label">Existing Agreement:</label>
+                <div class="d-flex flex-wrap gap-3 align-items-center">
+                    <a href="@Url.Action("GetPdf", "Document", new { id = documentId })" class="btn btn-outline-success px-4" target="_blank">View</a>
+                    <a href="@Url.Action("DownloadPdf", "Document", new { id = documentId })" class="btn btn-outline-success px-4">Download</a>
+                    <a href="@Url.Action("DeleteAgreement", "RentalRecords", new { rentalId = Model.RentalRequestId })"
+                       class="btn btn-outline-danger px-4"
+                       onclick="return confirm('Are you sure you want to delete the current agreement?')">
+                        Delete
+                    </a>
+                </div>
+            </div>
+        } else {
+            <label class="form-label">Rental Agreement:</label>
+            <div class="d-flex justify-content-between align-items-center">
+                <a href="@Url.Action("DownloadAgreement", "Document", new { rentalRequestId = request.Id })" class="btn btn-outline-success custom-action-btn px-4" target="_blank">Download Agreement PDF</a>
+            </div>
+        }
+
+        <div class="mb-3">
+            <label for="AgreementUpload" class="form-label">
+                @(documentId != null ? "Replace Agreement (PDF)" : "Upload Agreement (PDF)")
+            </label>
+            <input type="file" name="Agreement" id="AgreementUpload" class="form-control" accept="application/pdf" />
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex justify-content-center gap-3 mt-5">
+            <input type="submit" value="Save Changes" class="btn btn-success px-4" />
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn btn-outline-secondary px-4">Cancel</a>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const fileInput = document.getElementById("AgreementUpload");
+            const hasExisting = @((documentId != null).ToString().ToLower());
+
+            if (fileInput && hasExisting) {
+                fileInput.addEventListener("change", () => {
+                    if (fileInput.files.length > 0) {
+                        showFlash("Uploading a new file will replace the existing agreement.", "info");
+                    }
+                });
+            }
+        });
+    </script>
+}
