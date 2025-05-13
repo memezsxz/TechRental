@@ -2,23 +2,36 @@
 using Database.Persistence;
 using Microsoft.EntityFrameworkCore;
 
+/// <summary>
+/// Manages creation of user notifications related to rental requests and return records.
+/// </summary>
 public class NotificationManager
 {
     /// <summary>
-    /// Creates a notification for a specific user and record.
-    /// Automatically resolves the equipment name from request or return record.
+    /// Creates a notification entry in the database for a specific user based on a rental request or return record.
     /// </summary>
-    /// <param name="userId">The ID of the user to notify</param>
-    /// <param name="notificationTypeId">The ID of the notification type</param>
-    /// <param name="recordType">Either "request" or "return"</param>
-    /// <param name="recordId">The ID of the related request or return record</param>
-    public async static Task CreateAsync(RentalDBContext _context,int userId, int notificationTypeId, string recordType, int recordId)
+    /// <param name="userId">The ID of the user who should receive the notification.</param>
+    /// <param name="notificationTypeId">The type ID indicating the reason for the notification (e.g., Approved, Rejected).</param>
+    /// <param name="recordType">The type of record associated with the notification. Must be "request" or "return".</param>
+    /// <param name="recordId">The ID of the associated RentalRequest or RentalRecord.</param>
+    /// <returns>A Task representing the asynchronous operation.</returns>
+    /// <exception cref="ArgumentException">Thrown if the record is not found or the recordType is invalid.</exception>
+    /// <remarks>
+    /// This method dynamically constructs the notification message based on:
+    /// - The type of action (e.g., approval, rejection, confirmation)
+    /// - The associated equipment's name
+    /// - The record context (request vs return)
+    /// 
+    /// It loads the related RentalRequest or RentalRecord including equipment name,
+    /// looks up the NotificationType name, and builds a meaningful user-friendly message.
+    /// </remarks>
+    public static async Task CreateAsync(RentalDBContext _context, int userId, int notificationTypeId, string recordType, int recordId)
     {
         string message;
         string equipmentName = "";
         int requestId = 0;
 
-        // Load equipment name and request ID based on record type
+        // Load equipment and request ID depending on record type
         if (recordType.ToLower() == "request")
         {
             var request = await _context.RentalRequests
@@ -48,7 +61,7 @@ public class NotificationManager
             throw new ArgumentException("Invalid record type. Must be 'request' or 'return'.");
         }
 
-        // Generate default message
+        // Determine message based on notification type
         var type = await _context.NotificationTypes.FindAsync(notificationTypeId);
         var typeName = type?.TypeName?.ToLower();
 
@@ -62,7 +75,7 @@ public class NotificationManager
             _ => $"You have a new update regarding {equipmentName}."
         };
 
-        // Insert notification
+        // Create and save the notification
         var notification = new Notification
         {
             UserId = userId,
