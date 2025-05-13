@@ -11,7 +11,6 @@ using Microsoft.AspNetCore.Identity;
 
 namespace WebApp.Controllers
 {
-    [Authorize]
     public class RentalRecordsController : Controller
     {
         private readonly RentalDBContext _context;
@@ -162,8 +161,13 @@ namespace WebApp.Controllers
         public IActionResult CreateTransaction(int rentalRequestId)
         {
 
+
             //do not allow the Unuthenticated users to enter this
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
+
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) {
+                return View("Forbidden");
+            }
 
             var request = _context.RentalRequests
                 .Include(r => r.Customer)
@@ -206,6 +210,12 @@ namespace WebApp.Controllers
 
             //do not allow the Unuthenticated users to enter this
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
+
+
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return View("Forbidden");
+            }
 
             var request = await _context.RentalRequests
                 .Include(r => r.Customer)
@@ -287,6 +297,10 @@ namespace WebApp.Controllers
 
             //do not allow the Unuthenticated users to enter this
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return View("Forbidden");
+            }
 
             var record = await _context.RentalRecords
                 .Include(r => r.RentalRequest)
@@ -324,6 +338,11 @@ namespace WebApp.Controllers
             //do not allow the Unuthenticated users to enter this
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
 
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return View("Forbidden");
+            }
+
             var record = await _context.RentalRecords.FindAsync(id);
             if (record == null) return View("NotFound");
 
@@ -347,6 +366,11 @@ namespace WebApp.Controllers
             //do not allow the Unuthenticated users to enter this
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
             if (id == null) return View("NotFound"); // HTTP 404
+
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return View("Forbidden");
+            }
 
             var rentalRecord = await _context.RentalRecords
                 .Include(r => r.RentalRequest)
@@ -376,6 +400,12 @@ namespace WebApp.Controllers
         public async Task<IActionResult> Edit(int id, RentalRecord rentalRecord)
         {
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
+
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return View("Forbidden");
+            }
+
             if (id != rentalRecord.Id) return View("NotFound"); // HTTP 404
 
             if (ModelState.IsValid)
@@ -422,6 +452,11 @@ namespace WebApp.Controllers
         public async Task<IActionResult> DeleteAgreement(int rentalId)
         {
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
+
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+            {
+                return View("Forbidden");
+            }
 
             var document = await _context.Documents.FirstOrDefaultAsync(d => d.RentalId == rentalId);
             if (document == null)
