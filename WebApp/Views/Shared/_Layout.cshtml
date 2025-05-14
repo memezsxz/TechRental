@@ -111,7 +111,7 @@
                             if (User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager)) 
                             {
                                 <li class="nav-item mx-2">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "") text-dark" asp-controller="" asp-action="">Dashboard</a>
+                                   <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "") text-dark" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
                                 </li>
 
 
