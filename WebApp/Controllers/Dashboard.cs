@@ -29,26 +29,26 @@ namespace WebApp.Controllers
                         .Include(r => r.Status)
                         .CountAsync(r => r.Status.StatusName == "Pending"),
 
-                    CompletedRequests = await _context.RentalRequests
+                    ApprovedRequests = await _context.RentalRequests
                         .Include(r => r.Status)
-                        .CountAsync(r => r.Status.StatusName == "Completed"),
+                        .CountAsync(r => r.Status.StatusName == "Approved"),
 
-                    OverdueRequests = await _context.RentalRequests
-                        .Where(r => r.Status.StatusName == "Approved")
-                        .CountAsync(r => r.ReturnDate < DateTime.Now.Date),
+                    RejectedRequests = await _context.RentalRequests
+                        .Include(r => r.Status)
+                        .CountAsync(r => r.Status.StatusName == "Rejected"),
 
                     TotalRequests = await _context.RentalRequests.CountAsync(),
 
                     DamagedEquipment = await _context.Equipment
                         .Include(e => e.ConditionStatus)
-                        .CountAsync(e => e.ConditionStatus.ConditionName == "Damaged"),
+                        .CountAsync(e => e.ConditionStatus.ConditionName == "Needs Repair"),
 
                     TotalRepairCost = await _context.RentalRecords
                         .SumAsync(r => (decimal?)r.TotalCost) ?? 0,
 
                     RecentRequests = await _context.RentalRequests
                         .Include(r => r.Equipment)
-                            .ThenInclude(e => e.Category)
+                        .ThenInclude(e => e.Category)
                         .Include(r => r.Status)
                         .Include(r => r.Customer)
                         .OrderByDescending(r => r.CreatedAt)
@@ -66,7 +66,9 @@ namespace WebApp.Controllers
                         })
                         .ToListAsync(),
 
-                    TotalUsers = role == "Admin" ? await _context.Users.CountAsync() : 0,
+                    TotalUsers = role == "Admin" ? await _context.Users
+                    .Where(u => u.IsActive == true)
+                    .CountAsync() : 0,
 
                     Admins = role == "Admin" ?
                         await _context.Users
