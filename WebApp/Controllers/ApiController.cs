@@ -41,6 +41,7 @@ namespace WebApp.Controllers
                 categorieslist.Add(category.Name);
             }
 
+
             return Json(categorieslist);
         }
 

@@ -24,6 +24,7 @@ namespace WebApp.Controllers
 
                 var stats = new
                 {
+
                     PendingRequests = await _context.RentalRequests
                         .Include(r => r.Status)
                         .CountAsync(r => r.Status.StatusName == "Pending"),
@@ -33,8 +34,8 @@ namespace WebApp.Controllers
                         .CountAsync(r => r.Status.StatusName == "Completed"),
 
                     OverdueRequests = await _context.RentalRequests
-                        .Include(r => r.Status)
-                        .CountAsync(r => r.Status.StatusName == "Overdue"),
+                        .Where(r => r.Status.StatusName == "Approved")
+                        .CountAsync(r => r.ReturnDate < DateTime.Now.Date),
 
                     TotalRequests = await _context.RentalRequests.CountAsync(),
 
@@ -70,11 +71,13 @@ namespace WebApp.Controllers
                     Admins = role == "Admin" ?
                         await _context.Users
                             .Include(u => u.Role)
+                            .Where(u => u.IsActive == true)
                             .CountAsync(u => u.Role.RoleName == "Admin") : 0,
 
                     Managers = role == "Admin" ?
                         await _context.Users
                             .Include(u => u.Role)
+                            .Where(u => u.IsActive == true)
                             .CountAsync(u => u.Role.RoleName == "Manager") : 0
                 };
 
