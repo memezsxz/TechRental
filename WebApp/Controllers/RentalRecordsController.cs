@@ -370,8 +370,11 @@ namespace WebApp.Controllers
                 record.UpdatedAt = DateTime.Now;
 
                 await _context.SaveChangesAsync();
-                await NotificationManager.CreateAsync(_context, record.RentalRequest.CustomerId, 4, "return",
-                    record.Id);
+                await NotificationManager.CreateAsync(_context, record.RentalRequest.CustomerId, 4, "return",record.Id);
+
+                TempData["MessageText"] = "Rental return created successfully.";
+                TempData["MessageType"] = "success";
+
                 return RedirectToAction(nameof(Index), new { status = "return" });
             }
             catch
