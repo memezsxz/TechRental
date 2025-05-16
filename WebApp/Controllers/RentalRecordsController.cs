@@ -230,8 +230,7 @@ namespace WebApp.Controllers
                     var deposit = Math.Round(dailyRate * 0.7M, 2);
                     var total = rentalFee + deposit;
 
-                    rentalRecord.EquipmentName = request.Equipment?.Name;
-
+                    rentalRecord.EquipmentName = request.Equipment.Name;
                     rentalRecord.RentalFee = rentalFee;
                     rentalRecord.Deposit = deposit;
                     rentalRecord.TotalCost = total;
@@ -289,11 +288,6 @@ namespace WebApp.Controllers
                             Field = m.Key,
                             Errors = m.Value.Errors.Select(e => e.ErrorMessage)
                         });
-
-                    foreach (var e in errors)
-                    {
-                        Console.WriteLine($"Field: {e.Field}, Errors: {string.Join("; ", e.Errors)}");
-                    }
 
                     TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
                         errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));

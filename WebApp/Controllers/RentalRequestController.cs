@@ -195,7 +195,6 @@ namespace WebApp.Controllers
         /// </returns>
         public async Task<IActionResult> Create(RentalRequest rentalRequest)
         {
-
             // Ensure user is logged in
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // Shows HTTP 401 error page
 
@@ -221,6 +220,17 @@ namespace WebApp.Controllers
                     .FirstOrDefault(e => e.Id == rentalRequest.EquipmentId);
 
                 ViewBag.Equipment = equipment;
+
+                var errors = ModelState
+                    .Where(m => m.Value.Errors.Any())
+                    .Select(m => new {
+                        Field = m.Key,
+                        Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                    });
+
+                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageType"] = "error";
 
                 // Recompute the list of unavailable rental dates
                 ViewBag.UnavailableDates = GetUnavailableDates(rentalRequest.EquipmentId);

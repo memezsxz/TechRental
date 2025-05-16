@@ -80,9 +80,7 @@
         } else {
             <div class="col-md-6">
                 <label>Actual Pickup Date</label>
-                <input asp-for="PickupDate"
-                       id="actualPickupDate"
-                       name="PickupDate"
+                <input id="actualPickupDate"
                        class="form-control flatpickr-input"
                        placeholder="Select pickup date and time" />
             </div>
@@ -154,6 +152,8 @@
     <form asp-action="@(mode == "return" ? "CompleteReturn" : "CreateTransaction")" enctype="multipart/form-data" onsubmit="return validateReturnForm()">
         <input type="hidden" asp-for="RentalRequestId" value="@request?.Id" />
         <input type="hidden" asp-for="Id" />
+        <!-- Hidden input that will be filled before submission -->
+        <input asp-for="PickupDate" type="hidden" name="PickupDate" id="hiddenPickupDate" />
 
         @if (mode == "transaction")
         {   //class="btn  w-100 mb-3"
@@ -247,6 +247,11 @@
                 const fileInput = document.getElementById('agreementUpload');
                 const fileError = document.getElementById('fileError');
 
+                const pickup = document.getElementById('actualPickupDate')?.value;
+                if (!pickup) {
+                    showFlash("Please select the actual pickup date.", "warning");
+                    return false;
+                }
                 if (!fileInput || fileInput.files.length === 0) {
                     showFlash("Please upload the signed agreement PDF.", "warning");
                     fileError.classList.remove('d-none');
@@ -312,43 +317,41 @@
             });
         });
 
-            window.addEventListener("DOMContentLoaded", () => {
-        const startDate = new Date("@request.StartDate.ToString("yyyy-MM-ddTHH:mm")");
-        const returnDate = new Date("@request.ReturnDate.ToString("yyyy-MM-ddTHH:mm")");
-        const now = new Date();
+        window.addEventListener("DOMContentLoaded", () => {
+            const pickupInput = document.getElementById("actualPickupDate");
 
-        // Subtract 1 day from return date
-        const maxDate = new Date(returnDate);
-        maxDate.setDate(maxDate.getDate() - 1);
+            // Set flatpickr on the input
+            flatpickr(pickupInput, {
+                enableTime: true,
+                dateFormat: "Y-m-d\\TH:i",
+                defaultDate: null,
+                allowInput: true,
+                minDate: "@request.StartDate.ToString("yyyy-MM-ddTHH:mm")",
+                maxDate: "@request.ReturnDate.AddDays(-1).ToString("yyyy-MM-ddTHH:mm")",
 
-        // Decide default date
-        const defaultDate = now >= startDate ? now : startDate;
-
-        flatpickr("#actualPickupDate", {
-            enableTime: true,
-            dateFormat: "Y-m-d\\TH:i",
-            defaultDate: defaultDate,
-            minDate: startDate,
-            maxDate: maxDate
+                // Update hidden input when user picks a date
+                onChange: function(selectedDates, dateStr) {
+                    document.getElementById("hiddenPickupDate").value = dateStr;
+                }
+            });
         });
-    });
+
 
         window.addEventListener("DOMContentLoaded", () => {
-        const returnDateStr = "@request.ReturnDate.ToString("yyyy-MM-ddTHH:mm")";
-        const returnDate = new Date(returnDateStr);
-        const now = new Date();
+            const returnDateStr = "@request.ReturnDate.ToString("yyyy-MM-ddTHH:mm")";
+            const returnDate = new Date(returnDateStr);
+            const now = new Date();
 
-        // Default to today if today >= returnDate, else returnDate
-        const defaultReturnDate = now >= returnDate ? now : returnDate;
+            // Default to today if today >= returnDate, else returnDate
+            const defaultReturnDate = now >= returnDate ? now : returnDate;
 
-        flatpickr("#actualReturnDate", {
-            enableTime: true,
-            dateFormat: "Y-m-d\\TH:i",
-            defaultDate: defaultReturnDate,
-            minDate: returnDate
+            flatpickr("#actualReturnDate", {
+                enableTime: true,
+                dateFormat: "Y-m-d\\TH:i",
+                defaultDate: defaultReturnDate,
+                minDate: returnDate
+            });
         });
-    });
-
     </script>
 }
 

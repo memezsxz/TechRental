@@ -1,15 +1,23 @@
 ﻿function previewImage(event) {
     const file = event.target.files[0];
     const uploadBox = document.querySelector('.upload-box');
-    const uploadtxt = document.querySelector('.upload-text');
+    const uploadImg = uploadBox.querySelector('img');
+    const uploadText = document.querySelector('.upload-text');
 
     if (file) {
         const reader = new FileReader();
         reader.onload = function (e) {
+            // Remove old image if it exists
+            if (uploadImg) {
+                uploadImg.remove();
+            }
+
+            // Set background image preview
             uploadBox.style.backgroundImage = `url('${e.target.result}')`;
             uploadBox.style.backgroundSize = 'cover';
             uploadBox.style.backgroundPosition = 'center';
-            uploadtxt.innerHTML = ''; // Remove the "Add" text
+
+            if (uploadText) uploadText.innerHTML = '';
         };
         reader.readAsDataURL(file);
     }
