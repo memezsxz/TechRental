@@ -42,7 +42,7 @@
                             <small class="text-muted">${new Date(notification.createdAt).toLocaleString()}</small>
                             <p class="${textClass}" style="font-size: 1.25rem;">
                                 <i class="bi ${iconClass}" style="font-size: 1.5rem; margin-right: 6px;"></i>
-                                ${notification.messageContent}
+                                ${notification.notificationType.typeName || 'General'}
                             </p>
                         `;
 

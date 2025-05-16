@@ -4,6 +4,7 @@ using Database.Persistence;
 using Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApp.Controllers
 {
@@ -61,10 +62,21 @@ namespace WebApp.Controllers
 
             var id = currentUser.UserID;
 
-            var notifications = (await _unitOfWork.Notifications.GetAllAsync())
+            var notifications = await _contxet.Notifications
+                .Include(n => n.NotificationType)
                 .Where(n => n.UserId == id)
                 .OrderByDescending(n => n.CreatedAt)
-                .ToList();
+                .Select(n => new {
+                    n.Id,
+                    n.IsRead,
+                    n.CreatedAt,
+                    n.MessageContent,
+                    NotificationType = new
+                    {
+                        n.NotificationType.TypeName
+                    }
+                })
+                .ToListAsync();
 
             return Json(notifications);
         }
