@@ -2,6 +2,7 @@
 // Example source: <script id="reservedDatesData" type="application/json">["2025-06-10", "2025-06-15"]</script>
 const reservedDates = JSON.parse(document.getElementById("reservedDatesData").textContent.trim());
 
+console.log("Hello");
 /**
  *  Checks if a given date (JS Date object) is within the reserved dates
  * @param {Date} date
