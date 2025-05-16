@@ -10,7 +10,7 @@ namespace Database.Persistence.Repositories
     {
         #region Constructor
 
-        public ReturnConditionStatusRepository(RentalDBContext context, int? userId)
+        public ReturnConditionStatusRepository(RentalDBContext context, int userId)
             : base(context, userId)
         {
         }

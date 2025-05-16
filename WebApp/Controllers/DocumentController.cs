@@ -33,7 +33,7 @@ namespace WebApp.Controllers
         public async Task<IActionResult> GetPdf(int id)
         {
             var doc = await _context.Documents.FindAsync(id);
-            if (doc == null || !doc.Guid.HasValue)
+            if (doc == null)
                 return NotFound();
 
             var stream = await S3Uploader.GetFileByGuidAsync(doc.Guid.ToString());
@@ -46,7 +46,7 @@ namespace WebApp.Controllers
         public async Task<IActionResult> DownloadPdf(int id)
         {
             var doc = await _context.Documents.FindAsync(id);
-            if (doc == null || !doc.Guid.HasValue)
+            if (doc == null)
                 return NotFound();
 
             var stream = await S3Uploader.GetFileByGuidAsync(doc.Guid.ToString());

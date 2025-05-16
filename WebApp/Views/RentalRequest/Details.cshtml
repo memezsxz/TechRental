@@ -25,7 +25,7 @@
 
     // Pre-calculate total rental period and cost for display
     var totalDays = (Model.ReturnDate.Date - Model.StartDate.Date).Days + 1;
-    var rentalFee = Model.RentalPerDay.GetValueOrDefault();
+    var rentalFee = Model.RentalPerDay;
     var totalCost = totalDays * rentalFee;
 }
 

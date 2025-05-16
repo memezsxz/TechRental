@@ -102,7 +102,7 @@
         </div>
         <div class="col-md-4">
             <label>Total Cost (BD)</label>
-            <input class="form-control" value="@Model.TotalCost?.ToString("0.00")" readonly />
+            <input class="form-control" value="@Model.TotalCost.ToString("0.00")" readonly />
         </div>
     </div>
 
@@ -183,7 +183,7 @@
         </div>
 
         @{
-            var adjustedTotal = (Model.TotalCost ?? 0) + (Model.LateReturnFees ?? 0) + (Model.ExtraCharges ?? 0);
+            var adjustedTotal = (Model.TotalCost) + (Model.LateReturnFees ?? 0) + (Model.ExtraCharges ?? 0);
         }
         <div class="row mb-4">
             <div class="col-md-4">

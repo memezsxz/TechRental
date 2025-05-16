@@ -23,9 +23,9 @@ namespace Database.Core.Domain
         public string ImageName { get; set; } = null!;
         [Column("image_type")]
         [StringLength(20)]
-        public string ImageType { get; set; } = null!;
+        public string? ImageType { get; set; } = null!;
         [Column("guid")]
-        public Guid? Guid { get; set; }
+        public Guid Guid { get; set; }
         [Column("created_at", TypeName = "datetime")]
         public DateTime? CreatedAt { get; set; }
 

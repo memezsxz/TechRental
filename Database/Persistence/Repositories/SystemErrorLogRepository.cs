@@ -10,7 +10,7 @@ namespace Database.Persistence.Repositories
     {
         #region Constructor
 
-        public SystemErrorLogRepository(RentalDBContext context, int? userId)
+        public SystemErrorLogRepository(RentalDBContext context, int userId)
             : base(context, userId)
         {
         }

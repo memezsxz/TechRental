@@ -11,7 +11,7 @@ namespace Database.Persistence.Repositories
     {
         #region Constructor
 
-        public NotificationRepository(RentalDBContext context, int? userId)
+        public NotificationRepository(RentalDBContext context, int userId)
             : base(context, userId)
         {
         }

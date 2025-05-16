@@ -21,9 +21,9 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
 {
 
     protected readonly RentalDBContext context;
-    public int? UserId { get; set; }
+    public int UserId { get; set; }
 
-    public Repository(RentalDBContext context, int? userId)
+    public Repository(RentalDBContext context, int userId)
     {
         this.context = context;
         this.UserId = userId;

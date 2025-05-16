@@ -409,7 +409,7 @@ public abstract class BaseViewEditDeleteForm : Form
     /// <summary>
     /// Loads an image into a panel for preview, using the image's GUID and type.
     /// </summary>
-    protected async Task LoadImage(Guid? guid, string imageType, Panel displayPanel, Label imageLabel)
+    protected async Task LoadImage(Guid? guid, string? imageType, Panel displayPanel, Label imageLabel)
     {
         try
         {

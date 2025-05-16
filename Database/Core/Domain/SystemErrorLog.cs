@@ -15,18 +15,18 @@ namespace Database.Core.Domain
         [Column("error_message")]
         public string ErrorMessage { get; set; } = null!;
         [Column("user_id")]
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
         [Column("timestamp", TypeName = "datetime")]
-        public DateTime? Timestamp { get; set; }
+        public DateTime Timestamp { get; set; }
         [Column("source_procedure")]
         [StringLength(255)]
         public string? SourceProcedure { get; set; }
         [Column("error_source")]
         [StringLength(255)]
-        public string? ErrorSource { get; set; }
+        public string ErrorSource { get; set; } = null!;
 
         [ForeignKey("UserId")]
         [InverseProperty("SystemErrorLogs")]
-        public virtual User? User { get; set; }
+        public virtual User User { get; set; } = null!;
     }
 }

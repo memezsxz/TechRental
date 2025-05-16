@@ -82,7 +82,7 @@ namespace FormsApp.views.panels
             // Load profile image if available
             if (user.Image != null)
             {
-                Global.LoadImage(user.Image.Guid.Value, user.Image.ImageType, pnlImage, lblImage);
+                Global.LoadImage(user.Image.Guid, user.Image.ImageType, pnlImage, lblImage);
             }
             else
             {

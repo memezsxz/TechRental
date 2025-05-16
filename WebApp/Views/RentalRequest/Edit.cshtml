@@ -23,7 +23,7 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 
     var totalDays = (Model.ReturnDate.Date - Model.StartDate.Date).Days + 1;
-    var rentalFee = Model.RentalPerDay.GetValueOrDefault();
+    var rentalFee = Model.RentalPerDay;
     var totalCost = totalDays * rentalFee;
 }
 
@@ -132,7 +132,7 @@
             </div>
             <div class="col-md-4">
                 <label>Rental Fee (BD/Day)</label>
-                <input class="form-control" value="@Model.RentalPerDay.GetValueOrDefault(0).ToString("0.00")" readonly />
+                <input class="form-control" value="@Model.RentalPerDay.ToString("0.00")" readonly />
             </div>
             <div class="col-md-4">
                 <label>Total Cost (BD)</label>
@@ -168,7 +168,7 @@
 </script>
 
 <!-- Pass daily rental rate to JS -->
-<input type="hidden" id="rentalPerDay" value="@Model.RentalPerDay.GetValueOrDefault(0).ToString("0.00")" />
+<input type="hidden" id="rentalPerDay" value="@Model.RentalPerDay.ToString("0.00")" />
 
 @section Scripts {
     <!-- Shared logic: flatpickr setup, validation, dynamic cost -->

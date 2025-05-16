@@ -20,6 +20,6 @@ namespace Database.ViewModels
         /// <summary>
         /// The total earnings value for the specified month.
         /// </summary>
-        public int Value { get; set; }
+        public decimal Value { get; set; }
     }
 }

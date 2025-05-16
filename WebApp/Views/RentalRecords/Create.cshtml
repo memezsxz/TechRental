@@ -113,7 +113,7 @@
         </div>
         <div class="col-md-4">
             <label>Total Cost (BD)</label>
-            <input class="form-control" value="@Model?.TotalCost?.ToString("0.00")" readonly />
+            <input class="form-control" value="@Model?.TotalCost.ToString("0.00")" readonly />
         </div>
     </div>
     <div class="mb-4">
@@ -171,7 +171,7 @@
             <div class="row mb-4">
                 <div class="col-md-4">
                     <label>Amount (BD)</label>
-                    <input type="text" class="form-control" name="Amount" value="@Model?.TotalCost?.ToString("0.00")" readonly />
+                    <input type="text" class="form-control" name="Amount" value="@Model?.TotalCost.ToString("0.00")" readonly />
                 </div>
                 <div class="col-md-4">
                     <label for="PaymentMethodId">Payment Method</label>
