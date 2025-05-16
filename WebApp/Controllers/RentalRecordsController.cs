@@ -176,7 +176,7 @@ namespace WebApp.Controllers
                 .FirstOrDefault(r => r.Id == rentalRequestId);
 
             if (request == null) return View("NotFound"); // HTTP 404
-            if (DateTime.Now > request.ReturnDate) return View("Forbidden"); // HTTP 403 Forbidden
+            if (DateTime.Now > request.ReturnDate || request.StatusId != 2) return View("Forbidden"); // HTTP 403 Forbidden
 
             var days = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
             var dailyRate = request.RentalPerDay;
@@ -187,8 +187,7 @@ namespace WebApp.Controllers
             ViewBag.Mode = "transaction";
             ViewBag.RentalRequest = request;
             ViewBag.PaymentMethodId = new SelectList(_context.PaymentMethods, "Id", "MethodName", 3); // default to Cash
-            ViewBag.PaymentStatusId =
-                new SelectList(_context.PaymentStatuses, "Id", "StatusName", 2); // default to Paid
+            ViewBag.PaymentStatusId = new SelectList(_context.PaymentStatuses, "Id", "StatusName", 2); // default to Paid
 
             var record = new RentalRecord
             {
@@ -224,7 +223,7 @@ namespace WebApp.Controllers
             {
                 if (ModelState.IsValid)
                 {
-                    // Step 1: Calculate fees
+                    // Step 1: Calculate fees 
                     var days = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
                     var dailyRate = request.RentalPerDay;
                     var rentalFee = dailyRate * days;
@@ -232,7 +231,7 @@ namespace WebApp.Controllers
                     var total = rentalFee + deposit;
 
                     rentalRecord.EquipmentName = request.Equipment?.Name;
-                    rentalRecord.PickupDate = DateTime.Now;
+
                     rentalRecord.RentalFee = rentalFee;
                     rentalRecord.Deposit = deposit;
                     rentalRecord.TotalCost = total;
@@ -282,6 +281,23 @@ namespace WebApp.Controllers
                     TempData["MessageText"] = "Rental transaction created successfully.";
                     TempData["MessageType"] = "success";
                     return RedirectToAction(nameof(Index), new { status = "transaction" });
+                } else
+                {
+                    var errors = ModelState
+                        .Where(m => m.Value.Errors.Any())
+                        .Select(m => new {
+                            Field = m.Key,
+                            Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                        });
+
+                    foreach (var e in errors)
+                    {
+                        Console.WriteLine($"Field: {e.Field}, Errors: {string.Join("; ", e.Errors)}");
+                    }
+
+                    TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                        errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                    TempData["MessageType"] = "error";
                 }
             }
             catch
@@ -290,9 +306,11 @@ namespace WebApp.Controllers
             }
 
             // Repopulate form
+            ViewBag.Mode = "transaction";
             ViewBag.RentalRequest = request;
-            ViewBag.ReturnConditionId = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName",
-                rentalRecord.ReturnConditionId);
+            ViewBag.PaymentMethodId = new SelectList(_context.PaymentMethods, "Id", "MethodName", 3); // default to Cash
+            ViewBag.PaymentStatusId = new SelectList(_context.PaymentStatuses, "Id", "StatusName", 2); // default to Paid
+
             return View("Create", rentalRecord);
         }
 
@@ -341,7 +359,10 @@ namespace WebApp.Controllers
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
             if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden");
 
-            var record = await _context.RentalRecords.FindAsync(id);
+            var record = await _context.RentalRecords
+                .Include(r => r.RentalRequest)
+                .FirstOrDefaultAsync(r => r.Id == id);
+            
             if (record == null) return View("NotFound");
 
             try
