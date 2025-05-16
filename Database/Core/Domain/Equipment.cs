@@ -22,15 +22,15 @@ namespace Database.Core.Domain
         public string Name { get; set; } = null!;
         [Column("description")]
         [StringLength(255)]
-        public string? Description { get; set; }
+        public string Description { get; set; } = null!;
         [Column("rental_price_per_day", TypeName = "decimal(10, 2)")]
         public decimal RentalPricePerDay { get; set; }
         [Column("availability_status_id")]
-        public int? AvailabilityStatusId { get; set; }
+        public int AvailabilityStatusId { get; set; }
         [Column("condition_status_id")]
-        public int? ConditionStatusId { get; set; }
+        public int ConditionStatusId { get; set; }
         [Column("category_id")]
-        public int? CategoryId { get; set; }
+        public int CategoryId { get; set; }
         [Column("is_active")]
         public bool? IsActive { get; set; }
         [Column("created_at", TypeName = "datetime")]
@@ -42,13 +42,13 @@ namespace Database.Core.Domain
 
         [ForeignKey("AvailabilityStatusId")]
         [InverseProperty("Equipment")]
-        public virtual EquipmentAvailabilityStatus? AvailabilityStatus { get; set; }
+        public virtual EquipmentAvailabilityStatus AvailabilityStatus { get; set; } = null!;
         [ForeignKey("CategoryId")]
         [InverseProperty("Equipment")]
-        public virtual Category? Category { get; set; }
+        public virtual Category Category { get; set; } = null!;
         [ForeignKey("ConditionStatusId")]
         [InverseProperty("Equipment")]
-        public virtual EquipmentConditionStatus? ConditionStatus { get; set; }
+        public virtual EquipmentConditionStatus ConditionStatus { get; set; } = null!;
         [ForeignKey("ImageId")]
         [InverseProperty("Equipment")]
         public virtual Image? Image { get; set; }

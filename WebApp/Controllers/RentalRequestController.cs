@@ -223,7 +223,7 @@ namespace WebApp.Controllers
                 ViewBag.Equipment = equipment;
 
                 // Recompute the list of unavailable rental dates
-                ViewBag.UnavailableDates = GetUnavailableDates(rentalRequest.EquipmentId ?? 0);
+                ViewBag.UnavailableDates = GetUnavailableDates(rentalRequest.EquipmentId);
 
                 return View(rentalRequest); // Redisplay form with validation errors
             }
@@ -236,7 +236,7 @@ namespace WebApp.Controllers
                 var user = (ApplicationUser)await _userManager.GetUserAsync(User);
 
                 // Assign customer ID to the rental request
-                rentalRequest.CustomerId = user.UserID;
+                rentalRequest.CustomerId = user.UserID.Value;
 
                 // Add and save the new request
                 _context.Add(rentalRequest);
@@ -301,7 +301,7 @@ namespace WebApp.Controllers
 
             // GET UNAVAILABLE DATES FOR CALENDAR DISABLING (excludes current request)
             // ViewBag.UnavailableDates is used by JS to prevent selecting already booked dates
-            ViewBag.UnavailableDates = GetUnavailableDates(rentalRequest.EquipmentId ?? 0, excludeRequestId: id.Value);
+            ViewBag.UnavailableDates = GetUnavailableDates(rentalRequest.EquipmentId, excludeRequestId: id.Value);
 
             // RETURN EDIT VIEW WITH POPULATED RENTAL REQUEST
             return View(rentalRequest);

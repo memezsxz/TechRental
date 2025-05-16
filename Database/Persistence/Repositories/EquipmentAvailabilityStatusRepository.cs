@@ -16,7 +16,7 @@ namespace Database.Persistence.Repositories
     {
         #region Constructor
 
-        public EquipmentAvailabilityStatusRepository(RentalDBContext context, int? userId)
+        public EquipmentAvailabilityStatusRepository(RentalDBContext context, int userId)
             : base(context, userId)
         {
         }

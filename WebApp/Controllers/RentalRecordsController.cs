@@ -178,7 +178,7 @@ namespace WebApp.Controllers
             if (DateTime.Now > request.ReturnDate) return View("Forbidden"); // HTTP 403 Forbidden
 
             var days = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
-            var dailyRate = request.RentalPerDay ?? 0;
+            var dailyRate = request.RentalPerDay;
             var rentalFee = dailyRate * days;
             var deposit = Math.Round(dailyRate * 0.7M, 2);
             var total = rentalFee + deposit;
@@ -224,7 +224,7 @@ namespace WebApp.Controllers
                 {
                     // Step 1: Calculate fees
                     var days = (request.ReturnDate.Date - request.StartDate.Date).Days + 1;
-                    var dailyRate = request.RentalPerDay ?? 0;
+                    var dailyRate = request.RentalPerDay;
                     var rentalFee = dailyRate * days;
                     var deposit = Math.Round(dailyRate * 0.7M, 2);
                     var total = rentalFee + deposit;
@@ -243,7 +243,7 @@ namespace WebApp.Controllers
                     var payment = new Payment
                     {
                         RentalRecordId = rentalRecord.Id,
-                        Amount = rentalRecord.TotalCost ?? 0,
+                        Amount = rentalRecord.TotalCost,
                         PaymentMethodId = int.Parse(Request.Form["PaymentMethodId"]),
                         PaymentStatusId = 2, // Paid
                         PaymentDate = DateTime.Now
@@ -268,6 +268,13 @@ namespace WebApp.Controllers
                             Agreement.ContentType,
                             rentalRecord.RentalRequestId.Value
                         );
+                    var uploadSuccess = await PdfManager.UploadPdfAndSaveToDatabase(
+                        _context,
+                        memoryStream,
+                        Agreement.FileName,
+                        Agreement.ContentType,
+                        rentalRecord.RentalRequestId
+                    );
 
                         if (!uploadSuccess)
                         {
@@ -350,7 +357,7 @@ namespace WebApp.Controllers
                 record.UpdatedAt = DateTime.Now;
 
                 await _context.SaveChangesAsync();
-                await NotificationManager.CreateAsync(_context, record.RentalRequest.CustomerId.Value, 4, "return", record.Id);
+                await NotificationManager.CreateAsync(_context, record.RentalRequest.CustomerId, 4, "return", record.Id);
                 return RedirectToAction(nameof(Index), new { status = "return" });
             }
             catch
@@ -421,7 +428,7 @@ namespace WebApp.Controllers
 
                         // Save new one
                         using var stream = Agreement.OpenReadStream();
-                        var uploadSuccess = await PdfManager.UploadPdfAndSaveToDatabase(_context, stream, Agreement.FileName, Agreement.ContentType, rentalRecord.RentalRequestId.Value);
+                        var uploadSuccess = await PdfManager.UploadPdfAndSaveToDatabase(_context, stream, Agreement.FileName, Agreement.ContentType, rentalRecord.RentalRequestId);
 
                         if (!uploadSuccess)
                         {

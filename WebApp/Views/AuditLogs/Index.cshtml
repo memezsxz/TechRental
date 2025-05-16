@@ -105,7 +105,7 @@
                 @foreach (var item in Model)
                 {
                     <tr>
-                        <td>@item.Timestamp?.ToString("g")</td>
+                        <td>@item.Timestamp.ToString("g")</td>
                         <td>@item.User?.Email</td>
                         <td>@item.ActionType</td>
                         <td>@item.Source</td>

@@ -56,6 +56,7 @@ namespace Database.Persistence
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.AuditLogs)
                     .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__AuditLog__user_i__6754599E");
             });
 
@@ -75,6 +76,7 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Rental)
                     .WithMany(p => p.Documents)
                     .HasForeignKey(d => d.RentalId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Document__rental__00200768");
             });
 
@@ -89,16 +91,19 @@ namespace Database.Persistence
                 entity.HasOne(d => d.AvailabilityStatus)
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.AvailabilityStatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Equipment__avail__45F365D3");
 
                 entity.HasOne(d => d.Category)
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.CategoryId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Equipment__categ__47DBAE45");
 
                 entity.HasOne(d => d.ConditionStatus)
                     .WithMany(p => p.Equipment)
                     .HasForeignKey(d => d.ConditionStatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Equipment__condi__46E78A0C");
 
                 entity.HasOne(d => d.Image)
@@ -120,16 +125,19 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Equipment)
                     .WithMany(p => p.Feedbacks)
                     .HasForeignKey(d => d.EquipmentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Feedback__equipm__6D0D32F4");
 
                 entity.HasOne(d => d.RentalRecord)
                     .WithMany(p => p.Feedbacks)
                     .HasForeignKey(d => d.RentalRecordId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Feedback_RentalRecord");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Feedbacks)
                     .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Feedback__user_i__6C190EBB");
             });
 
@@ -151,11 +159,13 @@ namespace Database.Persistence
                 entity.HasOne(d => d.NotificationType)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.NotificationTypeId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Notificat__notif__73BA3083");
 
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.Notifications)
                     .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Notificat__user___72C60C4A");
             });
 
@@ -166,16 +176,19 @@ namespace Database.Persistence
                 entity.HasOne(d => d.PaymentMethod)
                     .WithMany(p => p.Payments)
                     .HasForeignKey(d => d.PaymentMethodId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Payment__payment__0A9D95DB");
 
                 entity.HasOne(d => d.PaymentStatus)
                     .WithMany(p => p.Payments)
                     .HasForeignKey(d => d.PaymentStatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Payment__payment__0B91BA14");
 
                 entity.HasOne(d => d.RentalRecord)
                     .WithMany(p => p.Payments)
                     .HasForeignKey(d => d.RentalRecordId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__Payment__rental___09A971A2");
             });
 
@@ -186,8 +199,9 @@ namespace Database.Persistence
                 entity.Property(e => e.UpdatedAt).HasDefaultValueSql("(getdate())");
 
                 entity.HasOne(d => d.RentalRequest)
-                    .WithMany(p => p.RentalRecords)
-                    .HasForeignKey(d => d.RentalRequestId)
+                    .WithOne(p => p.RentalRecord)
+                    .HasForeignKey<RentalRecord>(d => d.RentalRequestId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__RentalRec__renta__03F0984C");
 
                 entity.HasOne(d => d.ReturnCondition)
@@ -205,16 +219,19 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Customer)
                     .WithMany(p => p.RentalRequests)
                     .HasForeignKey(d => d.CustomerId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__RentalReq__custo__7A672E12");
 
                 entity.HasOne(d => d.Equipment)
                     .WithMany(p => p.RentalRequests)
                     .HasForeignKey(d => d.EquipmentId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__RentalReq__equip__797309D9");
 
                 entity.HasOne(d => d.Status)
                     .WithMany(p => p.RentalRequests)
                     .HasForeignKey(d => d.StatusId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__RentalReq__statu__7B5B524B");
             });
 
@@ -225,6 +242,7 @@ namespace Database.Persistence
                 entity.HasOne(d => d.User)
                     .WithMany(p => p.SystemErrorLogs)
                     .HasForeignKey(d => d.UserId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__SystemErr__user___0F624AF8");
             });
 
@@ -244,6 +262,7 @@ namespace Database.Persistence
                 entity.HasOne(d => d.Role)
                     .WithMany(p => p.Users)
                     .HasForeignKey(d => d.RoleId)
+                    .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK__User__role_id__60A75C0F");
             });
 

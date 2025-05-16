@@ -218,7 +218,7 @@ namespace FormsApp
         /// <param name="guid">Unique identifier for the image</param>
         /// <param name="format">Image format (e.g., "image/png")</param>
         /// <returns>Image object or null if not found</returns>
-        public static async Task<Image> GetImage(Guid guid, string format)
+        public static async Task<Image> GetImage(Guid guid, string? format)
         {
             try
             {
@@ -248,7 +248,7 @@ namespace FormsApp
         /// <param name="displayPanel">Panel to display the image</param>
         /// <param name="imageLabel">Label for status messages</param>
         /// <returns>True if image loaded successfully, false otherwise</returns>
-        public static async Task<bool> LoadImage(Guid? guid, string imageType, Panel displayPanel, Label imageLabel)
+        public static async Task<bool> LoadImage(Guid? guid, string? imageType, Panel displayPanel, Label imageLabel)
         {
             try
             {

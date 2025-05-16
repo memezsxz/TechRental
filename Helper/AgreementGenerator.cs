@@ -93,8 +93,8 @@ public static class AgreementGenerator
 
         // Calculated fields
         int numberOfDays = (request.ReturnDate - request.StartDate).Days;
-        decimal deposit = request.RentalPerDay.Value * 0.7m;
-        decimal totalCost = (numberOfDays * request.RentalPerDay.Value) + deposit;
+        decimal deposit = request.RentalPerDay * 0.7m;
+        decimal totalCost = (numberOfDays * request.RentalPerDay) + deposit;
 
         WriteLabelValue("Number of Days: ", numberOfDays.ToString());
         WriteLabelValue("Security Deposit: ", $"{deposit:0.000} BHD");

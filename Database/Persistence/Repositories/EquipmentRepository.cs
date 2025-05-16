@@ -22,7 +22,7 @@ namespace Database.Persistence.Repositories
     {
         #region Constructor
 
-        public EquipmentRepository(RentalDBContext context, int? userId)
+        public EquipmentRepository(RentalDBContext context, int userId)
             : base(context, userId)
         {
         }
@@ -56,68 +56,57 @@ namespace Database.Persistence.Repositories
         /// <inheritdoc/>
         public async Task<List<TopRentedEquipmentStats>> GetTop5RentedEquipmentStatsAsync()
         {
-            // Get the top 5 equipment IDs based on rental count
+            // Step 1: Identify top 5 equipment IDs based on number of rental records
             var top5EquipmentIds = await context.RentalRecords
-                .Where(r => r.RentalRequest != null && r.RentalRequest.EquipmentId != null)
-                .GroupBy(r => r.RentalRequest.EquipmentId.Value)
-                .OrderByDescending(g => g.Count())
-                .Take(5)
-                .Select(g => g.Key)
+                .GroupBy(r => r.RentalRequest.EquipmentId)          // Group records by equipment ID through rental request
+                .OrderByDescending(g => g.Count())                  // Order by rental count descending
+                .Take(5)                                             // Take the top 5
+                .Select(g => g.Key)                                 // Select the equipment ID
                 .ToListAsync();
 
-            // Query the full equipment records and project statistics
+            // Step 2: Query full equipment records and project relevant statistics
             return await context.Equipment
-         // Only include equipment that is in the top 5 most rented
-         .Where(e => top5EquipmentIds.Contains(e.Id))
+                .Where(e => top5EquipmentIds.Contains(e.Id))        // Filter only the top 5 equipment
+                .Select(e => new TopRentedEquipmentStats
+                {
+                    EquipmentId = e.Id,                             // Equipment ID
+                    Name = e.Name,                                  // Equipment name
 
-         // Project the selected equipment into TopRentedEquipmentStats view model
-         .Select(e => new TopRentedEquipmentStats
-         {
-             // Equipment ID
-             EquipmentId = e.Id,
+                    // Count of rental requests (each may correspond to one rental)
+                    TotalRentals = e.RentalRequests.Count(),
 
-             // Equipment name
-             Name = e.Name,
+                    // Total revenue from all completed rentals (with RentalRecord)
+                    TotalRevenue = e.RentalRequests
+                        .Where(rq => rq.RentalRecord != null)
+                        .Sum(rq => rq.RentalRecord!.TotalCost),
 
-             // Count of rental records associated with this equipment
-             TotalRentals = e.RentalRequests
-                 .SelectMany(rq => rq.RentalRecords) // flatten requests to records
-                 .Count(),
+                    // Average rental duration in days, only for valid records with pickup and return dates
+                    AvgRentalDuration = e.RentalRequests
+                        .Any(rq => rq.RentalRecord != null &&
+                                   rq.RentalRecord.ActualReturnDate != null)
+                        ? (float)(e.RentalRequests
+                            .Where(rq => rq.RentalRecord != null &&
+                                         rq.RentalRecord.ActualReturnDate != null)
+                            .Average(rq => (int?)EF.Functions.DateDiffDay(
+                                rq.RentalRecord!.PickupDate,
+                                rq.RentalRecord.ActualReturnDate)) ?? 0)
+                        : 0f,
 
-             // Sum of all total costs from associated rental records
-             TotalRevenue = e.RentalRequests
-                 .SelectMany(rq => rq.RentalRecords)
-                 .Sum(rr => (decimal?)rr.TotalCost) ?? 0, // fallback to 0 if null
+                    // Average rating from visible feedback (non-hidden)
+                    Rating = e.Feedbacks
+                        .Any(f => !f.IsHidden.HasValue || !f.IsHidden.Value)
+                        ? (float)(e.Feedbacks
+                            .Where(f => !f.IsHidden.HasValue || !f.IsHidden.Value)
+                            .Average(f => (decimal?)f.Rate) ?? 0)
+                        : 0f,
 
-             // Average number of rental days for records that have both pickup and return dates
-             AvgRentalDuration = e.RentalRequests
-                 .SelectMany(rq => rq.RentalRecords)
-                 .Any(rr => rr.PickupDate != null && rr.ActualReturnDate != null)
-                 ? (float)(
-                     e.RentalRequests
-                         .SelectMany(rq => rq.RentalRecords)
-                         .Where(rr => rr.PickupDate != null && rr.ActualReturnDate != null)
-                         .Average(rr => (int?)EF.Functions.DateDiffDay(rr.PickupDate, rr.ActualReturnDate.Value)) ?? 0)
-                 : 0f,
-
-             // Average rating from visible (non-hidden) feedback records
-             Rating = e.Feedbacks
-                 .Any(f => !f.IsHidden.HasValue || !f.IsHidden.Value) // check if any visible feedback exists
-                 ? (float)(
-                     e.Feedbacks
-                         .Where(f => !f.IsHidden.HasValue || !f.IsHidden.Value)
-                         .Average(f => (decimal?)f.Rate) ?? 0)
-                 : 0f,
-
-             // Image metadata: GUID (nullable) and MIME type
-             ImageGuid = e.Image.Guid ?? null,
-             ImageFormat = e.Image.ImageType
-         })
-
-         // Execute the query asynchronously and return the results as a list
-         .ToListAsync();
-
+                    // Optional image info
+                    ImageGuid = e.Image != null ? e.Image.Guid : null,
+                    ImageFormat = e.Image != null ? e.Image.ImageType : null
+                })
+                .ToListAsync();  // Execute the query asynchronously
         }
+
 
         #endregion
 

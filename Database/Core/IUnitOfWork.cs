@@ -20,7 +20,7 @@ namespace Database.Core
         /// <summary>
         /// The ID of the currently authenticated user, used for auditing or tracking purposes.
         /// </summary>
-        int? UserId { get; set; }
+        int UserId { get; set; }
 
         #region Repository Properties
 

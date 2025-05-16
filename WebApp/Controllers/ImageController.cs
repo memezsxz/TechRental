@@ -20,7 +20,7 @@ namespace WebApp.Controllers
             var imageEntity = await _context.Images
                 .FirstOrDefaultAsync(i => i.ImageId == id);
 
-            if (imageEntity == null || !imageEntity.Guid.HasValue)
+            if (imageEntity == null)
                 return NotFound();
 
             string extension = "";

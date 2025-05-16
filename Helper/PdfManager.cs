@@ -63,10 +63,10 @@ namespace Helper
         public static async Task<bool> DeletePdfFromDatabaseAndS3(RentalDBContext context, int docId)
         {
             var doc = await context.Documents.FindAsync(docId);
-            if (doc == null || !doc.Guid.HasValue)
+            if (doc == null)
                 return false;
 
-            var deleted = await S3Uploader.DeleteFileAsync(doc.Guid.Value);
+            var deleted = await S3Uploader.DeleteFileAsync(doc.Guid);
             if (!deleted)
                 return false;
 
