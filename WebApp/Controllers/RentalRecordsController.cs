@@ -216,6 +216,8 @@ namespace WebApp.Controllers
                 .Include(r => r.Customer)
                 .Include(r => r.Equipment)
                 .FirstOrDefaultAsync(r => r.Id == rentalRecord.RentalRequestId);
+            Console.WriteLine("PickupDate submitted: ");
+            Console.WriteLine("PickupDate submitted: " + rentalRecord.PickupDate);
 
             if (request == null) return View("NotFound"); // HTTP 404
 
@@ -230,8 +232,8 @@ namespace WebApp.Controllers
                     var deposit = Math.Round(dailyRate * 0.7M, 2);
                     var total = rentalFee + deposit;
 
-                    rentalRecord.EquipmentName = request.Equipment?.Name;
-
+                    rentalRecord.EquipmentName = request.Equipment.Name;
+                    //rentalRecord.PickupDate = DateTime.Now;
                     rentalRecord.RentalFee = rentalFee;
                     rentalRecord.Deposit = deposit;
                     rentalRecord.TotalCost = total;

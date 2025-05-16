@@ -26,8 +26,8 @@ const isCreatePage = !startVal && !returnVal;  // true only if no dates are init
 //  Initialize Flatpickr for START date
 // ----------------------------------------------------------------------------------
 const startPicker = flatpickr("#startDate", {
-    dateFormat: "Y-m-d",
-    enableTime: false,
+    dateFormat: "Y-m-d\\TH:i",
+    enableTime: true,
     minDate: "today",
     defaultDate: isCreatePage ? null : startVal,
     disable: reservedDates,
@@ -52,8 +52,8 @@ const startPicker = flatpickr("#startDate", {
 //  Initialize Flatpickr for RETURN date
 // ----------------------------------------------------------------------------------
 const returnPicker = flatpickr("#returnDate", {
-    dateFormat: "Y-m-d",
-    enableTime: false,
+    dateFormat: "Y-m-d\\TH:i",
+    enableTime: true,
     minDate: startVal || "today",  // fallback if startVal is null
     defaultDate: isCreatePage ? null : returnVal,
     disable: reservedDates,
