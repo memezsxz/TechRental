@@ -247,6 +247,11 @@
                 const fileInput = document.getElementById('agreementUpload');
                 const fileError = document.getElementById('fileError');
 
+                const pickup = document.getElementById('actualPickupDate')?.value;
+                if (!pickup) {
+                    showFlash("Please select the actual pickup date.", "warning");
+                    return false;
+                }
                 if (!fileInput || fileInput.files.length === 0) {
                     showFlash("Please upload the signed agreement PDF.", "warning");
                     fileError.classList.remove('d-none');
@@ -319,10 +324,15 @@
             flatpickr(pickupInput, {
                 enableTime: true,
                 dateFormat: "Y-m-d\\TH:i",
-                defaultDate: new Date(),
-                altInput: false,
+                defaultDate: null,
+                allowInput: true,
                 minDate: "@request.StartDate.ToString("yyyy-MM-ddTHH:mm")",
-                maxDate: "@request.ReturnDate.AddDays(-1).ToString("yyyy-MM-ddTHH:mm")"
+                maxDate: "@request.ReturnDate.AddDays(-1).ToString("yyyy-MM-ddTHH:mm")",
+
+                // Update hidden input when user picks a date
+                onChange: function(selectedDates, dateStr) {
+                    document.getElementById("hiddenPickupDate").value = dateStr;
+                }
             });
         });
 
@@ -342,17 +352,6 @@
                 minDate: returnDate
             });
         });
-
-        document.querySelector("form").addEventListener("submit", function () {
-            const visiblePickup = document.getElementById("actualPickupDate");
-            const hiddenPickup = document.getElementById("hiddenPickupDate");
-
-            if (visiblePickup && hiddenPickup) {
-                hiddenPickup.value = visiblePickup.value;
-            }
-        });
-
-
     </script>
 }
 

@@ -241,11 +241,6 @@ namespace WebApp.Controllers
                     Errors = m.Value.Errors.Select(e => e.ErrorMessage)
                 });
 
-                foreach (var e in errors)
-                {
-                    Console.WriteLine($"Field: {e.Field}, Errors: {string.Join("; ", e.Errors)}");
-                }
-
                 TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
                     errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
                 TempData["MessageType"] = "error";
@@ -341,7 +336,7 @@ namespace WebApp.Controllers
                     // Optionally delete previous image from S3 (disabled for now)
                     if (existingEquipment.ImageId.HasValue)
                     {
-                        await ImageManager.DeleteImageFromDatabaseAndS3(_context, equipment.ImageId.Value);
+                        await ImageManager.DeleteImageFromDatabaseAndS3(_context, existingEquipment.ImageId.Value);
                     }
 
                     existingEquipment.ImageId = uploadedImageId.Value;
@@ -386,11 +381,6 @@ namespace WebApp.Controllers
                     Field = m.Key,
                     Errors = m.Value.Errors.Select(e => e.ErrorMessage)
                 });
-
-                foreach (var e in errors)
-                {
-                    Console.WriteLine($"Field: {e.Field}, Errors: {string.Join("; ", e.Errors)}");
-                }
 
                 TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
                     errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
