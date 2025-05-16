@@ -35,6 +35,7 @@
             // 
             // tlpFill
             // 
+            tlpFill.BackColor = Color.White;
             tlpFill.ColumnCount = 5;
             tlpFill.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
             tlpFill.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 20F));
