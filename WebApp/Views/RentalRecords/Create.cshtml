@@ -69,7 +69,7 @@
     <div class="row mb-4">
         <div class="col-md-6">
             <label>Equipment Title</label>
-            <input class="form-control" value="@request?.Equipment?.Name" readonly />
+            <input class="form-control" value="@request?.Equipment.Name" readonly />
         </div>
         @if (mode == "return") {
             <div class="col-md-6">
@@ -80,7 +80,7 @@
         } else {
             <div class="col-md-6">
                 <label>Actual Pickup Date</label>
-                <input type="text"
+                <input asp-for="PickupDate"
                        id="actualPickupDate"
                        name="PickupDate"
                        class="form-control flatpickr-input"
@@ -105,15 +105,15 @@
     <div class="row mb-4">
         <div class="col-md-4">
             <label>Deposit</label>
-            <input class="form-control" value="@Model?.Deposit?.ToString("0.00")" readonly />
+            <input asp-for="Deposit" class="form-control" value="@Model?.Deposit?.ToString("0.00")" readonly />
         </div>
         <div class="col-md-4">
             <label>Rental Fee (BD)</label>
-            <input class="form-control" value="@Model?.RentalFee?.ToString("0.00")" readonly />
+            <input asp-for="RentalFee" class="form-control" value="@Model?.RentalFee?.ToString("0.00")" readonly />
         </div>
         <div class="col-md-4">
             <label>Total Cost (BD)</label>
-            <input class="form-control" value="@Model?.TotalCost.ToString("0.00")" readonly />
+            <input asp-for="TotalCost" class="form-control" value="@Model?.TotalCost.ToString("0.00")" readonly />
         </div>
     </div>
     <div class="mb-4">

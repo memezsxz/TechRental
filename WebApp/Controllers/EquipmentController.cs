@@ -154,7 +154,7 @@ namespace WebApp.Controllers
 
             // Populate dropdowns for form
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName");
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
+            ViewData["CategoryId"] = new SelectList(_context.Categories.Where(r => r.IsActive == true), "Id", "Name");
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName");
 
             return View();
@@ -232,6 +232,23 @@ namespace WebApp.Controllers
 
                     return RedirectToAction(nameof(Details), new { id = equipment.Id });
                 }
+            } else
+            {
+                var errors = ModelState
+                .Where(m => m.Value.Errors.Any())
+                .Select(m => new {
+                    Field = m.Key,
+                    Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                });
+
+                foreach (var e in errors)
+                {
+                    Console.WriteLine($"Field: {e.Field}, Errors: {string.Join("; ", e.Errors)}");
+                }
+
+                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageType"] = "error";
             }
 
             // If model is invalid, repopulate dropdowns and return to form
@@ -268,7 +285,7 @@ namespace WebApp.Controllers
 
             // Populate dropdowns for edit form
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName", equipment.AvailabilityStatusId);
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", equipment.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories.Where(r => r.IsActive == true), "Id", "Name", equipment.CategoryId);
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName", equipment.ConditionStatusId);
             ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName", equipment.ImageId);
 
@@ -360,6 +377,24 @@ namespace WebApp.Controllers
 
                     return RedirectToAction(nameof(Details), new { id = equipment.Id });
                 }
+            }
+            else
+            {
+                var errors = ModelState
+                .Where(m => m.Value.Errors.Any())
+                .Select(m => new {
+                    Field = m.Key,
+                    Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                });
+
+                foreach (var e in errors)
+                {
+                    Console.WriteLine($"Field: {e.Field}, Errors: {string.Join("; ", e.Errors)}");
+                }
+
+                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageType"] = "error";
             }
 
             // Repopulate dropdowns if validation fails
