@@ -12,6 +12,13 @@ document.addEventListener('DOMContentLoaded', function () {
         .then(categories => {
             const dropdown = document.getElementById('categoryDropdown');
             dropdown.innerHTML = ""; // Clear loading state
+            const li = document.createElement("li");
+            const link = document.createElement("a");
+            link.className = "dropdown-item text-black";
+            link.href = `/Equipment`;
+            link.textContent = "All Categories";
+            li.appendChild(link);
+            dropdown.appendChild(li);
 
             categories.forEach(name => {
                 const li = document.createElement("li");

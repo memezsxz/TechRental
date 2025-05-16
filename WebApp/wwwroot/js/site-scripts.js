@@ -119,35 +119,35 @@ document.addEventListener("DOMContentLoaded", function () {
             });
         });
     });
-
-    function showFlash(message, type) {
-        const iconMap = {
-            success: "fas fa-check-circle text-success",
-            error: "fas fa-times-circle text-danger",
-            info: "fas fa-info-circle text-primary",
-            warning: "fas fa-exclamation-circle text-warning"
-        };
-
-        document.getElementById("flashIcon").className = iconMap[type] || "fas fa-info-circle text-secondary";
-        document.getElementById("flashText").textContent = message;
-
-        const modal = new bootstrap.Modal(document.getElementById("flashMessageModal"));
-        modal.show();
-        setTimeout(() => modal.hide(), 2500);
-    }
-
-    function showConfirmation(message, onConfirm) {
-        document.getElementById("confirmationText").textContent = message;
-        const modal = new bootstrap.Modal(document.getElementById("confirmationModal"));
-        modal.show();
-
-        const confirmBtn = document.getElementById("confirmYes");
-        const newBtn = confirmBtn.cloneNode(true);
-        confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
-
-        newBtn.addEventListener("click", () => {
-            modal.hide();
-            onConfirm();
-        });
-    }
 });
+
+function showFlash(message, type) {
+    const iconMap = {
+        success: "fas fa-check-circle text-success",
+        error: "fas fa-times-circle text-danger",
+        info: "fas fa-info-circle text-primary",
+        warning: "fas fa-exclamation-circle text-warning"
+    };
+
+    document.getElementById("flashIcon").className = iconMap[type] || "fas fa-info-circle text-secondary";
+    document.getElementById("flashText").textContent = message;
+
+    const modal = new bootstrap.Modal(document.getElementById("flashMessageModal"));
+    modal.show();
+    setTimeout(() => modal.hide(), 2500);
+}
+
+function showConfirmation(message, onConfirm) {
+    document.getElementById("confirmationText").textContent = message;
+    const modal = new bootstrap.Modal(document.getElementById("confirmationModal"));
+    modal.show();
+
+    const confirmBtn = document.getElementById("confirmYes");
+    const newBtn = confirmBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newBtn, confirmBtn);
+
+    newBtn.addEventListener("click", () => {
+        modal.hide();
+        onConfirm();
+    });
+}

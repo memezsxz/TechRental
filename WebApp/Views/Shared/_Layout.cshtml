@@ -10,6 +10,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Tech Rental</title>
     <link rel="stylesheet" href="~/css/Lux.css" asp-append-version="true" />
+    
 
     <link rel="stylesheet" href="~/css/equipmentStyle.css" asp-append-version="true" /> 
     <link rel="stylesheet" href="~/css/FlatpickrStyleSheet.css" asp-append-version="true" /> 
@@ -27,6 +28,7 @@
     <link href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
+    <link rel="icon" type="image/x-icon" href="~/favicon.ico">
 </head>
 <body>
     <header>
@@ -111,7 +113,7 @@
                             if (User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager)) 
                             {
                                 <li class="nav-item mx-2">
-                                    <a class="nav-link @(ViewContext.RouteData.Values["action"]?.ToString() == "Dashboard" ? "active" : "") text-dark" asp-controller="" asp-action="">Dashboard</a>
+                                   <a class="nav-link @(ViewContext.RouteData.Values["controller"]?.ToString() == "Dashboard" ? "active" : "") text-dark" asp-controller="Dashboard" asp-action="Index">Dashboard</a>
                                 </li>
 
 
@@ -254,17 +256,6 @@
             @RenderBody()
         </main>
 
-
-        <!-- Flash Message Modal (Auto close) -->
-        <div class="modal fade" id="flashMessageModal" tabindex="-1" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content text-center p-4">
-                    <i id="flashIcon" class="mb-3" style="font-size: 2rem;"></i>
-                    <p id="flashText" class="mb-0"></p>
-                </div>
-            </div>
-        </div>
-
         <!-- Confirmation Modal -->
         <div class="modal fade" id="confirmationModal" tabindex="-1" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
@@ -282,12 +273,26 @@
         <!-- TempData bindings -->
         <input type="hidden" id="tempDataMessage" value="@(TempData["MessageText"] ?? "")" />
         <input type="hidden" id="tempDataMessageType" value="@(TempData["MessageType"] ?? "")" />
+
+        <!-- Flash Message Modal -->
+        <div class="modal fade" id="flashMessageModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content text-center p-4">
+                    <div class="modal-body">
+                        <i id="flashIcon" class="fas fa-info-circle fa-2x mb-3"></i>
+                        <p id="flashText" class="mb-0 fs-5 fw-semibold"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
+
+
 
     <!-- shared JS file -->
     <script src="~/js/site-scripts.js" asp-append-version="true"></script>
     <script src="~/js/ToolBarJavaScript.js" asp-append-version="true"></script>
-
+    <script src="~/js/feedback.js" asp-append-version="true"></script>
 
     <footer class="border-top footer text-muted">
         <div class="container">

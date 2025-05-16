@@ -1,0 +1,92 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+    var role = ViewBag.Role as string;
+    var stats = ViewBag.Stats as dynamic;
+}
+
+
+<div class="container py-4">
+<h2>Welcome, @role</h2>
+
+<div class="dashboard-cards" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px;">
+        <div class="card dashboard-card">
+        <img src="/images/pending.png" alt="Pending">
+        <p class="fw-bold fs-4">Pending Requests: @stats.PendingRequests</p>
+    </div>
+        <div class="card dashboard-card">
+            <img src="/images/completed.png" alt="Approved">
+            <p class="fw-bold fs-4">Approved Requests: @stats.ApprovedRequests</p>
+    </div>
+        <div class="card dashboard-card">
+            <img src="/images/rejected.png" alt="Rejected">
+            <p class="fw-bold fs-4">Rejected Requests: @stats.RejectedRequests</p>
+    </div>
+        <div class="card dashboard-card">
+        <img src="/images/total.png" alt="Total">
+        <p class="fw-bold fs-4">Total Requests: @stats.TotalRequests</p>
+    </div>
+        <div class="card dashboard-card">
+        <img src="/images/damaged.png" alt="Damaged">
+        <p class="fw-bold fs-4">Damaged Equipments: @stats.DamagedEquipment</p>
+    </div>
+        <div class="card dashboard-card">
+        <img src="/images/repair.png" alt="Repair">
+        <p class="fw-bold fs-4">Total Repair Costs: @stats.TotalRepairCost BD</p>
+    </div>
+
+    @if (role == "Admin")
+    {
+            <div class="card dashboard-card">
+            <img src="/images/user.png" alt="Users">
+                <p class="fw-bold fs-4">Total Users: @stats.TotalUsers</p>
+                <p class="fw-bold fs-4">Admins: @stats.Admins</p>
+                <p class="fw-bold fs-4">Managers: @stats.Managers</p>
+        </div>
+    }
+</div>
+
+<h3 class="mt-4">Pending Rental Requests</h3>
+<table class="table text-center align-middle">
+    <thead>
+        <tr>
+            <th>Request ID</th>
+            <th>Equipment Name</th>
+            <th>Category</th>
+            <th>Status</th>
+            <th>Start Date</th>
+            <th>Return Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in stats.RecentRequests)
+        {
+            var status = item.Status?.ToLower();
+            var badgeClass = status switch
+            {
+                "approved" => "success",
+                "pending" => "warning",
+                "rejected" => "danger",
+                "cancelled" => "dark",
+                _ => "secondary"
+            };
+            <tr class="clickable-row"
+                data-bs-toggle="tooltip"
+                data-bs-placement="top"
+                title="Click to view details"
+                data-href="@Url.Action("Details", "RentalRequest", new { id = item.RequestId })"
+                style="cursor: pointer;">
+                <td>@item.RequestId</td>
+                <td>@item.EquipmentName</td>
+                <td>@item.Category</td>
+                <td>
+                    <span class="badge bg-@badgeClass text-uppercase">
+                        @item.Status
+                    </span>
+                </td>
+                <td>@item.StartDate.ToString("d/M/yyyy")</td>
+                <td>@item.ReturnDate.ToString("d/M/yyyy")</td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>
