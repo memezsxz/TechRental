@@ -405,9 +405,9 @@ namespace WebApp.Controllers
                 existing.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
 
-                if (sendNotification && rentalRequest.StatusId == 2) await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId.Value, 1, "request", rentalRequest.Id);
-                else if (sendNotification && rentalRequest.StatusId == 3) await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId.Value, 2, "request", rentalRequest.Id);
-                else if (sendNotification && rentalRequest.StatusId == 4) await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId.Value, 5, "request", rentalRequest.Id);
+                if (sendNotification && rentalRequest.StatusId == 2) await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId, 1, "request", rentalRequest.Id);
+                else if (sendNotification && rentalRequest.StatusId == 3) await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId, 2, "request", rentalRequest.Id);
+                else if (sendNotification && rentalRequest.StatusId == 4) await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId, 5, "request", rentalRequest.Id);
 
 
                 TempData["MessageText"] = "Rental updated successfully.";

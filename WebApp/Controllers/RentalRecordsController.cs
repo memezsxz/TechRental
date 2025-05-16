@@ -30,9 +30,9 @@ namespace WebApp.Controllers
         /// - Filtering by due status (for transactions)
         /// - Sorting and pagination
         /// </summary>
-        public async Task<IActionResult> Index(string search, string sortBy, string status, string conditionFilter, string dueFilter, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(string search, string sortBy, string status, string conditionFilter,
+            string dueFilter, int page = 1, int pageSize = 10)
         {
-
             // Block unauthenticated users
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
 
@@ -127,14 +127,14 @@ namespace WebApp.Controllers
 
             var rentalRecord = await _context.RentalRecords
                 .Include(r => r.RentalRequest)
-                    .ThenInclude(r => r.Customer)
+                .ThenInclude(r => r.Customer)
                 .Include(r => r.RentalRequest)
-                    .ThenInclude(r => r.Equipment)
+                .ThenInclude(r => r.Equipment)
                 .Include(r => r.ReturnCondition)
                 .Include(r => r.Payments)
-                    .ThenInclude(p => p.PaymentMethod)
+                .ThenInclude(p => p.PaymentMethod)
                 .Include(r => r.Payments)
-                    .ThenInclude(p => p.PaymentStatus)
+                .ThenInclude(p => p.PaymentStatus)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (rentalRecord == null) return View("NotFound"); // HTTP 404
@@ -142,7 +142,8 @@ namespace WebApp.Controllers
             if (User.IsInRole(RoleConstants.Customer))
             {
                 var loggedInEmail = User.Identity.Name;
-                if (rentalRecord.RentalRequest.Customer.Email != loggedInEmail) return View("Forbidden"); // HTTP 403 Forbidden
+                if (rentalRecord.RentalRequest.Customer.Email != loggedInEmail)
+                    return View("Forbidden"); // HTTP 403 Forbidden
             }
 
             var document = await _context.Documents
@@ -186,7 +187,8 @@ namespace WebApp.Controllers
             ViewBag.Mode = "transaction";
             ViewBag.RentalRequest = request;
             ViewBag.PaymentMethodId = new SelectList(_context.PaymentMethods, "Id", "MethodName", 3); // default to Cash
-            ViewBag.PaymentStatusId = new SelectList(_context.PaymentStatuses, "Id", "StatusName", 2); // default to Paid
+            ViewBag.PaymentStatusId =
+                new SelectList(_context.PaymentStatuses, "Id", "StatusName", 2); // default to Paid
 
             var record = new RentalRecord
             {
@@ -261,20 +263,14 @@ namespace WebApp.Controllers
                         await Agreement.CopyToAsync(memoryStream);
                         memoryStream.Position = 0;
 
+
                         var uploadSuccess = await PdfManager.UploadPdfAndSaveToDatabase(
                             _context,
                             memoryStream,
                             Agreement.FileName,
                             Agreement.ContentType,
-                            rentalRecord.RentalRequestId.Value
+                            rentalRecord.RentalRequestId
                         );
-                    var uploadSuccess = await PdfManager.UploadPdfAndSaveToDatabase(
-                        _context,
-                        memoryStream,
-                        Agreement.FileName,
-                        Agreement.ContentType,
-                        rentalRecord.RentalRequestId
-                    );
 
                         if (!uploadSuccess)
                         {
@@ -295,7 +291,8 @@ namespace WebApp.Controllers
 
             // Repopulate form
             ViewBag.RentalRequest = request;
-            ViewBag.ReturnConditionId = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName", rentalRecord.ReturnConditionId);
+            ViewBag.ReturnConditionId = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName",
+                rentalRecord.ReturnConditionId);
             return View("Create", rentalRecord);
         }
 
@@ -308,13 +305,13 @@ namespace WebApp.Controllers
 
             var record = await _context.RentalRecords
                 .Include(r => r.RentalRequest)
-                    .ThenInclude(r => r.Customer)
+                .ThenInclude(r => r.Customer)
                 .Include(r => r.RentalRequest)
-                    .ThenInclude(r => r.Equipment)
+                .ThenInclude(r => r.Equipment)
                 .Include(r => r.Payments)
-                    .ThenInclude(p => p.PaymentMethod)
+                .ThenInclude(p => p.PaymentMethod)
                 .Include(r => r.Payments)
-                    .ThenInclude(p => p.PaymentStatus)
+                .ThenInclude(p => p.PaymentStatus)
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (record == null) return View("NotFound"); // HTTP 404
@@ -323,7 +320,8 @@ namespace WebApp.Controllers
             ViewBag.RentalRequest = record.RentalRequest;
             ViewBag.ReturnConditionId = new SelectList(_context.ReturnConditionStatuses, "Id", "ConditionName");
             ViewBag.PaymentMethodId = new SelectList(_context.PaymentMethods, "Id", "MethodName", 3); // default to Cash
-            ViewBag.PaymentStatusId = new SelectList(_context.PaymentStatuses, "Id", "StatusName", 2); // default to Paid
+            ViewBag.PaymentStatusId =
+                new SelectList(_context.PaymentStatuses, "Id", "StatusName", 2); // default to Paid
 
             // Retrieve the uploaded agreement file from Document table (if available)
             var document = await _context.Documents
@@ -357,7 +355,8 @@ namespace WebApp.Controllers
                 record.UpdatedAt = DateTime.Now;
 
                 await _context.SaveChangesAsync();
-                await NotificationManager.CreateAsync(_context, record.RentalRequest.CustomerId, 4, "return", record.Id);
+                await NotificationManager.CreateAsync(_context, record.RentalRequest.CustomerId, 4, "return",
+                    record.Id);
                 return RedirectToAction(nameof(Index), new { status = "return" });
             }
             catch
@@ -378,14 +377,14 @@ namespace WebApp.Controllers
 
             var rentalRecord = await _context.RentalRecords
                 .Include(r => r.RentalRequest)
-                    .ThenInclude(r => r.Customer)
+                .ThenInclude(r => r.Customer)
                 .Include(r => r.RentalRequest)
-                    .ThenInclude(r => r.Equipment)
+                .ThenInclude(r => r.Equipment)
                 .Include(r => r.ReturnCondition)
                 .Include(r => r.Payments)
-                    .ThenInclude(p => p.PaymentMethod)
+                .ThenInclude(p => p.PaymentMethod)
                 .Include(r => r.Payments)
-                    .ThenInclude(p => p.PaymentStatus)
+                .ThenInclude(p => p.PaymentStatus)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (rentalRecord == null) return View("NotFound"); // HTTP 404
@@ -420,7 +419,9 @@ namespace WebApp.Controllers
                     if (Agreement != null && Agreement.Length > 0)
                     {
                         // Delete existing agreement (if exists)
-                        var existingDoc = await _context.Documents.FirstOrDefaultAsync(d => d.RentalId == rentalRecord.RentalRequestId);
+                        var existingDoc =
+                            await _context.Documents.FirstOrDefaultAsync(
+                                d => d.RentalId == rentalRecord.RentalRequestId);
                         if (existingDoc != null)
                         {
                             await PdfManager.DeletePdfFromDatabaseAndS3(_context, existingDoc.Id);
@@ -428,14 +429,14 @@ namespace WebApp.Controllers
 
                         // Save new one
                         using var stream = Agreement.OpenReadStream();
-                        var uploadSuccess = await PdfManager.UploadPdfAndSaveToDatabase(_context, stream, Agreement.FileName, Agreement.ContentType, rentalRecord.RentalRequestId);
+                        var uploadSuccess = await PdfManager.UploadPdfAndSaveToDatabase(_context, stream,
+                            Agreement.FileName, Agreement.ContentType, rentalRecord.RentalRequestId);
 
                         if (!uploadSuccess)
                         {
                             TempData["MessageText"] = "PDF upload failed.";
                             TempData["MessageType"] = "warning";
                         }
-
                     }
 
                     TempData["MessageText"] = "Transaction Record updated successfully.";
@@ -455,7 +456,7 @@ namespace WebApp.Controllers
         {
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
             if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden");
-            
+
             var rentalRecord = await _context.RentalRecords.FirstOrDefaultAsync(r => r.Id == rentalId);
             if (rentalRecord.ActualReturnDate != null) return View("Forbidden");
 
@@ -466,6 +467,7 @@ namespace WebApp.Controllers
                 TempData["MessageType"] = "warning";
                 return RedirectToAction("Details", new { id = rentalId });
             }
+
             try
             {
                 var result = await PdfManager.DeletePdfFromDatabaseAndS3(_context, document.Id);
