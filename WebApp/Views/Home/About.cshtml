@@ -37,25 +37,25 @@
     <div class="container">
         <h2 class="text-center mb-4 text-white">Contact Us</h2>
 
-        <form class="row g-3 justify-content-center">
+        <form asp-action="Contact" asp-controller="Home" method="post" class="row g-3 justify-content-center">
 
             <div class="col-md-4 form-floating">
-                <input type="text" class="form-control" id="firstName" placeholder="First Name">
+                <input name="FirstName" type="text" class="form-control" id="firstName" placeholder="First Name" required>
                 <label for="firstName" class="text-dark">First Name</label>
             </div>
 
             <div class="col-md-4 form-floating">
-                <input type="text" class="form-control" id="lastName" placeholder="Last Name">
+                <input name="LastName" type="text" class="form-control" id="lastName" placeholder="Last Name" required>
                 <label for="lastName" class="text-dark">Last Name</label>
             </div>
 
             <div class="col-md-8 form-floating">
-                <input type="email" class="form-control" id="email" placeholder="Email">
+                <input name="Email" type="email" class="form-control" id="email" placeholder="Email" required>
                 <label for="email" class="text-dark">Email</label>
             </div>
 
             <div class="col-md-8 form-floating">
-                <textarea class="form-control" placeholder="Message" id="message" style="height: 150px;"></textarea>
+                <textarea name="Message" class="form-control" placeholder="Message" id="message" style="height: 150px;" required></textarea>
                 <label for="message" class="text-dark">Message</label>
             </div>
 
@@ -65,4 +65,5 @@
         </form>
     </div>
 </div>
+
 

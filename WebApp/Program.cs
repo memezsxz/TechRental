@@ -18,6 +18,8 @@ builder.Services.AddDbContext<RentalDBContext>(options => options.UseSqlServer(
 builder.Services.AddDbContext<IdentityContext>(options => options.UseSqlServer(
     builder.Configuration.GetConnectionString("IdentityContextConnection")));
 
+// Configure Email settings
+builder.Services.Configure<EmailSettings>(builder.Configuration.GetSection("EmailSettings"));
 
 builder.Services.AddDefaultIdentity<ApplicationUser>()
     .AddRoles<IdentityRole>()
