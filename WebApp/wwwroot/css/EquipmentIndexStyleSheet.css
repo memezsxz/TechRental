@@ -84,13 +84,6 @@
     padding: 1rem;
 }
 
-/* Equipment Name: Large and Bold */
-.equipment-name {
-    font-size: 1.5rem; /* Larger size for the name */
-    font-weight: bold;
-    margin-bottom: 20px;
-}
-
 /* Rental Price: Smaller and lighter */
 .rental-price {
     font-size: 0.875rem; /* Smaller font size */
@@ -130,8 +123,6 @@
         color: white;
         text-decoration: none;
     }
-
-
 
 .card-title {
     font-weight: bold;
