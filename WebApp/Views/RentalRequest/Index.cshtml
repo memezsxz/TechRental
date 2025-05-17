@@ -16,7 +16,6 @@
         - Tooltips and row click-to-view
         - Conditional display of user email based on role
    ------------------------------------------------------------------------------ *@
-
 @{
     var isCustomer = User.IsInRole("Customer");
     var userEmail = isCustomer ? User.Identity?.Name : null;
@@ -68,7 +67,8 @@
 
         <!-- Submit button -->
         <div>
-            <button type="submit" class="btn btn-success px-4">Search</button>
+            <button type="submit" class="btn btn-success px-4">SEARCH</button>
+            <button type="reset" class="btn btn-danger px-4">CLEAR</button>
         </div>
     </form>
 
