@@ -279,3 +279,8 @@
         position: relative;
     }
 
+.nav-link.active {
+    color: #28a745 !important; /* Bootstrap success green */
+    font-weight: bold;
+}
+
