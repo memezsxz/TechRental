@@ -257,7 +257,7 @@
 
     .dropdown-menu .dropdown-item:hover,
     .dropdown-menu .dropdown-item:focus {
-        background-color: green !important;
+        background-color: #4bbf73 !important;
         color: white !important;
     }
 

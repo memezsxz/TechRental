@@ -80,16 +80,10 @@ namespace WebApp.Controllers
             page = Math.Clamp(page, 1, Math.Max(1, totalPages));
 
             // Fetch paged records
-            var items = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
             // ViewBag state for UI
-            ViewBag.Categories = await _context.Categories
-                .Select(c => c.Name)
-                .Distinct()
-                .ToListAsync();
+            ViewBag.Categories = await _context.Categories.Where(c => c.IsActive == true).Select(c => c.Name).Distinct().ToListAsync();
 
             ViewBag.Search = search;
             ViewBag.Category = category;

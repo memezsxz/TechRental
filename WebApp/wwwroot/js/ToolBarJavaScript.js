@@ -34,5 +34,25 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     });
+
+
+    // Handle reset button to clear fields and auto-submit
+    form.addEventListener("reset", function (e) {
+        // Wait for the reset to apply
+        setTimeout(() => {
+            // Clear all select values explicitly (optional, since reset usually does this)
+            form.querySelectorAll("select").forEach(select => {
+                select.selectedIndex = 0;
+            });
+
+            // Clear all text inputs
+            form.querySelectorAll("input[type='text']").forEach(input => {
+                input.value = "";
+            });
+
+            // Submit the form after reset
+            form.submit();
+        }, 0);
+    });
 });
 
