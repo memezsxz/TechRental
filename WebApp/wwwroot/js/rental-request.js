@@ -2,7 +2,6 @@
 // Example source: <script id="reservedDatesData" type="application/json">["2025-06-10", "2025-06-15"]</script>
 const reservedDates = JSON.parse(document.getElementById("reservedDatesData").textContent.trim());
 
-console.log("Hello");
 /**
  *  Checks if a given date (JS Date object) is within the reserved dates
  * @param {Date} date
@@ -80,18 +79,11 @@ const returnPicker = flatpickr("#returnDate", {
 
     //  Add reserved day styling and prevent selection of start date as return
     onDayCreate: function (_, __, ___, dayElem) {
-        const iso = dayElem.dateObj.toISOString().split('T')[0];
         const selectedStart = startPicker.selectedDates?.[0];
-        const selectedStartIso = selectedStart ? selectedStart.toISOString().split('T')[0] : null;
+        const d = dayElem.dateObj;
 
-        if (isReservedDate(dayElem.dateObj)) {
+        if (isReservedDate(d)) {
             dayElem.classList.add("reserved-day");
-        }
-
-        //  Highlight same-day return as a conflict
-        if (selectedStartIso && iso === selectedStartIso) {
-            dayElem.classList.add("conflict-day");
-            dayElem.setAttribute("title", "Return date cannot be the same as start date.");
         }
     }
 });
