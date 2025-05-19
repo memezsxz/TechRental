@@ -107,6 +107,14 @@ namespace Database.Persistence.Repositories
                 .ToListAsync();  // Execute the query asynchronously
         }
 
+        /// <inheritdoc/>
+        public bool IsInUse(int id)
+        {
+            return RentalDBContext.RentalRecords
+                   .Any(r =>
+                       r.RentalRequest.EquipmentId == id &&
+                       r.ActualReturnDate == null);
+        }
 
         #endregion
 

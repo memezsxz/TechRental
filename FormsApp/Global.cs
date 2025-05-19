@@ -10,6 +10,7 @@ using Database.Core;
 using Database.Core.Domain;
 using Database.Core.Repositories;
 using Database.Persistence;
+using Helper;
 using Image = System.Drawing.Image;
 
 namespace FormsApp
@@ -390,6 +391,13 @@ namespace FormsApp
             if (string.IsNullOrEmpty(input)) return string.Empty;
             return input.Length <= maxLength ? input : input.Substring(0, maxLength - 3) + "...";
         }
+        #endregion
+
+        #region File Handling
+
+
+
+
         #endregion
     }
 }

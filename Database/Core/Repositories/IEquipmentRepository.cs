@@ -42,5 +42,15 @@ namespace Database.Core.Repositories
         /// <param name="id">The ID of the equipment to check.</param>
         /// <returns>True if the equipment is referenced; otherwise, false.</returns>
         bool IsReferenced(int id);
+
+        /// <summary>
+        /// Checks whether the specified equipment is currently in use.
+        /// </summary>
+        /// <param name="id">The equipment ID to check.</param>
+        /// <returns>
+        /// <c>true</c> if there exists at least one active rental record (i.e., not yet returned) 
+        /// associated with the given equipment ID; otherwise, <c>false</c>.
+        /// </returns>
+        bool IsInUse(int id);
     }
 }

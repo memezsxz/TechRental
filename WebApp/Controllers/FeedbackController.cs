@@ -28,8 +28,8 @@ namespace WebApp.Controllers
         public async Task<IActionResult> Index(int id, string status = "Unhidden")
         {
             if (!User.Identity.IsAuthenticated) return View("Unauthorized");
-
             if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden");
+            if (id == 0) return View("NotFound");
 
             // Pass equipment ID and current status to the view
             ViewBag.EquipmentId = id;

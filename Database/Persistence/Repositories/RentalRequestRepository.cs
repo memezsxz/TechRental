@@ -51,10 +51,6 @@ namespace Database.Persistence.Repositories
         }
 
         /// <inheritdoc/>
-        /// <summary>
-        /// Computes weekly dashboard statistics for rental activity, including pickups, completions, overdue, and damages.
-        /// </summary>
-        /// <returns>A populated WeeklyStats object for the current week.</returns>
         public async Task<WeeklyStats> GetWeeklyDashboardStatsAsync()
         {
             DateTime today = DateTime.Today;
@@ -104,6 +100,21 @@ namespace Database.Persistence.Repositories
             };
         }
 
+
+        /// <inheritdoc/>
+        public bool IsConflicted(int requestId, int equipmentId, DateTime startDate, DateTime returnDate)
+        {
+            return context.RentalRequests.Any(r =>
+                r.Id != requestId &&                       // Exclude the current request
+                r.EquipmentId == equipmentId &&            // Same equipment
+                r.StatusId == 2 &&                         // Already approved
+                (
+                    (startDate >= r.StartDate && startDate < r.ReturnDate) || // Starts inside another
+                    (returnDate > r.StartDate && returnDate <= r.ReturnDate) || // Ends inside another
+                    (startDate <= r.StartDate && returnDate >= r.ReturnDate)   // Fully overlaps another
+                )
+            );
+        }
         #endregion
 
         #region Internal Helpers
@@ -113,7 +124,8 @@ namespace Database.Persistence.Repositories
             return RentalDBContext.RentalRequests
                 .Include(r => r.Customer)
                 .Include(r => r.Equipment)
-                .Include(r => r.Status);
+                .Include(r => r.Status)
+                .Include(r => r.Documents);
         }
 
         private IQueryable<RentalRequest> GetWithRecordDetailsQuery()

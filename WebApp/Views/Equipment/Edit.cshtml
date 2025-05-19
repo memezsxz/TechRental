@@ -49,14 +49,20 @@
                 <!-- Name input -->
                 <div class="form-group mb-3">
                     <label asp-for="Name" class="form-label">Name</label>
-                    <input asp-for="Name" class="form-control" maxlength="50" />
+                    <input asp-for="Name" class="form-control" maxlength="50" minlength="3"
+                           oninvalid="this.setCustomValidity('Name should be 3–50 characters')"
+                           required 
+                           oninput="setCustomValidity('')" />
                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
                 <!-- Description input -->
                 <div class="form-group mb-3">
                     <label asp-for="Description" class="form-label">Description</label>
-                    <textarea asp-for="Description" class="form-control" rows="4" maxlength="255"></textarea>
+                    <textarea asp-for="Description" class="form-control" rows="4" maxlength="255" minlength="3"
+                              oninvalid="this.setCustomValidity('Description should be at least 3 characters')"
+                              required
+                              oninput="setCustomValidity('')"></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
 
@@ -66,14 +72,14 @@
                     <input asp-for="RentalPricePerDay" class="form-control"
                            inputmode="decimal"
                            pattern="\d+(\.\d{1,2})?"
-                           title="Enter a valid price (e.g., 12 or 12.50)" />
+                           title="Enter a valid price (e.g., 12 or 12.50)" required />
                     <span asp-validation-for="RentalPricePerDay" class="text-danger"></span>
                 </div>
 
                 <!-- Category dropdown -->
                 <div class="form-group mb-3">
                     <label asp-for="CategoryId" class="form-label">Category</label>
-                    <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId"></select>
+                    <select asp-for="CategoryId" class="form-select" asp-items="ViewBag.CategoryId" ></select>
                 </div>
 
                 <!-- Condition and Availability dropdowns -->
@@ -121,7 +127,7 @@
         <!-- Submit and Cancel buttons -->
         <div class="d-flex justify-content-center gap-3 mt-4">
             <input type="submit" value="Save" class="btn custom-btn" />
-            <a asp-action="Index" class="btn custom-btn-outline">Cancel</a>
+            <a asp-action="Details" asp-route-id="@Model.Id" class="btn custom-btn-outline">Cancel</a>
         </div>
     </form>
 </div>

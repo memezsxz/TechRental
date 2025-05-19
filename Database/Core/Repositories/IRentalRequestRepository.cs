@@ -29,5 +29,19 @@ namespace Database.Core.Repositories
         /// </summary>
         /// <returns>A <see cref="WeeklyStats"/> view model containing key weekly metrics.</returns>
         Task<WeeklyStats> GetWeeklyDashboardStatsAsync();
+
+        /// <summary>
+        /// Determines whether the given rental period for an equipment conflicts with any existing approved rental requests.
+        /// </summary>
+        /// <param name="requestId">
+        /// The ID of the current rental request (used to exclude it from the conflict check, e.g., during updates).
+        /// </param>
+        /// <param name="equipmentId">The ID of the equipment being rented.</param>
+        /// <param name="startDate">The proposed rental start date.</param>
+        /// <param name="returnDate">The proposed rental return date.</param>
+        /// <returns>
+        /// <c>true</c> if the specified rental period overlaps with any existing approved requests for the same equipment; otherwise, <c>false</c>.
+        /// </returns>
+        public bool IsConflicted(int requestId, int equipmentId, DateTime startDate, DateTime returnDate);
     }
 }
