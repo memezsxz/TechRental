@@ -34,6 +34,8 @@
         <p class="fw-bold fs-4">Total Repair Costs: @stats.TotalRepairCost BD</p>
     </div>
 
+
+
     @if (role == "Admin")
     {
             <div class="card dashboard-card">
@@ -43,6 +45,14 @@
                 <p class="fw-bold fs-4">Managers: @stats.Managers</p>
         </div>
     }
+    <div class="card dashboard-card">
+        <div id="piechart"></div>
+    </div>
+
+        <div class="card dashboard-card">
+            <div id="barchart"></div>
+        </div>
+
 </div>
 
 <h3 class="mt-4">Pending Rental Requests</h3>
@@ -90,3 +100,80 @@
     </tbody>
 </table>
 </div>
+
+
+@section Scripts {
+    <script type="text/javascript">
+               $.ajax({
+            type: 'GET',
+            url: '/Dashboard/ChartData',
+            dataType: 'json',
+            success: function (result) {
+                google.charts.load('current', { packages: ['corechart'] });
+                google.charts.setOnLoadCallback(function () {
+                    drawPieChart(result.statusCounts);
+                    drawBarChart(result.mostRented);
+                });
+            }
+        });
+
+        function drawPieChart(data) {
+            var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn('string', 'Status');
+            dataTable.addColumn('number', 'Count');
+
+            var rows = [];
+            $.each(data, function (i, obj) {
+                rows.push([obj.status, obj.count]);
+            });
+
+            dataTable.addRows(rows);
+
+            var options = {
+                title: 'Rental Request Status',
+                backgroundColor: '#ffff',
+                pieSliceText: 'percentage',
+                legend: { position: 'right' },
+                colors: ['#28a745','#f0ad4e','#007bff','#d9534f']
+            };
+
+            var chart = new google.visualization.PieChart(document.getElementById('piechart'));
+            chart.draw(dataTable, options);
+        }
+
+        function drawBarChart(data) {
+            var dataTable = new google.visualization.DataTable();
+            dataTable.addColumn('string', 'Equipment');
+            dataTable.addColumn('number', 'Count');
+
+            var rows = [];
+            $.each(data, function (i, obj) {
+                rows.push([obj.equipmentName, obj.count]);
+            });
+
+            dataTable.addRows(rows);
+
+                    var options = {
+            title: 'Most Rented Equipments',
+            legend: { position: 'none' },
+            hAxis: { title: 'Count' },
+            vAxis: {
+                textStyle: {
+                    fontSize: 10
+                }
+            },
+            chartArea: {
+                left: 150,
+                width: '70%',
+                height: '80%'
+            },
+            colors: ['#28a745']
+        };
+
+
+            var chart = new google.visualization.BarChart(document.getElementById('barchart'));
+            chart.draw(dataTable, options);
+        }
+
+    </script>
+}

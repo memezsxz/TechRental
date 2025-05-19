@@ -89,5 +89,40 @@ namespace WebApp.Controllers
                 return View();
             }
         }
+
+        public async Task<IActionResult> ChartData()
+        {
+            if (!(User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager)))
+            {
+                return View("Forbidden");
+            }
+
+            var statusCounts = await _context.RentalRequests
+                .Include(r => r.Status)
+                .GroupBy(r => r.Status.StatusName)
+                .Select(g => new
+                {
+                    Status = g.Key,
+                    Count = g.Count()
+                }).ToListAsync();
+
+            var mostRented = await _context.RentalRequests
+                .GroupBy(r => r.Equipment.Name)
+                .Select(g => new
+                {
+                    EquipmentName = g.Key,
+                    Count = g.Count()
+                })
+                .OrderByDescending(g => g.Count)
+                .Take(4)
+                .ToListAsync();
+
+            return Json(new
+            {
+                StatusCounts = statusCounts,
+                MostRented = mostRented
+            });
+        }
+
     }
 }
