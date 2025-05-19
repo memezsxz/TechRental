@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Method Not Allowed";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="text-center mt-5 pt-5">
+    <img src="https://cdn-icons-png.flaticon.com/512/1828/1828906.png" width="100" class="mb-4" />
+    <h1 class="display-4 text-danger fw-bold">405</h1>
+    <h4 class="mb-3">Method Not Allowed</h4>
+    <p>The method used to access this page is not allowed.</p>
+    <a href="@Url.Action("Index", "Home")" class="btn btn-outline-danger mt-3 px-4">Return Home</a>
+</div>

@@ -32,13 +32,29 @@
 <div class="container mt-5">
      <h2 class="text-center mb-5 page-title">Equipments</h2>
 
-     <!-- Add button visible only for Admins or Managers -->
+     <!-- Add button/ and status filter visible only for Admins or Managers -->
     @if (User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager))
     {
-        <div class="d-flex justify-content-end my-3">
+        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+            <!-- Left: Add button -->
             <a asp-action="Create" class="btn create-button">Add New Equipment</a>
+
+            <!-- Right: Toggle buttons -->
+            <div class="btn-group" role="group">
+                <a href="@Url.Action("Index", new { status = "Active", search = ViewBag.Search, category = ViewBag.Category, sortBy = ViewBag.SortBy })"
+                   class="btn btn-outline-success px-4 @(ViewBag.Status == "Active" ? "active" : "")"
+                   style="border-radius: 8px 0 0 8px;">
+                    ACTIVE
+                </a>
+                <a href="@Url.Action("Index", new { status = "Inactive", search = ViewBag.Search, category = ViewBag.Category, sortBy = ViewBag.SortBy })"
+                   class="btn btn-outline-success px-4 @(ViewBag.Status == "Inactive" ? "active" : "")"
+                   style="border-radius: 0 8px 8px 0;">
+                    INACTIVE
+                </a>
+            </div>
         </div>
     }
+
     <br/>
     <br/>
 
@@ -63,7 +79,7 @@
         <!-- Search Box -->
         <div style="flex: 2; min-width: 300px;">
             <input type="text" name="search" class="form-control"
-                   placeholder="Search by equipment name"
+                   placeholder="Search by equipment name or Id"
                    style="min-width: 240px;" value="@ViewBag.Search" />
         </div>
 
@@ -128,15 +144,19 @@
                                 @if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin))
                                 {
                                     <h5 class="card-title">Manage Item</h5>
+                                    <br />
+                                    <p class="card-text rental-price">Equipment Id: @item.Id</p>
+                                    <br /><br /><br />
                                 }
                                 else
                                 {
                                     <h5 class="card-title">Rent Now</h5>
+                                    <br />
+                                    <p class="card-text rental-price">@item.RentalPricePerDay BD/Day Only</p>
+                                    <br /><br /><br />
                                 }
 
-                                <br />
-                                <p class="card-text rental-price">@item.RentalPricePerDay BD/Day Only</p>
-                                <br /><br /><br />
+
 
                                 <!-- Condition Info -->
                                 <p class="card-text condition-status">@item.ConditionStatus.ConditionName</p>
@@ -162,7 +182,8 @@
                    asp-route-page="@(ViewBag.CurrentPage - 1)"
                    asp-route-search="@ViewBag.Search"
                    asp-route-category="@ViewBag.Category"
-                   asp-route-sortBy="@ViewBag.SortBy">
+                   asp-route-sortBy="@ViewBag.SortBy"
+                   asp-route-status="@ViewBag.Status">
                     <i class="bi bi-chevron-left"></i> Previous
                 </a>
             </li>

@@ -77,13 +77,15 @@
         </div>
 
         <div>
-            <button type="submit" class="btn btn-success px-4">Search</button>
+            <button type="submit" class="btn btn-success px-4">SEARCH</button>
+            <button type="reset" class="btn btn-danger px-4">CLEAR</button>
         </div>
     </form>
 
     <!-- Error Logs Table -->
-    <table class="table table-bordered text-center">
-        <thead class="table-light text-success">
+    <div class="table-responsive">
+    <table class="table table-bordered text-center align-middle">
+    <thead class="table-light text-success">
             <tr>
                 <th>Timestamp</th>
                 <th>User</th>
@@ -114,6 +116,7 @@
             }
         </tbody>
     </table>
+    </div>
 
     <!-- Pagination -->
     @{

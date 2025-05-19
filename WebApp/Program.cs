@@ -37,6 +37,7 @@ if (!app.Environment.IsDevelopment())
 app.UseStaticFiles();
 
 app.UseRouting();
+app.UseStatusCodePagesWithReExecute("/Home/ErrorHandler", "?statusCode={0}");
 
 //// Seed roles and admin user
 ///

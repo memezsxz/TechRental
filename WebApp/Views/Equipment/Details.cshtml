@@ -129,6 +129,11 @@
                 var averageRating = Model.Feedbacks.Any() ? Model.Feedbacks.Average(f => f.Rate) : 0;
             }
 
+            @if (User.IsInRole("Admin") || User.IsInRole("Manager")){
+                <!-- Equipment ID -->
+                <h5 class="mb-3">Equipment Id: <strong>@Model.Id</strong></h5>
+            }
+
             <!-- Average rating -->
             <h5 class="mb-3">Overall Rating: <strong>@Math.Round(averageRating, 1)</strong></h5>
 
