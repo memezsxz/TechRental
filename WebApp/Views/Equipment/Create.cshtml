@@ -43,14 +43,20 @@
                 <!-- Equipment Name input -->
                 <div class="form-group mb-3">
                     <label asp-for="Name" class="form-label">Name</label>
-                    <input asp-for="Name" class="form-control" maxlength="50" />
-                    <span asp-validation-for="Name" class="text-danger"></span>
+                    <input asp-for="Name" class="form-control" maxlength="50" minlength="3"
+                           oninvalid="this.setCustomValidity('Name should be 3–50 characters')"
+                           required
+                           oninput="setCustomValidity('')" />
+                     <span asp-validation-for="Name" class="text-danger"></span>
                 </div>
 
                 <!-- Description input -->
                 <div class="form-group mb-3">
                     <label asp-for="Description" class="form-label">Description</label>
-                    <textarea asp-for="Description" class="form-control" rows="4" maxlength="255"></textarea>
+                    <textarea asp-for="Description" class="form-control" rows="4" maxlength="255" minlength="3"
+                              oninvalid="this.setCustomValidity('Description should be at least 3 characters')"
+                              required
+                              oninput="setCustomValidity('')"></textarea>
                     <span asp-validation-for="Description" class="text-danger"></span>
                 </div>
 
@@ -58,8 +64,9 @@
                 <div class="form-group mb-3">
                     <label asp-for="RentalPricePerDay" class="form-label">Rental Price (BHD / Day)</label>
                     <input asp-for="RentalPricePerDay" class="form-control"
-                           inputmode="decimal" pattern="\d+(\.\d{1,2})?"
-                           title="Enter a valid price (e.g., 12 or 12.50)" />
+                           inputmode="decimal"
+                           pattern="\d+(\.\d{1,2})?"
+                           title="Enter a valid price (e.g., 12 or 12.50)" required />
                     <span asp-validation-for="RentalPricePerDay" class="text-danger"></span>
                 </div>
 

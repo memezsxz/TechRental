@@ -37,7 +37,7 @@ namespace WebApp.Controllers
         /// ViewBag keys:
         /// - Search, Category, SortBy, CurrentPage, TotalPages, Categories
         /// </summary>
-        public async Task<IActionResult> Index(string search, string category, string sortBy, int page = 1, int pageSize = 9)
+        public async Task<IActionResult> Index(string search, string category, string sortBy, string status = "Active", int page = 1, int pageSize = 9)
         {
             // Build query with relationships
             var query = _context.Equipment
@@ -46,16 +46,34 @@ namespace WebApp.Controllers
                 .Include(e => e.Image)
                 .AsQueryable();
 
-            // Restrict to active equipment for customers only
-            if (User.IsInRole(RoleConstants.Customer))
+            // Filter by IsActive if Admin/Manager (based on "status" query)
+            if (User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager))
             {
+                if (!string.IsNullOrWhiteSpace(status))
+                {
+                    query = status == "Inactive"
+                        ? query.Where(e => e.IsActive == false)
+                        : query.Where(e => e.IsActive == true);
+                }
+            }
+            else
+            {
+                // Customers see only active items
                 query = query.Where(e => e.IsActive == true);
             }
 
-            // Apply search
+            // Apply search (by name or exact ID)
             if (!string.IsNullOrWhiteSpace(search))
             {
-                query = query.Where(e => e.Name.Contains(search));
+                search = search.Trim();
+                if (int.TryParse(search, out int id))
+                {
+                    query = query.Where(e => e.Id == id || e.Name.Contains(search));
+                }
+                else
+                {
+                    query = query.Where(e => e.Name.Contains(search));
+                }
             }
 
             // Apply category filter
@@ -90,6 +108,7 @@ namespace WebApp.Controllers
             ViewBag.SortBy = sortBy;
             ViewBag.CurrentPage = page;
             ViewBag.TotalPages = totalPages;
+            ViewBag.Status = status;
 
             return View(items);
         }
@@ -120,19 +139,17 @@ namespace WebApp.Controllers
             if (equipment == null) return View("NotFound");
 
             // Customers can only view active equipment
-            if (User.IsInRole(RoleConstants.Customer) && equipment.IsActive == false) return View("NotFound");
+            if ((User.IsInRole(RoleConstants.Customer) || !User.Identity.IsAuthenticated) && equipment.IsActive == false) return View("NotFound");
 
             // Filter out hidden feedback
-            equipment.Feedbacks = equipment.Feedbacks
-                .Where(f => f.IsHidden == false)
-                .ToList();
+            equipment.Feedbacks = equipment.Feedbacks.Where(f => f.IsHidden == false).ToList();
 
             return View(equipment);
         }
 
 
         // GET: Equipment/Create
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
+        //[Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         /// <summary>
         /// Displays the equipment creation form for Admins and Managers only.
         /// Loads all necessary dropdown lists: availability status, category, and condition.
@@ -143,7 +160,7 @@ namespace WebApp.Controllers
         /// </summary>
         public IActionResult Create()
         {
-            // Fallback check (extra safety in addition to [Authorize])
+            // Fallback check
             if (!User.IsInRole(RoleConstants.Manager) && !User.IsInRole(RoleConstants.Admin)) return View("Forbidden");
 
             // Populate dropdowns for form
@@ -157,7 +174,6 @@ namespace WebApp.Controllers
         // POST: Equipment/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         /// <summary>
         /// Handles the submission of the equipment creation form.
         /// - Restricted to Admins and Managers.
@@ -171,45 +187,42 @@ namespace WebApp.Controllers
         /// </summary>
         public async Task<IActionResult> Create(Equipment equipment)
         {
-            // Fallback check in addition to [Authorize]
-            if (!User.IsInRole(RoleConstants.Manager) && !User.IsInRole(RoleConstants.Admin)) return View("Forbidden");
+            // Fallback permission check
+            if (!User.IsInRole(RoleConstants.Manager) && !User.IsInRole(RoleConstants.Admin))
+                return View("Forbidden");
 
-            // Handle image upload
-            var uploadedFile = Request.Form.Files["ImageFile"];
             int? uploadedImageId = null;
 
-            if (uploadedFile != null && uploadedFile.Length > 0)
+            try
             {
-                using var memoryStream = new MemoryStream();
-                await uploadedFile.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
-
-                uploadedImageId = await ImageManager.UploadImageAndSaveToDatabase(
-                    _context,
-                    memoryStream,
-                    uploadedFile.FileName,
-                    uploadedFile.ContentType
-                );
-
-                if (uploadedImageId == null)
+                // Handle image upload
+                var uploadedFile = Request.Form.Files["ImageFile"];
+                if (uploadedFile != null && uploadedFile.Length > 0)
                 {
-                    ModelState.AddModelError("", "Failed to upload the image.");
-                }
-            }
-            else
-            {
-                ModelState.AddModelError("", "Please upload an image.");
-            }
+                    using var memoryStream = new MemoryStream();
+                    await uploadedFile.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
 
-            // Proceed only if model is valid
-            if (ModelState.IsValid)
-            {
-                try
+                    uploadedImageId = await ImageManager.UploadImageAndSaveToDatabase(
+                        _context,
+                        memoryStream,
+                        uploadedFile.FileName,
+                        uploadedFile.ContentType
+                    );
+
+                    if (uploadedImageId == null)
+                        ModelState.AddModelError("", "Failed to upload the image.");
+                }
+                else
+                {
+                    ModelState.AddModelError("", "Please upload an image.");
+                }
+
+                // Save only if model is valid
+                if (ModelState.IsValid)
                 {
                     if (uploadedImageId.HasValue)
-                    {
                         equipment.ImageId = uploadedImageId.Value;
-                    }
 
                     _context.Add(equipment);
                     await _context.SaveChangesAsync();
@@ -219,28 +232,28 @@ namespace WebApp.Controllers
 
                     return RedirectToAction(nameof(Details), new { id = equipment.Id });
                 }
-                catch (Exception)
+                else
                 {
-                    TempData["MessageText"] = "An error occurred while saving the equipment.";
+                    var errors = ModelState
+                        .Where(m => m.Value.Errors.Any())
+                        .Select(m => new
+                        {
+                            Field = m.Key,
+                            Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                        });
+
+                    TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                        errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
                     TempData["MessageType"] = "error";
-
-                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
                 }
-            } else
+            }
+            catch (Exception ex)
             {
-                var errors = ModelState
-                .Where(m => m.Value.Errors.Any())
-                .Select(m => new {
-                    Field = m.Key,
-                    Errors = m.Value.Errors.Select(e => e.ErrorMessage)
-                });
-
-                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
-                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageText"] = "An unexpected error occurred: " + ex.Message;
                 TempData["MessageType"] = "error";
             }
 
-            // If model is invalid, repopulate dropdowns and return to form
+            // Repopulate dropdowns and return to form
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName", equipment.AvailabilityStatusId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", equipment.CategoryId);
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName", equipment.ConditionStatusId);
@@ -248,8 +261,8 @@ namespace WebApp.Controllers
             return View(equipment);
         }
 
+
         // GET : Equipment/Edit/5
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         // <summary>
         /// Displays the equipment edit form for a specific equipment item.
         /// - Restricted to Admins and Managers only.
@@ -262,7 +275,7 @@ namespace WebApp.Controllers
         /// </summary>
         public async Task<IActionResult> Edit(int? id)
         {
-            // Extra fallback role check (redundant but explicit)
+            // fallback role check (redundant but explicit)
             if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden");
 
             // Validate ID and context availability
@@ -295,54 +308,57 @@ namespace WebApp.Controllers
         /// </summary>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
+        // [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> Edit(int id, Equipment equipment)
         {
-            // Extra role check for safety
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden"); // HTTP 403 Forbidden
+            // Role check
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+                return View("Forbidden"); // HTTP 403
 
-            // Ensure route ID matches model ID
-            if (id != equipment.Id) return View("NotFound"); // HTTP 404
+            // ID mismatch check
+            if (id != equipment.Id)
+                return View("NotFound"); // HTTP 404
 
-            // Load existing record
-            var existingEquipment = await _context.Equipment.FindAsync(id);
-            if (existingEquipment == null) return View("NotFound"); // HTTP 404
-
-            // Handle image upload
-            var uploadedFile = Request.Form.Files["ImageFile"];
-            int? uploadedImageId = null;
-
-            if (uploadedFile != null && uploadedFile.Length > 0)
+            try
             {
-                using var memoryStream = new MemoryStream();
-                await uploadedFile.CopyToAsync(memoryStream);
-                memoryStream.Position = 0;
+                // Load existing record
+                var existingEquipment = await _context.Equipment.FindAsync(id);
+                if (existingEquipment == null)
+                    return View("NotFound"); // HTTP 404
 
-                uploadedImageId = await ImageManager.UploadImageAndSaveToDatabase(
-                    _context,
-                    memoryStream,
-                    uploadedFile.FileName,
-                    uploadedFile.ContentType
-                );
+                // Handle image upload
+                var uploadedFile = Request.Form.Files["ImageFile"];
+                int? uploadedImageId = null;
 
-                if (uploadedImageId.HasValue)
+                if (uploadedFile != null && uploadedFile.Length > 0)
                 {
-                    // Optionally delete previous image from S3 (disabled for now)
-                    if (existingEquipment.ImageId.HasValue)
+                    using var memoryStream = new MemoryStream();
+                    await uploadedFile.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+
+                    uploadedImageId = await ImageManager.UploadImageAndSaveToDatabase(
+                        _context,
+                        memoryStream,
+                        uploadedFile.FileName,
+                        uploadedFile.ContentType
+                    );
+
+                    if (uploadedImageId.HasValue)
                     {
-                        await ImageManager.DeleteImageFromDatabaseAndS3(_context, existingEquipment.ImageId.Value);
+                        // Optionally delete previous image from S3
+                        if (existingEquipment.ImageId.HasValue)
+                        {
+                            await ImageManager.DeleteImageFromDatabaseAndS3(_context, existingEquipment.ImageId.Value);
+                        }
+
+                        existingEquipment.ImageId = uploadedImageId.Value;
                     }
-
-                    existingEquipment.ImageId = uploadedImageId.Value;
                 }
-            }
 
-            // Proceed if model is valid
-            if (ModelState.IsValid)
-            {
-                try
+                // Only proceed if model is valid
+                if (ModelState.IsValid)
                 {
-                    // Manually map updated fields (prevents overposting)
+                    // Manually map allowed fields
                     existingEquipment.Name = equipment.Name;
                     existingEquipment.Description = equipment.Description;
                     existingEquipment.RentalPricePerDay = equipment.RentalPricePerDay;
@@ -354,34 +370,33 @@ namespace WebApp.Controllers
                     _context.Update(existingEquipment);
                     await _context.SaveChangesAsync();
 
-                    TempData["MessageText"] = "Equipment was saved successfully!";
+                    TempData["MessageText"] = "Equipment was updated successfully!";
                     TempData["MessageType"] = "success";
 
                     return RedirectToAction(nameof(Details), new { id = equipment.Id });
                 }
-                catch (Exception)
+                else
                 {
-                    TempData["MessageText"] = "An error occurred while saving the equipment.";
-                    TempData["MessageType"] = "error";
+                    var errors = ModelState
+                        .Where(m => m.Value.Errors.Any())
+                        .Select(m => new
+                        {
+                            Field = m.Key,
+                            Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                        });
 
-                    return RedirectToAction(nameof(Details), new { id = equipment.Id });
+                    TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                        errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                    TempData["MessageType"] = "error";
                 }
             }
-            else
+            catch (Exception ex)
             {
-                var errors = ModelState
-                .Where(m => m.Value.Errors.Any())
-                .Select(m => new {
-                    Field = m.Key,
-                    Errors = m.Value.Errors.Select(e => e.ErrorMessage)
-                });
-
-                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
-                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageText"] = "An unexpected error occurred: " + ex.Message;
                 TempData["MessageType"] = "error";
             }
 
-            // Repopulate dropdowns if validation fails
+            // Repopulate dropdowns if we return to view
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName", equipment.AvailabilityStatusId);
             ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", equipment.CategoryId);
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName", equipment.ConditionStatusId);
@@ -405,48 +420,62 @@ namespace WebApp.Controllers
         ///     c) `success = false` if the equipment is not found
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         [ValidateAntiForgeryToken]
+        //[Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> DeleteCheck(int id)
         {
             // Role fallback check
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden"); // HTTP 403 Forbidden
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+                return View("Forbidden"); // HTTP 403 Forbidden
 
-            // Find the equipment record
-            var equipment = await _context.Equipment.FindAsync(id);
-            if (equipment == null) return Json(new { success = false, message = "Not found" });
-
-            // Check for references in rental requests
-            bool isReferenced = await _context.RentalRequests.AnyAsync(r => r.EquipmentId == id);
-
-            if (isReferenced)
+            try
             {
-                // Return a prompt to mark as inactive instead
-                return Json(new
+                // Find the equipment record
+                var equipment = await _context.Equipment.FindAsync(id);
+                if (equipment == null)
+                    return Json(new { success = false, message = "Not found" });
+
+                // Check for references in rental requests
+                bool isReferenced = await _context.RentalRequests.AnyAsync(r => r.EquipmentId == id);
+
+                if (isReferenced)
                 {
-                    requiresInactive = true,
-                    message = "This equipment is in use. Do you want to mark it as inactive instead?",
-                    setInactiveUrl = Url.Action("SetInactive", "Equipment", new { id })
-                });
-            }
-            else
-            {
-                // Remove associated image from S3 if available
-                if (equipment.ImageId.HasValue)
-                {
-                    await ImageManager.DeleteImageFromDatabaseAndS3(_context, equipment.ImageId.Value);
+                    // Return a prompt to mark as inactive instead
+                    return Json(new
+                    {
+                        requiresInactive = true,
+                        message = "This equipment is in use. Do you want to mark it as inactive instead?",
+                        setInactiveUrl = Url.Action("SetInactive", "Equipment", new { id })
+                    });
                 }
+                else
+                {
+                    // Delete associated image if exists
+                    if (equipment.ImageId.HasValue)
+                    {
+                        await ImageManager.DeleteImageFromDatabaseAndS3(_context, equipment.ImageId.Value);
+                    }
 
-                // Delete equipment from database
-                _context.Equipment.Remove(equipment);
-                await _context.SaveChangesAsync();
+                    // Delete the equipment
+                    _context.Equipment.Remove(equipment);
+                    await _context.SaveChangesAsync();
 
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Equipment deleted successfully.",
+                        redirectUrl = Url.Action("Index"),
+                        type = "success"
+                    });
+                }
+            }
+            catch (Exception ex)
+            {
                 return Json(new
                 {
-                    success = true,
-                    message = "Equipment deleted successfully.",
-                    redirectUrl = Url.Action("Index"),
-                    type = "success"
+                    success = false,
+                    message = "An unexpected error occurred: " + ex.Message,
+                    type = "error"
                 });
             }
         }
@@ -465,24 +494,39 @@ namespace WebApp.Controllers
         ///     b) success = false → item not found
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
-        [ValidateAntiForgeryToken] 
+        [ValidateAntiForgeryToken]
+        //[Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> SetInactive(int id)
         {
             // Role validation fallback
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden"); // HTTP 403 Forbidden
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+                return View("Forbidden"); // HTTP 403 Forbidden
 
-            // Locate the equipment by ID
-            var equipment = await _context.Equipment.FindAsync(id);
-            if (equipment == null) return Json(new { success = false, message = "Equipment not found.", type = "error" });
+            try
+            {
+                // Locate the equipment by ID
+                var equipment = await _context.Equipment.FindAsync(id);
+                if (equipment == null)
+                    return Json(new { success = false, message = "Equipment not found.", type = "error" });
 
-            // Mark as inactive and save
-            equipment.IsActive = false;
-            _context.Equipment.Update(equipment);
-            await _context.SaveChangesAsync();
+                // Mark as inactive and save
+                equipment.IsActive = false;
+                _context.Equipment.Update(equipment);
+                await _context.SaveChangesAsync();
 
-            return Json(new { success = true, message = "Equipment marked as inactive.", type = "success" });
+                return Json(new { success = true, message = "Equipment marked as inactive.", type = "success" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "An unexpected error occurred: " + ex.Message,
+                    type = "error"
+                });
+            }
         }
+
 
         /// <summary>
         /// Marks a specific equipment item as active (IsActive = true).
@@ -498,23 +542,37 @@ namespace WebApp.Controllers
         ///     b) success = false → item not found or update failed
         /// </summary>
         [HttpPost]
-        [Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         [ValidateAntiForgeryToken]
+        //[Authorize(Roles = $"{RoleConstants.Admin},{RoleConstants.Manager}")]
         public async Task<IActionResult> SetActive(int id)
         {
             // Role validation fallback
-            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager)) return View("Forbidden"); // HTTP 403 Forbidden
+            if (!User.IsInRole(RoleConstants.Admin) && !User.IsInRole(RoleConstants.Manager))
+                return View("Forbidden"); // HTTP 403 Forbidden
 
-            // Locate the equipment by ID
-            var equipment = await _context.Equipment.FindAsync(id);
-            if (equipment == null) return Json(new { success = false, message = "Equipment not found.", type = "error" });
+            try
+            {
+                // Locate the equipment by ID
+                var equipment = await _context.Equipment.FindAsync(id);
+                if (equipment == null)
+                    return Json(new { success = false, message = "Equipment not found.", type = "error" });
 
-            // Mark as active and save
-            equipment.IsActive = true;
-            _context.Equipment.Update(equipment);
-            await _context.SaveChangesAsync();
+                // Mark as active and save
+                equipment.IsActive = true;
+                _context.Equipment.Update(equipment);
+                await _context.SaveChangesAsync();
 
-            return Json(new { success = true, message = "Equipment marked as active.", type = "success" });
+                return Json(new { success = true, message = "Equipment marked as active.", type = "success" });
+            }
+            catch (Exception ex)
+            {
+                return Json(new
+                {
+                    success = false,
+                    message = "An unexpected error occurred: " + ex.Message,
+                    type = "error"
+                });
+            }
         }
     }
 }

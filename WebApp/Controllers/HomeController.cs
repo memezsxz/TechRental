@@ -102,5 +102,22 @@ namespace WebApp.Controllers
             await smtpClient.SendMailAsync(mailMessage);
         }
 
+        public IActionResult ErrorHandler(int? statusCode = null)
+        {
+            switch (statusCode)
+            {
+                case 401:
+                    return View("~/Views/Shared/Unauthorized.cshtml");
+                case 403:
+                    return View("~/Views/Shared/Forbidden.cshtml");                
+                case 405:
+                    return View("~/Views/Shared/MethodNotAllowed.cshtml");
+                case 500:
+                    return View("~/Views/Shared/InternalServerError.cshtml");
+                default:
+                    return View("~/Views/Shared/NotFound.cshtml");
+            }
+        }
+
     }
 }
