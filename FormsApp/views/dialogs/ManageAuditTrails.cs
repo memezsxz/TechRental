@@ -4,34 +4,52 @@ using System;
 
 namespace FormsApp.views.dialogs
 {
+    /*
+     * WARNING:
+     * To view this form in the Windows Forms Designer,
+     * temporarily change the base class from 'BaseViewEditDeleteForm' to 'Form'.
+     * 
+     * Example:
+     *     public partial class ManageAuditTrails : Form
+     * 
+     * After making design changes, revert the base class back to 'BaseViewEditDeleteForm'
+     * to preserve functionality and application behavior.
+     */
+
+    /// <summary>
+    /// Provides a read-only interface for viewing audit trail entries in the system.
+    /// This form disables add, edit, and delete operations to preserve audit integrity.
+    /// </summary>
     //public partial class ManageAuditTrails : Form
     public partial class ManageAuditTrails : BaseViewEditDeleteForm
     {
         #region Fields
+
+        /// <summary>
+        /// The audit log record currently loaded into the form.
+        /// </summary>
         private AuditLog item;
+
         #endregion
 
         #region Constructor
 
         /// <summary>
-        /// Initializes the ManageAuditTrails form with the specified view type and optional equipment ID.
+        /// Initializes the ManageAuditTrails form with the given view type and optional ID.
         /// </summary>
-        /// <param name="viewType">The mode in which the form is opened (Add, Edit, or View).</param>
-        /// <param name="id">Optional ID of the category to load in Edit mode.</param>
-        public ManageAuditTrails(BaseViewEditDeleteForm.ViewType viewType, int? id = null) : base(viewType, id) { }
+        /// <param name="viewType">The type of interaction (only View is supported).</param>
+        /// <param name="id">The ID of the log entry to load.</param>
+        public ManageAuditTrails(BaseViewEditDeleteForm.ViewType viewType, int? id = null)
+            : base(viewType, id) { }
 
         #endregion
 
         #region Form Initialization
 
-        /// <summary>
-        /// Initializes the form components, disables validation errors,
-        /// maps action buttons, and loads dropdown lists.
-        /// </summary>
+        /// <inheritdoc/>
         protected override void InitializeForm()
         {
             InitializeComponent();
-
             MapActionButtons(lblClose, lblSave, lblDelete);
         }
 
@@ -39,26 +57,27 @@ namespace FormsApp.views.dialogs
 
         #region View Preparation
 
+        /// <inheritdoc/>
         protected override void PrepareForView()
         {
             base.PrepareForView();
             LoadItemInfo();
         }
 
+        /// <inheritdoc/>
         protected override void PrepareForAdd()
         {
             MessageBox.Show("Cannot add a log");
-            return;
-
         }
+
+        /// <inheritdoc/>
         protected override void PrepareForEdit()
         {
             MessageBox.Show("Cannot edit a log");
-            return;
         }
 
         /// <summary>
-        /// Loads data from the item into the form controls.
+        /// Loads the selected audit log item into the form's UI controls.
         /// </summary>
         private void LoadItemInfo()
         {
@@ -73,37 +92,41 @@ namespace FormsApp.views.dialogs
 
         #endregion
 
-
-
         #region Data Loaders
+
+        /// <inheritdoc/>
         protected override bool FetchItem()
         {
             item = context.AuditLogs.Get(id.Value);
 
             if (item != null) return true;
 
-            MessageBox.Show($"Log with the id {id.Value} not found");
+            MessageBox.Show($"Log with the ID {id.Value} was not found.");
             return false;
         }
-
 
         #endregion
 
         #region Save/Delete Logic
+
+        /// <inheritdoc/>
         public override void Delete()
         {
-            MessageBox.Show("Cannot Delete a log.");
+            MessageBox.Show("Cannot delete a log.");
             Dispose();
         }
+
+        /// <inheritdoc/>
         protected override async Task SaveItem()
         {
             MessageBox.Show("Cannot edit a log.");
             Dispose();
-
         }
 
+        /// <inheritdoc/>
         protected override void MapFormToEntity()
         {
+            // Not applicable for audit logs (view-only).
         }
 
         #endregion
