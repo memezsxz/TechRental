@@ -316,7 +316,7 @@ namespace FormsApp
                 var errorLog = new SystemErrorLog
                 {
                     ErrorMessage = Truncate(e.GetType().Name + ": " + e.Message, 255),
-                    ErrorSource = Truncate(e.Source, 255),
+                    ErrorSource = "FormsApp",
                     SourceProcedure = sourceProc,
                     UserId = unitOfWork.UserId,
                     Timestamp = DateTime.Now

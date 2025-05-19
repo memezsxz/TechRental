@@ -151,12 +151,7 @@ namespace Database.Persistence.Repositories
         public override Dictionary<string, string> GetEntityColumnsWithTypes()
         {
             var d = base.GetEntityColumnsWithTypes();
-            d.Remove("Image");
-
-            //foreach (var kv in d)
-            //{
-            //    Console.WriteLine(kv); // For debugging metadata mapping
-            //}
+            d.Remove("ImageId");
 
             return d;
         }
