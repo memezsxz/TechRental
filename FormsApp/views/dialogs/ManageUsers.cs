@@ -120,7 +120,6 @@ namespace FormsApp.views.dialogs
             //        "User"
             //    );
             //}
-
         }
 
         protected override async Task SaveItem()

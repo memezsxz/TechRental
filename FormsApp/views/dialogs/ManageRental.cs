@@ -12,6 +12,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DotNetEnv;
+using Database.Persistence;
 
 namespace FormsApp.views.dialogs
 {
@@ -59,6 +60,11 @@ namespace FormsApp.views.dialogs
                 if (record.ActualReturnDate == null)
                 {
                     gbReturn.Visible = false;
+                }
+                else
+                {
+                    pnlUploadDoc.Visible = false;
+                    pnlDeleteDoc.Visible = false;
                 }
             }
             else
@@ -122,8 +128,6 @@ namespace FormsApp.views.dialogs
 
                 }
             }
-
-
         }
 
         /// <summary>
@@ -273,7 +277,10 @@ namespace FormsApp.views.dialogs
                 if (request != null)
                 {
                     record = context.RentalRecords.GetWithDetailsByRentalRequest(id.Value);
-                    if (record != null) payment = record.Payments.FirstOrDefault();
+                    if (record != null)
+                    {
+                        payment = record.Payments.FirstOrDefault();
+                    }
 
                     return true;
                 }
@@ -354,9 +361,11 @@ namespace FormsApp.views.dialogs
                 if (record.ActualReturnDate != null)
                 {
                     record.ReturnConditionId = (int)ddlRetCondetion.SelectedValue;
-                    record.ExtraCharges = decimal.Parse(tbRecExtraCharge.Text.Trim(), NumberStyles.Currency, CultureInfo.CurrentCulture);
+                    record.ExtraCharges = decimal.Parse(tbRecExtraCharge.Text.Trim(), NumberStyles.Currency,
+                        CultureInfo.CurrentCulture);
                     record.ExtraChargeDescription = tbRecExtraChargeDescreption.Text.Trim();
                 }
+
             }
         }
         #endregion
@@ -375,6 +384,22 @@ namespace FormsApp.views.dialogs
 
             bool isValidInput = true;
 
+            if (request.StatusId != 2 && ((int)ddlReqStatus.SelectedValue) == 2)
+            {
+                isValidInput &= !context.RentalRequests.IsConflicted(request.Id, request.EquipmentId, request.StartDate,
+                    request.ReturnDate);
+                if (!isValidInput)
+                {
+                    MessageBox.Show("This request conflicts with another approved rental for the same equipment.", "Overlap Detected", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+
+
+            if (record != null && request.Documents.FirstOrDefault() == null)
+            {
+                isValidInput = false;
+                lblDocError.Visible = true;
+            }
 
             if (record is { ActualReturnDate: not null })
             {
@@ -385,7 +410,6 @@ namespace FormsApp.views.dialogs
             Console.WriteLine($"Final validation result: {isValidInput}");
 
             return isValidInput;
-
         }
 
 
@@ -398,6 +422,7 @@ namespace FormsApp.views.dialogs
             lblRecExtraChargeError.Visible = false;
             lblRecExtraChargeError.Visible = false;
             lblReqStatusError.Visible = false;
+            lblDocError.Visible = false;
         }
         #endregion
 
@@ -411,10 +436,34 @@ namespace FormsApp.views.dialogs
 
         private void lblStartTransaction_Click(object sender, EventArgs e)
         {
+            SwitchAction();
+        }
+
+        private void SwitchAction()
+        {
             if (record == null)
             {
-                InstansiatTransaction();
+                if (DateTime.Now < request.StartDate)
+                {
+                    MessageBox.Show("Transaction cannot start before the start date.", "Transation",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                if (DateTime.Now >= request.ReturnDate)
+                {
+                    MessageBox.Show("Transaction cannot start after or on the return date.", "Transation",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
 
+                if (context.Equipment.IsInUse(request.EquipmentId))
+                {
+                    MessageBox.Show("The equipment is already in use and cannot be rented until it is returned.", "Conflict",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                InstansiatTransaction();
             }
             else if (record.ActualReturnDate == null)
             {
@@ -575,14 +624,168 @@ namespace FormsApp.views.dialogs
             LoadItemInfo();
         }
 
-        private void pnlDownloadDoc_Paint(object sender, PaintEventArgs e)
+        private async void pnlDownloadDoc_Click(object sender, EventArgs e)
         {
-
+            DownloadAndSaveAgreement();
         }
 
-        private void pnlUploadDoc_Paint(object sender, PaintEventArgs e)
+        private void pnlUploadDoc_Click(object sender, EventArgs e)
         {
+            UploadPdfForRentalRequest();
+        }
 
+
+        public async void DownloadAndSaveAgreement()
+        {
+            try
+            {
+                Stream stream;
+                var doc = request.Documents.FirstOrDefault();
+
+                if (doc == null)
+                {
+                    stream = AgreementGenerator.GeneratePdf(request);
+                }
+                else
+                {
+                    stream = await S3Uploader.GetFileByGuidAsync(doc.Guid.ToString());
+
+                    if (stream == null)
+                    {
+                        DialogResult result = MessageBox.Show(
+                            "Saved agreement could not be found. Would you like to download the agreement template?",
+                            "Download Failed",
+                            MessageBoxButtons.YesNo,
+                            MessageBoxIcon.Question
+                        );
+
+                        if (result == DialogResult.Yes)
+                        {
+                            stream = AgreementGenerator.GeneratePdf(request);
+                        }
+                        else
+                        {
+                            return;
+                        }
+                    }
+                }
+
+                using SaveFileDialog saveFileDialog = new SaveFileDialog
+                {
+                    Title = "Save Rental Agreement",
+                    Filter = "PDF files (*.pdf)|*.pdf",
+                    FileName = $"Transaction_Record#{request.Id}_{request.CustomerId}.pdf"
+                };
+
+                if (saveFileDialog.ShowDialog() != DialogResult.OK) return;
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    stream.CopyTo(memoryStream);
+                    File.WriteAllBytes(saveFileDialog.FileName, memoryStream.ToArray());
+                }
+
+                MessageBox.Show("Agreement saved successfully.", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("Agreement could not be saved locally.", "Failure", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+
+        public async void UploadPdfForRentalRequest()
+        {
+            try
+            {
+                using var openFileDialog = new OpenFileDialog
+                {
+                    Title = "Select PDF Agreement",
+                    Filter = "PDF Files (*.pdf)|*.pdf"
+                };
+
+                if (openFileDialog.ShowDialog() != DialogResult.OK)
+                    return;
+
+                string filePath = openFileDialog.FileName;
+                string fileName = Path.GetFileName(filePath);
+                string contentType = "application/pdf";
+
+
+                if (!DeleteDocs(false))
+                {
+                    MessageBox.Show("Failed to upload document. Please try again.", "Upload Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+              return;  }
+
+
+                await using var fileStream = File.OpenRead(filePath);
+                bool success = await PdfManager.UploadPdfAndSaveToDatabase(
+                    context: context,
+                    fileStream: fileStream,
+                    fileName: fileName,
+                    contentType: contentType,
+                    rentalRequestId: request.Id
+                );
+
+                if (success)
+                {
+                    MessageBox.Show("Document uploaded successfully.", "Upload Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    lblDocError.Visible = false;
+                    request = context.RentalRequests.GetWithRecordDetails(request.Id);
+                }
+                else
+                {
+                    MessageBox.Show("Failed to upload document. Please ensure it's a valid PDF.", "Upload Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                Global.DisplayReportErrorDialog(ex);
+            }
+        }
+
+        private async void pnlDeleteDoc_Click(object sender, EventArgs e)
+        {
+            DeleteDocs(true);
+        }
+
+
+        private bool DeleteDocs(bool showMessages)
+        {
+            List<Document> docs = request.Documents.ToList();
+
+            if (docs.Any() == false)
+            {
+                if (showMessages) MessageBox.Show("No documeent uploaded to delete.");
+                return true;
+            }
+            try
+            {
+                bool success = true;
+
+                docs.ForEach(async d =>
+                {
+                    success &= await PdfManager.DeletePdfFromDatabaseAndS3(context, d.Id);
+                });
+
+                if (success)
+                {
+                    if (showMessages) MessageBox.Show("Document deleted successfully.", "Delete Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    lblDocError.Visible = false;
+                    request = context.RentalRequests.GetWithRecordDetails(request.Id);
+                    return true;
+                }
+                else
+                {
+                    if (showMessages) MessageBox.Show("Failed to delete the document.", "Delete Failed", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+            }
+            catch (Exception ex)
+            {
+                Global.DisplayReportErrorDialog(ex);
+            }
+
+            return false;
         }
     }
 }

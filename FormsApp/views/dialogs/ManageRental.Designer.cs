@@ -94,8 +94,11 @@
             lblAction = new Label();
             gbDocument = new GroupBox();
             tableLayoutPanel1 = new TableLayoutPanel();
+            label7 = new Label();
             pnlUploadDoc = new Panel();
             pnlDownloadDoc = new Panel();
+            lblDocError = new Label();
+            pnlDeleteDoc = new Panel();
             gbRequest.SuspendLayout();
             gbCustomer.SuspendLayout();
             gbEquipment.SuspendLayout();
@@ -765,9 +768,9 @@
             gbReturn.Controls.Add(label33);
             gbReturn.Controls.Add(label24);
             gbReturn.Controls.Add(tbRecExtraChargeDescreption);
-            gbReturn.Location = new Point(652, 563);
+            gbReturn.Location = new Point(652, 572);
             gbReturn.Name = "gbReturn";
-            gbReturn.Size = new Size(599, 418);
+            gbReturn.Size = new Size(599, 409);
             gbReturn.TabIndex = 66;
             gbReturn.TabStop = false;
             gbReturn.Text = "Return Info";
@@ -856,50 +859,96 @@
             gbDocument.Controls.Add(tableLayoutPanel1);
             gbDocument.Location = new Point(652, 456);
             gbDocument.Name = "gbDocument";
-            gbDocument.Size = new Size(599, 102);
+            gbDocument.Padding = new Padding(3, 10, 3, 3);
+            gbDocument.Size = new Size(599, 110);
             gbDocument.TabIndex = 73;
             gbDocument.TabStop = false;
             gbDocument.Text = "Document Info";
             // 
             // tableLayoutPanel1
             // 
-            tableLayoutPanel1.ColumnCount = 2;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tableLayoutPanel1.Controls.Add(pnlUploadDoc, 1, 0);
-            tableLayoutPanel1.Controls.Add(pnlDownloadDoc, 0, 0);
+            tableLayoutPanel1.ColumnCount = 4;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 31F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 23F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 23F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 23F));
+            tableLayoutPanel1.Controls.Add(pnlDeleteDoc, 3, 0);
+            tableLayoutPanel1.Controls.Add(label7, 0, 0);
+            tableLayoutPanel1.Controls.Add(pnlUploadDoc, 2, 0);
+            tableLayoutPanel1.Controls.Add(pnlDownloadDoc, 1, 0);
+            tableLayoutPanel1.Controls.Add(lblDocError, 0, 1);
             tableLayoutPanel1.Dock = DockStyle.Fill;
-            tableLayoutPanel1.Location = new Point(3, 30);
+            tableLayoutPanel1.Location = new Point(3, 37);
             tableLayoutPanel1.Margin = new Padding(0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 1;
+            tableLayoutPanel1.RowCount = 2;
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
-            tableLayoutPanel1.Size = new Size(593, 69);
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.Size = new Size(593, 70);
             tableLayoutPanel1.TabIndex = 0;
+            // 
+            // label7
+            // 
+            label7.AutoSize = true;
+            label7.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            label7.Location = new Point(2, 0);
+            label7.Margin = new Padding(2, 0, 2, 0);
+            label7.Name = "label7";
+            label7.Size = new Size(179, 31);
+            label7.TabIndex = 76;
+            label7.Text = "Agreement Doc:";
             // 
             // pnlUploadDoc
             // 
             pnlUploadDoc.BackgroundImage = (Image)resources.GetObject("pnlUploadDoc.BackgroundImage");
             pnlUploadDoc.BackgroundImageLayout = ImageLayout.Zoom;
             pnlUploadDoc.Dock = DockStyle.Fill;
-            pnlUploadDoc.Location = new Point(396, 5);
-            pnlUploadDoc.Margin = new Padding(100, 5, 100, 5);
+            pnlUploadDoc.Location = new Point(349, 5);
+            pnlUploadDoc.Margin = new Padding(30, 5, 30, 5);
             pnlUploadDoc.Name = "pnlUploadDoc";
-            pnlUploadDoc.Size = new Size(97, 59);
+            tableLayoutPanel1.SetRowSpan(pnlUploadDoc, 2);
+            pnlUploadDoc.Size = new Size(76, 60);
             pnlUploadDoc.TabIndex = 1;
-            pnlUploadDoc.Paint += pnlUploadDoc_Paint;
+            pnlUploadDoc.Click += pnlUploadDoc_Click;
             // 
             // pnlDownloadDoc
             // 
             pnlDownloadDoc.BackgroundImage = (Image)resources.GetObject("pnlDownloadDoc.BackgroundImage");
             pnlDownloadDoc.BackgroundImageLayout = ImageLayout.Zoom;
             pnlDownloadDoc.Dock = DockStyle.Fill;
-            pnlDownloadDoc.Location = new Point(100, 5);
-            pnlDownloadDoc.Margin = new Padding(100, 5, 100, 5);
+            pnlDownloadDoc.Location = new Point(213, 5);
+            pnlDownloadDoc.Margin = new Padding(30, 5, 30, 5);
             pnlDownloadDoc.Name = "pnlDownloadDoc";
-            pnlDownloadDoc.Size = new Size(96, 59);
+            tableLayoutPanel1.SetRowSpan(pnlDownloadDoc, 2);
+            pnlDownloadDoc.Size = new Size(76, 60);
             pnlDownloadDoc.TabIndex = 0;
-            pnlDownloadDoc.Paint += pnlDownloadDoc_Paint;
+            pnlDownloadDoc.Click += pnlDownloadDoc_Click;
+            // 
+            // lblDocError
+            // 
+            lblDocError.Dock = DockStyle.Fill;
+            lblDocError.Font = new Font("Segoe UI", 7.5F, FontStyle.Regular, GraphicsUnit.Point);
+            lblDocError.ForeColor = Color.Red;
+            lblDocError.Location = new Point(3, 35);
+            lblDocError.Name = "lblDocError";
+            lblDocError.Size = new Size(177, 35);
+            lblDocError.TabIndex = 75;
+            lblDocError.Text = "Document is required";
+            lblDocError.TextAlign = ContentAlignment.MiddleCenter;
+            lblDocError.Visible = false;
+            // 
+            // pnlDeleteDoc
+            // 
+            pnlDeleteDoc.BackgroundImage = (Image)resources.GetObject("pnlDeleteDoc.BackgroundImage");
+            pnlDeleteDoc.BackgroundImageLayout = ImageLayout.Zoom;
+            pnlDeleteDoc.Dock = DockStyle.Fill;
+            pnlDeleteDoc.Location = new Point(485, 5);
+            pnlDeleteDoc.Margin = new Padding(30, 5, 30, 5);
+            pnlDeleteDoc.Name = "pnlDeleteDoc";
+            tableLayoutPanel1.SetRowSpan(pnlDeleteDoc, 2);
+            pnlDeleteDoc.Size = new Size(78, 60);
+            pnlDeleteDoc.TabIndex = 77;
+            pnlDeleteDoc.Click += pnlDeleteDoc_Click;
             // 
             // ManageRental
             // 
@@ -936,6 +985,7 @@
             gbReturn.PerformLayout();
             gbDocument.ResumeLayout(false);
             tableLayoutPanel1.ResumeLayout(false);
+            tableLayoutPanel1.PerformLayout();
             ResumeLayout(false);
         }
 
@@ -1007,5 +1057,8 @@
         private TableLayoutPanel tableLayoutPanel1;
         private Panel pnlDownloadDoc;
         private Panel pnlUploadDoc;
+        private Label label7;
+        private Label lblDocError;
+        private Panel pnlDeleteDoc;
     }
 }

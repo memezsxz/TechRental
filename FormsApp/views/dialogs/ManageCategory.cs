@@ -32,6 +32,7 @@ namespace FormsApp.views.dialogs
         public ManageCategory(BaseViewEditDeleteForm.ViewType viewType, int? id, bool canDelete = false) : base(viewType, id, canDelete) { }
 
         #endregion
+      
         #region Form Initialization
 
         /// <summary>
@@ -80,8 +81,6 @@ namespace FormsApp.views.dialogs
 
         #endregion
 
-
-      
         #region Data Loaders
         protected override bool FetchItem()
         {
@@ -93,7 +92,6 @@ namespace FormsApp.views.dialogs
             return false;
         }
         #endregion
-
 
         #region Save/Delete Logic
         public override void Delete()

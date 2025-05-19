@@ -25,5 +25,14 @@ namespace Database.Persistence.Repositories
         public RentalDBContext RentalDBContext => context as RentalDBContext;
 
         #endregion
+
+        #region IEquipmentRepository Implementation
+
+        /// <inheritdoc/>
+        public List<Document> GetAllRequestDocuments(int requestId)
+        {
+            return context.Documents.Where(d => d.RentalId == requestId).ToList();
+        }
+        #endregion
     }
 }
