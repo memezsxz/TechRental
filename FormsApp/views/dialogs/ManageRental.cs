@@ -24,8 +24,8 @@ namespace FormsApp.views.dialogs
             Record
         }
 
-        RentalRecord record;
-        RentalRequest request;
+        private RentalRecord record;
+        private RentalRequest request;
         private Payment payment;
 
         ItemType itemType;
@@ -64,6 +64,7 @@ namespace FormsApp.views.dialogs
             else
             {
                 gbFee.Visible = false;
+                gbDocument.Visible = false;
                 gbReturn.Visible = false;
                 gbPayment.Visible = false;
             }
@@ -90,12 +91,12 @@ namespace FormsApp.views.dialogs
 
             lblSave.Text = "Add";
             lblDelete.Visible = false;
-            lblStartTransaction.Visible = false;
+            lblAction.Visible = false;
         }
         protected override void PrepareForEdit()
         {
             LoadItemInfo();
-            lblStartTransaction.Visible = false;
+            lblAction.Visible = false;
 
             if (request.Status?.StatusName.ToLower() != "pending") //TODO Maryam: make a method to retrive the status
             {
@@ -104,7 +105,7 @@ namespace FormsApp.views.dialogs
 
             if (request.Status?.StatusName.ToLower() == "approved" && record == null)
             {
-                lblStartTransaction.Visible = true;
+                lblAction.Visible = true;
             }
             else if (record != null)
 
@@ -116,8 +117,8 @@ namespace FormsApp.views.dialogs
                 }
                 else
                 {
-                    lblStartTransaction.Visible = true;
-                    lblStartTransaction.Text = "Process Return";
+                    lblAction.Visible = true;
+                    lblAction.Text = "Process Return";
 
                 }
             }
@@ -156,6 +157,7 @@ namespace FormsApp.views.dialogs
                 if (record != null)
                 {
                     gbFee.Visible = true;
+                    gbDocument.Visible = true;
                     gbPayment.Visible = true;
 
                     // record data
@@ -163,9 +165,6 @@ namespace FormsApp.views.dialogs
                     dtpRecPickupDate.Value = record.PickupDate;
                     tbRecPrice.Text = request.RentalPerDay.ToString("C");
                     tbRecDeposit.Text = record.Deposit?.ToString("C") ?? "$0.00";
-                    tbRecExtraCharge.Text = record.ExtraCharges?.ToString("C") ?? "$0.00";
-                    tbRecExtraChargeDescreption.Text = record.ExtraChargeDescription;
-
                     // fee data
 
                     var payment = record.Payments.FirstOrDefault();
@@ -200,6 +199,8 @@ namespace FormsApp.views.dialogs
                         dtpRetDate.Value = record.ActualReturnDate.Value;
                         tbRetLateFee.Text = record.LateReturnFees.Value.ToString("C");
                         ddlRetCondetion.SelectedValue = record.ReturnConditionId.Value;
+                        tbRecExtraCharge.Text = record.ExtraCharges?.ToString("C") ?? "$0.00";
+                        tbRecExtraChargeDescreption.Text = record.ExtraChargeDescription;
                     }
 
                 }
@@ -347,16 +348,14 @@ namespace FormsApp.views.dialogs
             {
                 if (record.Id == 0)
                 {
-                    record.ExtraCharges = decimal.Parse(tbRecExtraCharge.Text.Trim(), NumberStyles.Currency, CultureInfo.CurrentCulture);
-                    record.ExtraChargeDescription = tbRecExtraChargeDescreption.Text.Trim();
-
                     payment.Amount = record.TotalCost;
-
                 }
 
                 if (record.ActualReturnDate != null)
                 {
                     record.ReturnConditionId = (int)ddlRetCondetion.SelectedValue;
+                    record.ExtraCharges = decimal.Parse(tbRecExtraCharge.Text.Trim(), NumberStyles.Currency, CultureInfo.CurrentCulture);
+                    record.ExtraChargeDescription = tbRecExtraChargeDescreption.Text.Trim();
                 }
             }
         }
@@ -377,11 +376,10 @@ namespace FormsApp.views.dialogs
             bool isValidInput = true;
 
 
-            if (record != null && record.Id == 0)
+            if (record is { ActualReturnDate: not null })
             {
                 isValidInput &= ValidateExtraCharge();
             }
-
 
 
             Console.WriteLine($"Final validation result: {isValidInput}");
@@ -431,7 +429,6 @@ namespace FormsApp.views.dialogs
         private void tbRecExtraChargeDescreption_TextChanged(object sender, EventArgs e)
         {
             if (tbRecExtraChargeDescreption.Enabled) ValidateExtraCharge();
-
         }
         #endregion
 
@@ -476,7 +473,6 @@ namespace FormsApp.views.dialogs
         {
             request.StatusId = 2;
 
-
             decimal rentalFee = (request.ReturnDate.Date - DateTime.Now.Date).Days *
                                 request.Equipment.RentalPricePerDay;
             decimal deposit = rentalFee * 0.1m;
@@ -486,7 +482,6 @@ namespace FormsApp.views.dialogs
             {
                 Deposit = deposit,
                 EquipmentName = request.Equipment.Name,
-                ExtraCharges = 0,
                 PickupDate = DateTime.Now.Date,
                 RentalRequestId = request.Id,
                 RentalFee = rentalFee,
@@ -509,10 +504,7 @@ namespace FormsApp.views.dialogs
             record.Payments.Add(payment);
 
             ddlReqStatus.Enabled = false;
-            lblStartTransaction.Visible = false;
-
-            tbRecExtraCharge.Enabled = true;
-            tbRecExtraChargeDescreption.Enabled = true;
+            lblAction.Visible = false;
 
             LoadPaymentMethodDropDownList();
             LoadPaymentStatusDropDownList();
@@ -546,7 +538,7 @@ namespace FormsApp.views.dialogs
 
             record.ExtraCharges = extra;
 
-            RecalculateCharges();
+            //RecalculateCharges();
 
             return isValid;
         }
@@ -568,9 +560,12 @@ namespace FormsApp.views.dialogs
 
         private void ProcessReturn()
         {
-            lblStartTransaction.Visible = false;
+            lblAction.Visible = false;
             gbReturn.Visible = true;
+
             ddlRetCondetion.Enabled = true;
+            tbRecExtraCharge.Enabled = true;
+            tbRecExtraChargeDescreption.Enabled = true;
 
             record.ActualReturnDate = DateTime.Now.Date;
             record.LateReturnFees = (record.ActualReturnDate.Value - request.ReturnDate).Days * request.RentalPerDay;
@@ -578,6 +573,16 @@ namespace FormsApp.views.dialogs
             record.ReturnConditionId = 1; // TODO Maryam: create a method to retrive the status
 
             LoadItemInfo();
+        }
+
+        private void pnlDownloadDoc_Paint(object sender, PaintEventArgs e)
+        {
+
+        }
+
+        private void pnlUploadDoc_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }

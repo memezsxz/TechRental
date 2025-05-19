@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(ManageRental));
             lblClose = new Label();
             lblDelete = new Label();
             lblSave = new Label();
@@ -71,16 +72,16 @@
             label1 = new Label();
             tbPatyId = new TextBox();
             gbFee = new GroupBox();
-            lblRecExtraChargeError = new Label();
-            lblRecExtraChargeDescreptionError = new Label();
-            tbRecExtraCharge = new TextBox();
-            label28 = new Label();
             tbRecDeposit = new TextBox();
             label21 = new Label();
             label18 = new Label();
             tbRecId = new TextBox();
             dtpRecPickupDate = new DateTimePicker();
             label23 = new Label();
+            lblRecExtraChargeError = new Label();
+            lblRecExtraChargeDescreptionError = new Label();
+            tbRecExtraCharge = new TextBox();
+            label28 = new Label();
             tbRecExtraChargeDescreption = new TextBox();
             label24 = new Label();
             gbReturn = new GroupBox();
@@ -90,13 +91,19 @@
             label26 = new Label();
             ddlRetCondetion = new ComboBox();
             label33 = new Label();
-            lblStartTransaction = new Label();
+            lblAction = new Label();
+            gbDocument = new GroupBox();
+            tableLayoutPanel1 = new TableLayoutPanel();
+            pnlUploadDoc = new Panel();
+            pnlDownloadDoc = new Panel();
             gbRequest.SuspendLayout();
             gbCustomer.SuspendLayout();
             gbEquipment.SuspendLayout();
             gbPayment.SuspendLayout();
             gbFee.SuspendLayout();
             gbReturn.SuspendLayout();
+            gbDocument.SuspendLayout();
+            tableLayoutPanel1.SuspendLayout();
             SuspendLayout();
             // 
             // lblClose
@@ -104,7 +111,7 @@
             lblClose.BackColor = Color.White;
             lblClose.Font = new Font("Cascadia Mono", 10F, FontStyle.Regular, GraphicsUnit.Point);
             lblClose.ForeColor = Color.FromArgb(60, 173, 104);
-            lblClose.Location = new Point(994, 962);
+            lblClose.Location = new Point(994, 1000);
             lblClose.Margin = new Padding(0);
             lblClose.Name = "lblClose";
             lblClose.Size = new Size(122, 48);
@@ -117,7 +124,7 @@
             lblDelete.BackColor = Color.Red;
             lblDelete.Font = new Font("Cascadia Mono", 10F, FontStyle.Regular, GraphicsUnit.Point);
             lblDelete.ForeColor = Color.White;
-            lblDelete.Location = new Point(21, 962);
+            lblDelete.Location = new Point(21, 1000);
             lblDelete.Margin = new Padding(0);
             lblDelete.Name = "lblDelete";
             lblDelete.Size = new Size(122, 48);
@@ -130,7 +137,7 @@
             lblSave.BackColor = Color.FromArgb(60, 173, 104);
             lblSave.Font = new Font("Cascadia Mono", 10F, FontStyle.Regular, GraphicsUnit.Point);
             lblSave.ForeColor = Color.White;
-            lblSave.Location = new Point(1127, 962);
+            lblSave.Location = new Point(1127, 1000);
             lblSave.Margin = new Padding(0);
             lblSave.Name = "lblSave";
             lblSave.Size = new Size(122, 48);
@@ -497,9 +504,9 @@
             gbPayment.Controls.Add(label11);
             gbPayment.Controls.Add(label1);
             gbPayment.Controls.Add(tbPatyId);
-            gbPayment.Location = new Point(652, 457);
+            gbPayment.Location = new Point(21, 727);
             gbPayment.Name = "gbPayment";
-            gbPayment.Size = new Size(599, 254);
+            gbPayment.Size = new Size(609, 254);
             gbPayment.TabIndex = 64;
             gbPayment.TabStop = false;
             gbPayment.Text = "Payment Info";
@@ -512,7 +519,7 @@
             tbPayTotal.Location = new Point(216, 99);
             tbPayTotal.Margin = new Padding(2);
             tbPayTotal.Name = "tbPayTotal";
-            tbPayTotal.Size = new Size(363, 38);
+            tbPayTotal.Size = new Size(375, 38);
             tbPayTotal.TabIndex = 65;
             // 
             // label30
@@ -536,7 +543,7 @@
             ddlPayStatus.Location = new Point(216, 200);
             ddlPayStatus.Margin = new Padding(2);
             ddlPayStatus.Name = "ddlPayStatus";
-            ddlPayStatus.Size = new Size(363, 39);
+            ddlPayStatus.Size = new Size(375, 39);
             ddlPayStatus.TabIndex = 46;
             // 
             // label17
@@ -560,7 +567,7 @@
             ddlPayMethod.Location = new Point(216, 150);
             ddlPayMethod.Margin = new Padding(2);
             ddlPayMethod.Name = "ddlPayMethod";
-            ddlPayMethod.Size = new Size(363, 39);
+            ddlPayMethod.Size = new Size(375, 39);
             ddlPayMethod.TabIndex = 44;
             // 
             // label11
@@ -598,71 +605,20 @@
             // 
             // gbFee
             // 
-            gbFee.Controls.Add(lblRecExtraChargeError);
-            gbFee.Controls.Add(lblRecExtraChargeDescreptionError);
-            gbFee.Controls.Add(tbRecExtraCharge);
-            gbFee.Controls.Add(label28);
             gbFee.Controls.Add(tbRecDeposit);
             gbFee.Controls.Add(label21);
             gbFee.Controls.Add(label18);
             gbFee.Controls.Add(tbRecId);
             gbFee.Controls.Add(dtpRecPickupDate);
             gbFee.Controls.Add(label23);
-            gbFee.Controls.Add(tbRecExtraChargeDescreption);
-            gbFee.Controls.Add(label24);
             gbFee.Controls.Add(tbRecPrice);
             gbFee.Controls.Add(label4);
             gbFee.Location = new Point(21, 457);
             gbFee.Name = "gbFee";
-            gbFee.Size = new Size(609, 477);
+            gbFee.Size = new Size(609, 264);
             gbFee.TabIndex = 65;
             gbFee.TabStop = false;
             gbFee.Text = "Rental Fee";
-            // 
-            // lblRecExtraChargeError
-            // 
-            lblRecExtraChargeError.AutoSize = true;
-            lblRecExtraChargeError.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
-            lblRecExtraChargeError.ForeColor = Color.Red;
-            lblRecExtraChargeError.Location = new Point(218, 304);
-            lblRecExtraChargeError.Name = "lblRecExtraChargeError";
-            lblRecExtraChargeError.Size = new Size(73, 25);
-            lblRecExtraChargeError.TabIndex = 72;
-            lblRecExtraChargeError.Text = "label10";
-            // 
-            // lblRecExtraChargeDescreptionError
-            // 
-            lblRecExtraChargeDescreptionError.AutoSize = true;
-            lblRecExtraChargeDescreptionError.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
-            lblRecExtraChargeDescreptionError.ForeColor = Color.Red;
-            lblRecExtraChargeDescreptionError.Location = new Point(216, 443);
-            lblRecExtraChargeDescreptionError.Name = "lblRecExtraChargeDescreptionError";
-            lblRecExtraChargeDescreptionError.Size = new Size(73, 25);
-            lblRecExtraChargeDescreptionError.TabIndex = 71;
-            lblRecExtraChargeDescreptionError.Text = "label10";
-            // 
-            // tbRecExtraCharge
-            // 
-            tbRecExtraCharge.BackColor = Color.FromArgb(247, 247, 249);
-            tbRecExtraCharge.Enabled = false;
-            tbRecExtraCharge.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            tbRecExtraCharge.Location = new Point(218, 264);
-            tbRecExtraCharge.Margin = new Padding(2);
-            tbRecExtraCharge.Name = "tbRecExtraCharge";
-            tbRecExtraCharge.Size = new Size(373, 38);
-            tbRecExtraCharge.TabIndex = 63;
-            tbRecExtraCharge.TextChanged += tbRecExtraCharge_TextChanged;
-            // 
-            // label28
-            // 
-            label28.AutoSize = true;
-            label28.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label28.Location = new Point(14, 267);
-            label28.Margin = new Padding(2, 0, 2, 0);
-            label28.Name = "label28";
-            label28.Size = new Size(159, 31);
-            label28.TabIndex = 62;
-            label28.Text = "Extra Charges:";
             // 
             // tbRecDeposit
             // 
@@ -727,40 +683,91 @@
             label23.TabIndex = 56;
             label23.Text = "Actual Pickup Date:";
             // 
+            // lblRecExtraChargeError
+            // 
+            lblRecExtraChargeError.AutoSize = true;
+            lblRecExtraChargeError.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
+            lblRecExtraChargeError.ForeColor = Color.Red;
+            lblRecExtraChargeError.Location = new Point(205, 237);
+            lblRecExtraChargeError.Name = "lblRecExtraChargeError";
+            lblRecExtraChargeError.Size = new Size(73, 25);
+            lblRecExtraChargeError.TabIndex = 72;
+            lblRecExtraChargeError.Text = "label10";
+            // 
+            // lblRecExtraChargeDescreptionError
+            // 
+            lblRecExtraChargeDescreptionError.AutoSize = true;
+            lblRecExtraChargeDescreptionError.Font = new Font("Segoe UI", 8F, FontStyle.Regular, GraphicsUnit.Point);
+            lblRecExtraChargeDescreptionError.ForeColor = Color.Red;
+            lblRecExtraChargeDescreptionError.Location = new Point(205, 376);
+            lblRecExtraChargeDescreptionError.Name = "lblRecExtraChargeDescreptionError";
+            lblRecExtraChargeDescreptionError.Size = new Size(73, 25);
+            lblRecExtraChargeDescreptionError.TabIndex = 71;
+            lblRecExtraChargeDescreptionError.Text = "label10";
+            // 
+            // tbRecExtraCharge
+            // 
+            tbRecExtraCharge.BackColor = Color.FromArgb(247, 247, 249);
+            tbRecExtraCharge.Enabled = false;
+            tbRecExtraCharge.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            tbRecExtraCharge.Location = new Point(205, 197);
+            tbRecExtraCharge.Margin = new Padding(2);
+            tbRecExtraCharge.Name = "tbRecExtraCharge";
+            tbRecExtraCharge.Size = new Size(378, 38);
+            tbRecExtraCharge.TabIndex = 63;
+            tbRecExtraCharge.TextChanged += tbRecExtraCharge_TextChanged;
+            // 
+            // label28
+            // 
+            label28.AutoSize = true;
+            label28.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            label28.Location = new Point(11, 200);
+            label28.Margin = new Padding(2, 0, 2, 0);
+            label28.Name = "label28";
+            label28.Size = new Size(159, 31);
+            label28.TabIndex = 62;
+            label28.Text = "Extra Charges:";
+            // 
             // tbRecExtraChargeDescreption
             // 
             tbRecExtraChargeDescreption.BackColor = Color.FromArgb(247, 247, 249);
             tbRecExtraChargeDescreption.Enabled = false;
             tbRecExtraChargeDescreption.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            tbRecExtraChargeDescreption.Location = new Point(216, 337);
+            tbRecExtraChargeDescreption.Location = new Point(205, 270);
             tbRecExtraChargeDescreption.Margin = new Padding(2);
             tbRecExtraChargeDescreption.Multiline = true;
             tbRecExtraChargeDescreption.Name = "tbRecExtraChargeDescreption";
-            tbRecExtraChargeDescreption.Size = new Size(375, 104);
+            tbRecExtraChargeDescreption.Size = new Size(378, 104);
             tbRecExtraChargeDescreption.TabIndex = 44;
             tbRecExtraChargeDescreption.TextChanged += tbRecExtraChargeDescreption_TextChanged;
             // 
             // label24
             // 
             label24.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label24.Location = new Point(13, 337);
+            label24.Location = new Point(11, 270);
             label24.Margin = new Padding(2, 0, 2, 0);
             label24.Name = "label24";
-            label24.Size = new Size(155, 73);
+            label24.Size = new Size(178, 73);
             label24.TabIndex = 32;
             label24.Text = "Extra Charge Descreption:";
             // 
             // gbReturn
             // 
+            gbReturn.Controls.Add(lblRecExtraChargeError);
             gbReturn.Controls.Add(tbRetLateFee);
+            gbReturn.Controls.Add(lblRecExtraChargeDescreptionError);
             gbReturn.Controls.Add(label8);
+            gbReturn.Controls.Add(tbRecExtraCharge);
             gbReturn.Controls.Add(dtpRetDate);
+            gbReturn.Controls.Add(label28);
             gbReturn.Controls.Add(label26);
             gbReturn.Controls.Add(ddlRetCondetion);
             gbReturn.Controls.Add(label33);
-            gbReturn.Location = new Point(652, 729);
+            gbReturn.Controls.Add(label24);
+            gbReturn.Controls.Add(tbRecExtraChargeDescreption);
+            gbReturn.Location = new Point(652, 563);
             gbReturn.Name = "gbReturn";
-            gbReturn.Size = new Size(599, 205);
+            gbReturn.Size = new Size(599, 418);
             gbReturn.TabIndex = 66;
             gbReturn.TabStop = false;
             gbReturn.Text = "Return Info";
@@ -770,10 +777,10 @@
             tbRetLateFee.BackColor = Color.FromArgb(247, 247, 249);
             tbRetLateFee.Enabled = false;
             tbRetLateFee.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            tbRetLateFee.Location = new Point(216, 97);
+            tbRetLateFee.Location = new Point(205, 97);
             tbRetLateFee.Margin = new Padding(2);
             tbRetLateFee.Name = "tbRetLateFee";
-            tbRetLateFee.Size = new Size(365, 38);
+            tbRetLateFee.Size = new Size(376, 38);
             tbRetLateFee.TabIndex = 61;
             // 
             // label8
@@ -792,7 +799,7 @@
             dtpRetDate.Enabled = false;
             dtpRetDate.Location = new Point(229, 45);
             dtpRetDate.Name = "dtpRetDate";
-            dtpRetDate.Size = new Size(349, 34);
+            dtpRetDate.Size = new Size(352, 34);
             dtpRetDate.TabIndex = 59;
             // 
             // label26
@@ -813,10 +820,10 @@
             ddlRetCondetion.Enabled = false;
             ddlRetCondetion.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             ddlRetCondetion.FormattingEnabled = true;
-            ddlRetCondetion.Location = new Point(225, 146);
+            ddlRetCondetion.Location = new Point(205, 146);
             ddlRetCondetion.Margin = new Padding(2);
             ddlRetCondetion.Name = "ddlRetCondetion";
-            ddlRetCondetion.Size = new Size(358, 39);
+            ddlRetCondetion.Size = new Size(378, 39);
             ddlRetCondetion.TabIndex = 42;
             // 
             // label33
@@ -830,27 +837,78 @@
             label33.TabIndex = 35;
             label33.Text = "Reurn Condition:";
             // 
-            // lblStartTransaction
+            // lblAction
             // 
-            lblStartTransaction.BackColor = Color.FromArgb(60, 173, 104);
-            lblStartTransaction.Font = new Font("Cascadia Mono", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            lblStartTransaction.ForeColor = Color.White;
-            lblStartTransaction.Location = new Point(457, 963);
-            lblStartTransaction.Margin = new Padding(0);
-            lblStartTransaction.Name = "lblStartTransaction";
-            lblStartTransaction.Size = new Size(283, 48);
-            lblStartTransaction.TabIndex = 70;
-            lblStartTransaction.Text = "Start Transaction";
-            lblStartTransaction.TextAlign = ContentAlignment.MiddleCenter;
-            lblStartTransaction.Click += lblStartTransaction_Click;
+            lblAction.BackColor = Color.FromArgb(60, 173, 104);
+            lblAction.Font = new Font("Cascadia Mono", 10F, FontStyle.Regular, GraphicsUnit.Point);
+            lblAction.ForeColor = Color.White;
+            lblAction.Location = new Point(457, 1001);
+            lblAction.Margin = new Padding(0);
+            lblAction.Name = "lblAction";
+            lblAction.Size = new Size(283, 48);
+            lblAction.TabIndex = 70;
+            lblAction.Text = "Start Transaction";
+            lblAction.TextAlign = ContentAlignment.MiddleCenter;
+            lblAction.Click += lblStartTransaction_Click;
+            // 
+            // gbDocument
+            // 
+            gbDocument.Controls.Add(tableLayoutPanel1);
+            gbDocument.Location = new Point(652, 456);
+            gbDocument.Name = "gbDocument";
+            gbDocument.Size = new Size(599, 102);
+            gbDocument.TabIndex = 73;
+            gbDocument.TabStop = false;
+            gbDocument.Text = "Document Info";
+            // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.ColumnCount = 2;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.Controls.Add(pnlUploadDoc, 1, 0);
+            tableLayoutPanel1.Controls.Add(pnlDownloadDoc, 0, 0);
+            tableLayoutPanel1.Dock = DockStyle.Fill;
+            tableLayoutPanel1.Location = new Point(3, 30);
+            tableLayoutPanel1.Margin = new Padding(0);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 1;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tableLayoutPanel1.Size = new Size(593, 69);
+            tableLayoutPanel1.TabIndex = 0;
+            // 
+            // pnlUploadDoc
+            // 
+            pnlUploadDoc.BackgroundImage = (Image)resources.GetObject("pnlUploadDoc.BackgroundImage");
+            pnlUploadDoc.BackgroundImageLayout = ImageLayout.Zoom;
+            pnlUploadDoc.Dock = DockStyle.Fill;
+            pnlUploadDoc.Location = new Point(396, 5);
+            pnlUploadDoc.Margin = new Padding(100, 5, 100, 5);
+            pnlUploadDoc.Name = "pnlUploadDoc";
+            pnlUploadDoc.Size = new Size(97, 59);
+            pnlUploadDoc.TabIndex = 1;
+            pnlUploadDoc.Paint += pnlUploadDoc_Paint;
+            // 
+            // pnlDownloadDoc
+            // 
+            pnlDownloadDoc.BackgroundImage = (Image)resources.GetObject("pnlDownloadDoc.BackgroundImage");
+            pnlDownloadDoc.BackgroundImageLayout = ImageLayout.Zoom;
+            pnlDownloadDoc.Dock = DockStyle.Fill;
+            pnlDownloadDoc.Location = new Point(100, 5);
+            pnlDownloadDoc.Margin = new Padding(100, 5, 100, 5);
+            pnlDownloadDoc.Name = "pnlDownloadDoc";
+            pnlDownloadDoc.Size = new Size(96, 59);
+            pnlDownloadDoc.TabIndex = 0;
+            pnlDownloadDoc.Paint += pnlDownloadDoc_Paint;
             // 
             // ManageRental
             // 
             AutoScaleDimensions = new SizeF(11F, 28F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(1270, 1026);
-            Controls.Add(lblStartTransaction);
+            ClientSize = new Size(1270, 1059);
+            Controls.Add(gbDocument);
+            Controls.Add(lblAction);
             Controls.Add(gbReturn);
             Controls.Add(gbFee);
             Controls.Add(gbPayment);
@@ -876,6 +934,8 @@
             gbFee.PerformLayout();
             gbReturn.ResumeLayout(false);
             gbReturn.PerformLayout();
+            gbDocument.ResumeLayout(false);
+            tableLayoutPanel1.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -942,6 +1002,10 @@
         private Label lblReqStatusError;
         private Label lblRecExtraChargeError;
         private Label lblRecExtraChargeDescreptionError;
-        private Label lblStartTransaction;
+        private Label lblAction;
+        private GroupBox gbDocument;
+        private TableLayoutPanel tableLayoutPanel1;
+        private Panel pnlDownloadDoc;
+        private Panel pnlUploadDoc;
     }
 }

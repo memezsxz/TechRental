@@ -18,7 +18,7 @@ namespace FormsApp
             //Application.SetCompatibleTextRenderingDefault(false);
             //Application.SetHighDpiMode(HighDpiMode.PerMonitorV2);
             ApplicationConfiguration.Initialize();
-            Application.Run(new Login());
+            Application.Run(new Home());
         }
 
     }
