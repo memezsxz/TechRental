@@ -23,21 +23,16 @@ namespace Database.Core.Domain
         [Column("id")]
         public int Id { get; set; }
         [Column("first_name")]
-        [Required(ErrorMessage = "First name is required.")]
-        [StringLength(50, MinimumLength = 3, ErrorMessage = "First name must contain at least 3 characters.")]
+        [StringLength(50)]
         public string FirstName { get; set; } = null!;
         [Column("last_name")]
-        [Required(ErrorMessage = "Last name is required.")]
-        [StringLength(50, MinimumLength = 3, ErrorMessage = "Last name must contain at least 3 characters.")]
+        [StringLength(50)]
         public string LastName { get; set; } = null!;
         [Column("email")]
         [StringLength(100)]
-        [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email address format.")]
         public string Email { get; set; } = null!;
         [Column("role_id")]
-        [Required]
-        public int? RoleId { get; set; }
+        public int RoleId { get; set; }
         [Column("is_active")]
         public bool? IsActive { get; set; }
         [Column("created_at", TypeName = "datetime")]
@@ -56,7 +51,7 @@ namespace Database.Core.Domain
         public virtual Image? Image { get; set; }
         [ForeignKey("RoleId")]
         [InverseProperty("Users")]
-        public virtual UserRole? Role { get; set; }
+        public virtual UserRole Role { get; set; } = null!;
         [InverseProperty("User")]
         public virtual ICollection<AuditLog> AuditLogs { get; set; }
         [InverseProperty("User")]

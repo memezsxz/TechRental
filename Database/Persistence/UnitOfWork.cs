@@ -16,7 +16,7 @@ namespace Database.Persistence
         #region Fields
 
         /// <inheritdoc/>
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
 
         private readonly RentalDBContext _context = new RentalDBContext();
 

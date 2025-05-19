@@ -31,7 +31,6 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(BaseNavigationPanel));
             pnlPanel = new TableLayoutPanel();
             tlpProfile = new TableLayoutPanel();
-            pnlNotification = new Panel();
             pnlProfile = new Panel();
             lblDashboard = new Label();
             panel1 = new Panel();
@@ -66,41 +65,28 @@
             // 
             // tlpProfile
             // 
-            tlpProfile.ColumnCount = 2;
-            tlpProfile.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tlpProfile.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
-            tlpProfile.Controls.Add(pnlNotification, 0, 0);
-            tlpProfile.Controls.Add(pnlProfile, 1, 0);
+            tlpProfile.ColumnCount = 1;
+            tlpProfile.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            tlpProfile.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 20F));
+            tlpProfile.Controls.Add(pnlProfile, 0, 0);
             tlpProfile.Dock = DockStyle.Fill;
             tlpProfile.Location = new Point(0, 823);
             tlpProfile.Margin = new Padding(0, 20, 0, 20);
             tlpProfile.Name = "tlpProfile";
             tlpProfile.RowCount = 1;
-            tlpProfile.RowStyles.Add(new RowStyle(SizeType.Percent, 50F));
+            tlpProfile.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
             tlpProfile.Size = new Size(340, 95);
             tlpProfile.TabIndex = 15;
-            // 
-            // pnlNotification
-            // 
-            pnlNotification.BackgroundImage = (Image)resources.GetObject("pnlNotification.BackgroundImage");
-            pnlNotification.BackgroundImageLayout = ImageLayout.Zoom;
-            pnlNotification.Dock = DockStyle.Fill;
-            pnlNotification.Location = new Point(40, 10);
-            pnlNotification.Margin = new Padding(40, 10, 40, 10);
-            pnlNotification.Name = "pnlNotification";
-            pnlNotification.Size = new Size(90, 75);
-            pnlNotification.TabIndex = 1;
-            pnlNotification.Click += pnlNotification_Click;
             // 
             // pnlProfile
             // 
             pnlProfile.BackgroundImage = (Image)resources.GetObject("pnlProfile.BackgroundImage");
             pnlProfile.BackgroundImageLayout = ImageLayout.Zoom;
             pnlProfile.Dock = DockStyle.Fill;
-            pnlProfile.Location = new Point(210, 0);
+            pnlProfile.Location = new Point(40, 0);
             pnlProfile.Margin = new Padding(40, 0, 40, 0);
             pnlProfile.Name = "pnlProfile";
-            pnlProfile.Size = new Size(90, 95);
+            pnlProfile.Size = new Size(260, 95);
             pnlProfile.TabIndex = 0;
             pnlProfile.Click += pnlProfile_Click;
             // 
@@ -177,7 +163,6 @@
         private Panel pnlLogo;
         private Label lblDashboard;
         private TableLayoutPanel tlpProfile;
-        private Panel pnlNotification;
         private Panel pnlProfile;
     }
 }

@@ -25,8 +25,8 @@ const isCreatePage = !startVal && !returnVal;  // true only if no dates are init
 //  Initialize Flatpickr for START date
 // ----------------------------------------------------------------------------------
 const startPicker = flatpickr("#startDate", {
-    dateFormat: "Y-m-d",
-    enableTime: false,
+    dateFormat: "Y-m-d\\TH:i",
+    enableTime: true,
     minDate: "today",
     defaultDate: isCreatePage ? null : startVal,
     disable: reservedDates,
@@ -51,8 +51,8 @@ const startPicker = flatpickr("#startDate", {
 //  Initialize Flatpickr for RETURN date
 // ----------------------------------------------------------------------------------
 const returnPicker = flatpickr("#returnDate", {
-    dateFormat: "Y-m-d",
-    enableTime: false,
+    dateFormat: "Y-m-d\\TH:i",
+    enableTime: true,
     minDate: startVal || "today",  // fallback if startVal is null
     defaultDate: isCreatePage ? null : returnVal,
     disable: reservedDates,
@@ -79,18 +79,11 @@ const returnPicker = flatpickr("#returnDate", {
 
     //  Add reserved day styling and prevent selection of start date as return
     onDayCreate: function (_, __, ___, dayElem) {
-        const iso = dayElem.dateObj.toISOString().split('T')[0];
         const selectedStart = startPicker.selectedDates?.[0];
-        const selectedStartIso = selectedStart ? selectedStart.toISOString().split('T')[0] : null;
+        const d = dayElem.dateObj;
 
-        if (isReservedDate(dayElem.dateObj)) {
+        if (isReservedDate(d)) {
             dayElem.classList.add("reserved-day");
-        }
-
-        //  Highlight same-day return as a conflict
-        if (selectedStartIso && iso === selectedStartIso) {
-            dayElem.classList.add("conflict-day");
-            dayElem.setAttribute("title", "Return date cannot be the same as start date.");
         }
     }
 });

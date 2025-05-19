@@ -14,7 +14,7 @@ namespace Database.Core.Repositories
     {
 
         #region Fields
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
 
         #endregion
 

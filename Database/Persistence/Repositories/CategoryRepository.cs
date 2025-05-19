@@ -16,7 +16,7 @@ namespace Database.Persistence.Repositories
     {
         #region Constructor
 
-        public CategoryRepository(RentalDBContext context, int? userId)
+        public CategoryRepository(RentalDBContext context, int userId)
             : base(context, userId)
         {
         }

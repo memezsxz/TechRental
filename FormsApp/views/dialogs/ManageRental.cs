@@ -161,7 +161,7 @@ namespace FormsApp.views.dialogs
                     // record data
                     tbRecId.Text = record.Id.ToString();
                     dtpRecPickupDate.Value = record.PickupDate;
-                    tbRecPrice.Text = request.RentalPerDay?.ToString("C") ?? "$0.00";
+                    tbRecPrice.Text = request.RentalPerDay.ToString("C");
                     tbRecDeposit.Text = record.Deposit?.ToString("C") ?? "$0.00";
                     tbRecExtraCharge.Text = record.ExtraCharges?.ToString("C") ?? "$0.00";
                     tbRecExtraChargeDescreption.Text = record.ExtraChargeDescription;
@@ -283,7 +283,7 @@ namespace FormsApp.views.dialogs
                 record = context.RentalRecords.GetWithDetails(id.Value);
                 if (record != null)
                 {
-                    request = context.RentalRequests.GetWithRecordDetails(record.RentalRequestId.Value);
+                    request = context.RentalRequests.GetWithRecordDetails(record.RentalRequestId);
                     payment = record.Payments.FirstOrDefault();
                     return true;
                 }
@@ -350,7 +350,7 @@ namespace FormsApp.views.dialogs
                     record.ExtraCharges = decimal.Parse(tbRecExtraCharge.Text.Trim(), NumberStyles.Currency, CultureInfo.CurrentCulture);
                     record.ExtraChargeDescription = tbRecExtraChargeDescreption.Text.Trim();
 
-                    payment.Amount = record.TotalCost.Value;
+                    payment.Amount = record.TotalCost;
 
                 }
 
@@ -502,7 +502,7 @@ namespace FormsApp.views.dialogs
                 PaymentMethodId = 3, // TODO Maryam: create a get method for the status id
                 PaymentStatusId = 2,
                 RentalRecord = record,
-                Amount = record.TotalCost.Value
+                Amount = record.TotalCost
             };
 
             payment = pay;
@@ -560,7 +560,7 @@ namespace FormsApp.views.dialogs
             decimal total = rentalFee + deposit + extra;
 
             record.TotalCost = total;
-            payment.Amount = record.TotalCost.Value;
+            payment.Amount = record.TotalCost;
 
             tbPayTotal.Text = payment.Amount.ToString("C");
 

@@ -10,7 +10,7 @@ namespace Database.Persistence.Repositories
     {
         #region Constructor
 
-        public DocumentRepository(RentalDBContext context, int? userId)
+        public DocumentRepository(RentalDBContext context, int userId)
             : base(context, userId)
         {
         }

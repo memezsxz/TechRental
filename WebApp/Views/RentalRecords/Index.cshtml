@@ -96,7 +96,8 @@
         </div>
 
         <div>
-            <button type="submit" class="btn btn-success px-4">Search</button>
+            <button type="submit" class="btn btn-success px-4">SEARCH</button>
+            <button type="reset" class="btn btn-danger px-4">CLEAR</button>
         </div>
         <input type="hidden" name="status" value="@ViewBag.RecordStatus" />
     </form>
@@ -155,7 +156,7 @@
                     <td>@item.EquipmentName</td>
                     <td>@item.PickupDate.ToString("d/M/yyyy")</td>
                     <td style="@returnDateStyle">@item.RentalRequest.ReturnDate.ToString("d/M/yyyy")</td>
-                    <td>@item.TotalCost?.ToString("0.00")</td>
+                    <td>@item.TotalCost.ToString("0.00")</td>
                 </tr>
             }
             else
@@ -174,7 +175,7 @@
                     <td>@item.EquipmentName</td>
                     <td>@item.PickupDate.ToString("d/M/yyyy")</td>
                     <td>@item.ActualReturnDate?.ToString("d/M/yyyy")</td>
-                    <td>@item.TotalCost.Value.ToString("0.00")</td>
+                    <td>@item.TotalCost.ToString("0.00")</td>
                     @{
                         var condition = item.ReturnCondition?.ConditionName?.ToLower();
                         var badgeClass = condition switch

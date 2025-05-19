@@ -1,7 +1,6 @@
 ﻿document.addEventListener('DOMContentLoaded', function () {
     const bellButton = document.querySelector('[data-bs-target="#notificationsPanel"]');
 
-
     fetch(`/api/notifications`)
         .then(response => response.json())
         .then(data => {
@@ -42,7 +41,7 @@
                             <small class="text-muted">${new Date(notification.createdAt).toLocaleString()}</small>
                             <p class="${textClass}" style="font-size: 1.25rem;">
                                 <i class="bi ${iconClass}" style="font-size: 1.5rem; margin-right: 6px;"></i>
-                                ${notification.messageContent}
+                                ${notification.notificationType.typeName || 'General'}
                             </p>
                         `;
 
@@ -108,12 +107,13 @@ function showNotificationDetails(notification) {
 
 ///Login show password
 
-  const passwordInput = document.getElementById("passwordInput");
-        const toggleIcon = document.getElementById("toggleIcon");
+const passwordInput = document.getElementById("passwordInput");
+const toggleIcon = document.getElementById("toggleIcon");
 
-        toggleIcon.addEventListener("click", function () {
-            const isPassword = passwordInput.type === "password";
-            passwordInput.type = isPassword ? "text" : "password";
-            toggleIcon.classList.toggle("bi-eye");
-            toggleIcon.classList.toggle("bi-eye-slash");
-        });
+toggleIcon.addEventListener("click", function () {
+    const isPassword = passwordInput.type === "password";
+    passwordInput.type = isPassword ? "text" : "password";
+    toggleIcon.classList.toggle("bi-eye");
+    toggleIcon.classList.toggle("bi-eye-slash");
+});
+

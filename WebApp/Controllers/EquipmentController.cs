@@ -80,16 +80,10 @@ namespace WebApp.Controllers
             page = Math.Clamp(page, 1, Math.Max(1, totalPages));
 
             // Fetch paged records
-            var items = await query
-                .Skip((page - 1) * pageSize)
-                .Take(pageSize)
-                .ToListAsync();
+            var items = await query.Skip((page - 1) * pageSize).Take(pageSize).ToListAsync();
 
             // ViewBag state for UI
-            ViewBag.Categories = await _context.Categories
-                .Select(c => c.Name)
-                .Distinct()
-                .ToListAsync();
+            ViewBag.Categories = await _context.Categories.Where(c => c.IsActive == true).Select(c => c.Name).Distinct().ToListAsync();
 
             ViewBag.Search = search;
             ViewBag.Category = category;
@@ -154,7 +148,7 @@ namespace WebApp.Controllers
 
             // Populate dropdowns for form
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName");
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name");
+            ViewData["CategoryId"] = new SelectList(_context.Categories.Where(r => r.IsActive == true), "Id", "Name");
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName");
 
             return View();
@@ -232,6 +226,18 @@ namespace WebApp.Controllers
 
                     return RedirectToAction(nameof(Details), new { id = equipment.Id });
                 }
+            } else
+            {
+                var errors = ModelState
+                .Where(m => m.Value.Errors.Any())
+                .Select(m => new {
+                    Field = m.Key,
+                    Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                });
+
+                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageType"] = "error";
             }
 
             // If model is invalid, repopulate dropdowns and return to form
@@ -268,7 +274,7 @@ namespace WebApp.Controllers
 
             // Populate dropdowns for edit form
             ViewData["AvailabilityStatusId"] = new SelectList(_context.EquipmentAvailabilityStatuses, "Id", "StatusName", equipment.AvailabilityStatusId);
-            ViewData["CategoryId"] = new SelectList(_context.Categories, "Id", "Name", equipment.CategoryId);
+            ViewData["CategoryId"] = new SelectList(_context.Categories.Where(r => r.IsActive == true), "Id", "Name", equipment.CategoryId);
             ViewData["ConditionStatusId"] = new SelectList(_context.EquipmentConditionStatuses, "Id", "ConditionName", equipment.ConditionStatusId);
             ViewData["ImageId"] = new SelectList(_context.Images, "ImageId", "ImageName", equipment.ImageId);
 
@@ -324,7 +330,7 @@ namespace WebApp.Controllers
                     // Optionally delete previous image from S3 (disabled for now)
                     if (existingEquipment.ImageId.HasValue)
                     {
-                        await ImageManager.DeleteImageFromDatabaseAndS3(_context, equipment.ImageId.Value);
+                        await ImageManager.DeleteImageFromDatabaseAndS3(_context, existingEquipment.ImageId.Value);
                     }
 
                     existingEquipment.ImageId = uploadedImageId.Value;
@@ -360,6 +366,19 @@ namespace WebApp.Controllers
 
                     return RedirectToAction(nameof(Details), new { id = equipment.Id });
                 }
+            }
+            else
+            {
+                var errors = ModelState
+                .Where(m => m.Value.Errors.Any())
+                .Select(m => new {
+                    Field = m.Key,
+                    Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                });
+
+                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageType"] = "error";
             }
 
             // Repopulate dropdowns if validation fails

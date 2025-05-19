@@ -14,7 +14,7 @@ namespace Database.Persistence.Repositories
     {
         #region Constructor
 
-        public RentalRecordRepository(RentalDBContext context, int? userId)
+        public RentalRecordRepository(RentalDBContext context, int userId)
             : base(context, userId)
         {
         }
@@ -48,13 +48,13 @@ namespace Database.Persistence.Repositories
         public async Task<List<QuarterEarnings>> GetQuarterEarningsByYearAsync(int year)
         {
             var records = await RentalDBContext.RentalRecords
-                .Where(r => r.ActualReturnDate.HasValue && r.TotalCost.HasValue && r.ActualReturnDate.Value.Year == year)
+                .Where(r => r.ActualReturnDate.HasValue && r.ActualReturnDate.Value.Year == year)
                 .ToListAsync();
 
             // Group totals by month
             var earningsByMonth = records
                 .GroupBy(r => r.ActualReturnDate.Value.Month)
-                .ToDictionary(g => g.Key, g => g.Sum(r => (int)r.TotalCost.Value));
+                .ToDictionary(g => g.Key, g => g.Sum(r => (int)r.TotalCost + r.LateReturnFees ?? 0));
 
             var result = new List<QuarterEarnings>();
 
@@ -74,7 +74,7 @@ namespace Database.Persistence.Repositories
                     string label = new DateTime(year, month, 1).ToString("MMM");
 
                     // Get the total earnings for this month, or 0 if not present
-                    int value = earningsByMonth.TryGetValue(month, out var total) ? total : 0;
+                    decimal value = earningsByMonth.GetValueOrDefault(month, 0);
 
                     // Add this month's earnings to the quarter data
                     quarterData.Data.Add(new MonthlyEarnings { Month = label, Value = value });
@@ -213,7 +213,7 @@ namespace Database.Persistence.Repositories
 
                     // Fetch the corresponding RentalRequest from the database to get the user ID
                     var rentalRequest = context.RentalRequests.Find(rentalRequestId);
-                    var userId = rentalRequest?.CustomerId;
+                    var userId = rentalRequest.CustomerId;
 
                     // If a valid user ID was found, yield a new notification
                     if (userId != null)

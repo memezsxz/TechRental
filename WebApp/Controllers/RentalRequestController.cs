@@ -31,9 +31,7 @@ namespace WebApp.Controllers
         public async Task<IActionResult> Index(string search, string statusFilter, string sortBy, int page = 1, int pageSize = 10)
         {
 
-            if (!User.Identity.IsAuthenticated) {
-                return Unauthorized();
-            }
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
 
 
             //  Ensure page number is valid (avoid OFFSET negative errors)
@@ -119,7 +117,7 @@ namespace WebApp.Controllers
         {
             //  Block unauthenticated users
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
-           
+
             //  Validate input and data context
             if (id == null || _context.RentalRequests == null) return View("NotFound"); // HTTP 404
 
@@ -161,12 +159,10 @@ namespace WebApp.Controllers
         public IActionResult Create(int equipmentId)
         {
             // Ensure user is logged in
-            if (!User.Identity.IsAuthenticated)
-                return View("Unauthorized"); // Shows HTTP 401 error page
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // Shows HTTP 401 error page
 
             // Prevent Admins and Managers from creating rental requests
-            if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin))
-                return View("Forbidden"); // Shows HTTP 403 error page
+            if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin)) return View("Forbidden"); // Shows HTTP 403 error page
 
             // Retrieve the equipment record with related feedback and condition data
             var equipment = _context.Equipment
@@ -175,8 +171,7 @@ namespace WebApp.Controllers
                 .FirstOrDefault(e => e.Id == equipmentId);
 
             // If the equipment ID is invalid or not found, show HTTP 404
-            if (equipment == null)
-                return View("NotFound");
+            if (equipment == null) return View("NotFound");
 
             // call helper to get unavailable date strings
             ViewBag.UnavailableDates = GetUnavailableDates(equipmentId);
@@ -200,14 +195,11 @@ namespace WebApp.Controllers
         /// </returns>
         public async Task<IActionResult> Create(RentalRequest rentalRequest)
         {
-
             // Ensure user is logged in
-            if (!User.Identity.IsAuthenticated)
-                return View("Unauthorized"); // Shows HTTP 401 error page
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // Shows HTTP 401 error page
 
             // Prevent Admins and Managers from creating rental requests
-            if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin))
-                return View("Forbidden"); // Shows HTTP 403 error page
+            if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin)) return View("Forbidden"); // Shows HTTP 403 error page
 
 
             // Ensure both StartDate and ReturnDate are selected
@@ -229,8 +221,19 @@ namespace WebApp.Controllers
 
                 ViewBag.Equipment = equipment;
 
+                var errors = ModelState
+                    .Where(m => m.Value.Errors.Any())
+                    .Select(m => new {
+                        Field = m.Key,
+                        Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                    });
+
+                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageType"] = "error";
+
                 // Recompute the list of unavailable rental dates
-                ViewBag.UnavailableDates = GetUnavailableDates(rentalRequest.EquipmentId ?? 0);
+                ViewBag.UnavailableDates = GetUnavailableDates(rentalRequest.EquipmentId);
 
                 return View(rentalRequest); // Redisplay form with validation errors
             }
@@ -243,7 +246,7 @@ namespace WebApp.Controllers
                 var user = (ApplicationUser)await _userManager.GetUserAsync(User);
 
                 // Assign customer ID to the rental request
-                rentalRequest.CustomerId = user.UserID;
+                rentalRequest.CustomerId = user.UserID.Value;
 
                 // Add and save the new request
                 _context.Add(rentalRequest);
@@ -278,14 +281,8 @@ namespace WebApp.Controllers
             if (id == null) return View("NotFound");
 
             // Ensure user is logged in
-            if (!User.Identity.IsAuthenticated)
-                return View("Unauthorized"); // Shows HTTP 401 error page
+            if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // Shows HTTP 401 error page
 
-            // Prevent Admins and Managers from creating rental requests
-            //if (User.IsInRole(RoleConstants.Manager) || User.IsInRole(RoleConstants.Admin))
-            //    return View("Forbidden"); // Shows HTTP 403 error page
-
-            
 
             // Get the rental request and its related data (Customer, Equipment, Status)
             var rentalRequest = await _context.RentalRequests
@@ -297,10 +294,12 @@ namespace WebApp.Controllers
             // If rental request doesn't exist, return a NotFound page
             if (rentalRequest == null) return View("NotFound");
 
-            //make sure only rental requests accessed by the rlated customer 
-            //if (rentalRequest.Customer.Email.ToLower() != User.Identity.Name.ToLower()) {
-            //    return View("Forbidden");
-            //}
+            if (rentalRequest.StatusId != 1)
+            {
+                return View("Forbidden"); // Shows HTTP 403 error page
+            }
+
+            if (User.IsInRole(RoleConstants.Customer) && rentalRequest.Customer.Email.ToLower() != User.Identity.Name.ToLower()) return View("Forbidden");
 
 
             // POPULATE DROPDOWNS FOR ADMIN/MANAGER EDIT FORM
@@ -312,7 +311,7 @@ namespace WebApp.Controllers
 
             // GET UNAVAILABLE DATES FOR CALENDAR DISABLING (excludes current request)
             // ViewBag.UnavailableDates is used by JS to prevent selecting already booked dates
-            ViewBag.UnavailableDates = GetUnavailableDates(rentalRequest.EquipmentId ?? 0, excludeRequestId: id.Value);
+            ViewBag.UnavailableDates = GetUnavailableDates(rentalRequest.EquipmentId, excludeRequestId: id.Value);
 
             // RETURN EDIT VIEW WITH POPULATED RENTAL REQUEST
             return View(rentalRequest);
@@ -336,14 +335,13 @@ namespace WebApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, RentalRequest rentalRequest)
         {
+            var sendNotification = false;
             // Ensure route ID matches the posted model ID to prevent tampering
             if (id != rentalRequest.Id) return View("NotFound");
 
             // Ensure user is logged in
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // Shows HTTP 401 error page
 
-            // Prevent Admins and Managers from creating rental requests
-            //if (!User.IsInRole(RoleConstants.Manager) && !User.IsInRole(RoleConstants.Admin)) return View("Forbidden"); // Shows HTTP 403 error page
 
             try
             {
@@ -383,50 +381,44 @@ namespace WebApp.Controllers
                     existing.ReturnDate = rentalRequest.ReturnDate;
                     existing.StatusId = rentalRequest.StatusId;
                     existing.Notes = rentalRequest.Notes;
-                }
-                else
-                {
-                    // Users not authorized to edit
-                    return View("Forbidden");
-                }
 
-                // CHECK FOR CONFLICTING RENTAL DATES
-                // Prevent overlap with other approved bookings
-                var hasConflict = await _context.RentalRequests
-                    .Include(r => r.Status)
-                    .Where(r => r.EquipmentId == rentalRequest.EquipmentId && r.Id != rentalRequest.Id)
-                    .Where(r => r.Status.StatusName == "Approved")
-                    .AnyAsync(r =>
-                        rentalRequest.StartDate <= r.ReturnDate &&
-                        rentalRequest.ReturnDate >= r.StartDate);
+                    if (rentalRequest.StatusId == 2)
+                    {
+                        // CHECK FOR CONFLICTING RENTAL DATES
+                        // Prevent overlap with other approved bookings
+                        var hasConflict = await _context.RentalRequests
+                            .Include(r => r.Status)
+                            .Where(r => r.EquipmentId == rentalRequest.EquipmentId && r.Id != rentalRequest.Id)
+                            .Where(r => r.Status.StatusName == "Approved")
+                            .AnyAsync(r =>
+                                rentalRequest.StartDate <= r.ReturnDate &&
+                                rentalRequest.ReturnDate >= r.StartDate);
 
-                if (hasConflict)
-                {
-                    TempData["MessageText"] = "Selected dates overlap with an existing approved rental.";
-                    TempData["MessageType"] = "error";
-                    return RedirectToAction(nameof(Edit), new { id = rentalRequest.Id });
+                        if (hasConflict)
+                        {
+                            TempData["MessageText"] = "Selected dates overlap with an existing approved rental.";
+                            TempData["MessageType"] = "error";
+                            return RedirectToAction(nameof(Edit), new { id = rentalRequest.Id });
+                        }
+                    }
+
+                    // Check if status has changed to trigger notifications
+                    if (rentalRequest.StatusId != 1)
+                    {
+                        sendNotification = true;
+                    }
                 }
+                else return View("Forbidden");
 
                 // SAVE CHANGES TO DATABASE
                 // Update timestamp and persist changes
                 existing.UpdatedAt = DateTime.Now;
                 await _context.SaveChangesAsync();
 
-                int notificationType = 0; 
-                if (rentalRequest.StatusId == 2)
-                {
-                    notificationType = 1;
-                }
-                else if (rentalRequest.StatusId == 3)
-                {
-                    notificationType = 2;
-                }
-                else if (rentalRequest.StatusId == 4)
-                {
-                    notificationType = 5;
-                }
+                if (sendNotification && rentalRequest.StatusId == 2) await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId, 1, "request", rentalRequest.Id);
+                else if (sendNotification && rentalRequest.StatusId == 3) await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId, 2, "request", rentalRequest.Id);
+                else if (sendNotification && rentalRequest.StatusId == 4) await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId, 5, "request", rentalRequest.Id);
 
-                await NotificationManager.CreateAsync(_context, rentalRequest.CustomerId.Value, notificationType, "request", rentalRequest.Id);
 
                 TempData["MessageText"] = "Rental updated successfully.";
                 TempData["MessageType"] = "success";

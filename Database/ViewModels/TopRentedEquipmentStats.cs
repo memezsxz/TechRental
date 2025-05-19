@@ -50,6 +50,6 @@ namespace Database.ViewModels
         /// <summary>
         /// The MIME type of the equipment image (e.g., "image/jpeg", "image/png").
         /// </summary>
-        public string ImageFormat { get; set; }
+        public string? ImageFormat { get; set; }
     }
 }

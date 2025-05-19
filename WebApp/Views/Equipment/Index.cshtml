@@ -27,17 +27,21 @@
 @{
     ViewData["Title"] = "Index";
     Layout = "~/Views/Shared/_Layout.cshtml";
+}
 
-    // Add button visible only for Admins or Managers
-    if (User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager))
+<div class="container mt-5">
+     <h2 class="text-center mb-5 page-title">Equipments</h2>
+
+     <!-- Add button visible only for Admins or Managers -->
+    @if (User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager))
     {
         <div class="d-flex justify-content-end my-3">
             <a asp-action="Create" class="btn create-button">Add New Equipment</a>
         </div>
     }
-}
+    <br/>
+    <br/>
 
-<div class="container my-4">
     <!-- Filter/Search/Sort Form -->
     <form method="get"
           id="auto-filter-form"
@@ -80,6 +84,7 @@
         <!-- Submit Button -->
         <div>
             <button type="submit" class="btn btn-success px-4">SEARCH</button>
+            <button type="reset" class="btn btn-danger px-4">CLEAR</button>
         </div>
     </form>
 

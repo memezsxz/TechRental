@@ -13,12 +13,12 @@ namespace Database.Core.Domain
         [Column("id")]
         public int Id { get; set; }
         [Column("user_id")]
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
         [Column("message_content")]
         [StringLength(255)]
-        public string? MessageContent { get; set; }
+        public string MessageContent { get; set; } = null!;
         [Column("notification_type_id")]
-        public int? NotificationTypeId { get; set; }
+        public int NotificationTypeId { get; set; }
         [Column("isRead")]
         public bool? IsRead { get; set; }
         [Column("created_at", TypeName = "datetime")]
@@ -28,9 +28,9 @@ namespace Database.Core.Domain
 
         [ForeignKey("NotificationTypeId")]
         [InverseProperty("Notifications")]
-        public virtual NotificationType? NotificationType { get; set; }
+        public virtual NotificationType NotificationType { get; set; } = null!;
         [ForeignKey("UserId")]
         [InverseProperty("Notifications")]
-        public virtual User? User { get; set; }
+        public virtual User User { get; set; } = null!;
     }
 }

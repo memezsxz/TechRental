@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Database.Core.Domain
 {
     [Table("RentalRecord")]
+    [Index("RentalRequestId", Name = "UQ_rental_request_User", IsUnique = true)]
     public partial class RentalRecord
     {
         public RentalRecord()
@@ -19,10 +20,10 @@ namespace Database.Core.Domain
         [Column("id")]
         public int Id { get; set; }
         [Column("rental_request_id")]
-        public int? RentalRequestId { get; set; }
+        public int RentalRequestId { get; set; }
         [Column("equipment_name")]
         [StringLength(100)]
-        public string? EquipmentName { get; set; }
+        public string EquipmentName { get; set; } = null!;
         [Column("pickup_date", TypeName = "datetime")]
         public DateTime PickupDate { get; set; }
         [Column("actual_return_date", TypeName = "date")]
@@ -39,7 +40,7 @@ namespace Database.Core.Domain
         [StringLength(255)]
         public string? ExtraChargeDescription { get; set; }
         [Column("total_cost", TypeName = "decimal(10, 2)")]
-        public decimal? TotalCost { get; set; }
+        public decimal TotalCost { get; set; }
         [Column("rental_fee", TypeName = "decimal(10, 2)")]
         public decimal? RentalFee { get; set; }
         [Column("created_at", TypeName = "datetime")]
@@ -48,8 +49,8 @@ namespace Database.Core.Domain
         public DateTime? UpdatedAt { get; set; }
 
         [ForeignKey("RentalRequestId")]
-        [InverseProperty("RentalRecords")]
-        public virtual RentalRequest? RentalRequest { get; set; }
+        [InverseProperty("RentalRecord")]
+        public virtual RentalRequest RentalRequest { get; set; } = null!;
         [ForeignKey("ReturnConditionId")]
         [InverseProperty("RentalRecords")]
         public virtual ReturnConditionStatus? ReturnCondition { get; set; }

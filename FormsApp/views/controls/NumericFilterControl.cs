@@ -19,6 +19,7 @@ namespace FormsApp.views.controls;
 /// <summary>
 /// A dynamic filter control used for numeric or date-based filtering using an operator and up to two inputs.
 /// </summary>
+//public partial class NumericFilterControl : UserControl
 public partial class NumericFilterControl : BaseSearchControl
 {
     #region Fields

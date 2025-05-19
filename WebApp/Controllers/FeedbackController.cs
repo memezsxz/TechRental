@@ -45,7 +45,6 @@ namespace WebApp.Controllers
             return View(await feedbacks.ToListAsync());
         }
 
-
         // GET: Feedback/Create
         /// <summary>
         /// Renders the form to create a new feedback entry.
@@ -108,7 +107,21 @@ namespace WebApp.Controllers
             if (!User.Identity.IsAuthenticated) return View("Unauthorized");
             if (!User.IsInRole(RoleConstants.Customer)) return View("Forbidden");
 
-            if (!ModelState.IsValid) return View(feedback);
+            if (!ModelState.IsValid)
+            {
+                var errors = ModelState
+                    .Where(m => m.Value.Errors.Any())
+                    .Select(m => new {
+                        Field = m.Key,
+                        Errors = m.Value.Errors.Select(e => e.ErrorMessage)
+                    });
+
+                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
+                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageType"] = "error";
+                return View(feedback);
+            }
+
             try
             {
                 var record = await _context.RentalRecords

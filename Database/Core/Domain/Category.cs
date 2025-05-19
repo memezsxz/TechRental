@@ -22,7 +22,7 @@ namespace Database.Core.Domain
         public string Name { get; set; } = null!;
         [Column("description")]
         [StringLength(255)]
-        public string? Description { get; set; }
+        public string Description { get; set; } = null!;
         [Column("is_active")]
         public bool? IsActive { get; set; }
         [Column("created_at", TypeName = "datetime")]

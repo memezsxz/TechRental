@@ -14,15 +14,15 @@ namespace Database.Core.Domain
         public int Id { get; set; }
         [Column("note")]
         [StringLength(255)]
-        public string? Note { get; set; }
+        public string Note { get; set; } = null!;
         [Column("rate", TypeName = "decimal(5, 2)")]
         public decimal Rate { get; set; }
         [Column("time_date", TypeName = "datetime")]
-        public DateTime? TimeDate { get; set; }
+        public DateTime TimeDate { get; set; }
         [Column("user_id")]
-        public int? UserId { get; set; }
+        public int UserId { get; set; }
         [Column("equipment_id")]
-        public int? EquipmentId { get; set; }
+        public int EquipmentId { get; set; }
         [Column("is_hidden")]
         public bool? IsHidden { get; set; }
         [Column("created_at", TypeName = "datetime")]
@@ -30,16 +30,16 @@ namespace Database.Core.Domain
         [Column("updated_at", TypeName = "datetime")]
         public DateTime? UpdatedAt { get; set; }
         [Column("rental_record_id")]
-        public int? RentalRecordId { get; set; }
+        public int RentalRecordId { get; set; }
 
         [ForeignKey("EquipmentId")]
         [InverseProperty("Feedbacks")]
-        public virtual Equipment? Equipment { get; set; }
+        public virtual Equipment Equipment { get; set; } = null!;
         [ForeignKey("RentalRecordId")]
         [InverseProperty("Feedbacks")]
-        public virtual RentalRecord? RentalRecord { get; set; }
+        public virtual RentalRecord RentalRecord { get; set; } = null!;
         [ForeignKey("UserId")]
         [InverseProperty("Feedbacks")]
-        public virtual User? User { get; set; }
+        public virtual User User { get; set; } = null!;
     }
 }

@@ -60,10 +60,10 @@ namespace FormsApp.views.dialogs
         private void LoadItemInfo()
         {
             tbId.Text = item.Id.ToString();
-            tbUserId.Text = item.UserId?.ToString();
+            tbUserId.Text = item.UserId.ToString();
             tbSourceProseadure.Text = item.SourceProcedure;
             tbErrorMessage.Text = item.ErrorMessage;
-            dtpTimestamp.Text = item.Timestamp?.ToString() ;
+            dtpTimestamp.Text = item.Timestamp.ToString() ;
             tbSource.Text = item.ErrorSource;
         }
 

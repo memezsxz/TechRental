@@ -11,9 +11,7 @@
     <title>@ViewData["Title"] - Tech Rental</title>
     <link rel="stylesheet" href="~/css/Lux.css" asp-append-version="true" />
     
-
-    <link rel="stylesheet" href="~/css/equipmentStyle.css" asp-append-version="true" /> 
-    <link rel="stylesheet" href="~/css/FlatpickrStyleSheet.css" asp-append-version="true" /> 
+    <link rel="stylesheet" href="~/css/GeneralStyle.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/EquipmentIndexStyleSheet.css" asp-append-version="true" /> 
 
 
@@ -64,7 +62,7 @@
 
 
                                 <li class="nav-item dropdown mx-2">
-                                    <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["controller"]?.ToString() == "Shop" ? "active" : "") text-dark" href="#" id="shopDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <a class="nav-link dropdown-toggle @(ViewContext.RouteData.Values["controller"]?.ToString() == "Equipment" ? "active" : "") text-dark" href="#" id="shopDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                                         Shop
                                     </a>
                                     <ul class="dropdown-menu" aria-labelledby="shopDropdown" id="categoryDropdown">
@@ -291,7 +289,7 @@
 
     <!-- shared JS file -->
     <script src="~/js/site-scripts.js" asp-append-version="true"></script>
-    <script src="~/js/ToolBarJavaScript.js" asp-append-version="true"></script>
+    <script src="~/js/general-scripts.js" asp-append-version="true"></script>
     <script src="~/js/feedback.js" asp-append-version="true"></script>
 
     <footer class="border-top footer text-muted">

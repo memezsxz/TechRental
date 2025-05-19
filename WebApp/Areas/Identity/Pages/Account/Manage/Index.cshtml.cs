@@ -126,6 +126,12 @@ namespace WebApp.Areas.Identity.Pages.Account.Manage
                 return NotFound($"Unable to load user with ID '{user.UserID}'.");
             }
 
+            if (User.IsInRole(RoleConstants.Customer)) {
+                if (Input.PhoneNumber == null)
+                {
+                    ModelState.AddModelError("Input.PhoneNumber", "Phone number is required");
+                }
+            }
 
 
             if (!ModelState.IsValid)

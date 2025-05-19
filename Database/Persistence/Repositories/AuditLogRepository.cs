@@ -10,7 +10,7 @@ namespace Database.Persistence.Repositories
     {
         #region Constructor
 
-        public AuditLogRepository(RentalDBContext context, int? userId)
+        public AuditLogRepository(RentalDBContext context, int userId)
             : base(context, userId)
         {
         }
@@ -34,7 +34,7 @@ namespace Database.Persistence.Repositories
             query = query.Cast<AuditLog>().Select(a => new
             {
                 Id = a.Id,
-                UserId = a.UserId.Value,
+                UserId = a.UserId,
                 ActionType = a.ActionType,
                 Entity = a.SourceEntity,
                 AffectedRecordKey = a.AffectedRecordKey,
