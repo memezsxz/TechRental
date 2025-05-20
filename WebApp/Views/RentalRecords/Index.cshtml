@@ -111,8 +111,9 @@
                  @if (!User.IsInRole("Customer"))
                 {
                     <th>Customer ID</th>
+                    <th>Equipment ID</th>
                 }
-                <th>Equipment</th>
+                <th>Equipment Name</th>
                 <th>Pickup Date</th>
                 <th>Return Date</th>
                 <th>Total Cost</th>
@@ -125,8 +126,9 @@
                 @if (!User.IsInRole("Customer"))
                 {
                     <th>Customer ID</th>
+                    <th>Equipment ID</th>
                 }                
-                <th>Equipment</th>
+                <th>Equipment Name</th>
                 <th>Pickup Date</th>
                 <th>Return Date</th>
                 <th>Total Cost</th>
@@ -152,6 +154,7 @@
                     @if (!User.IsInRole("Customer"))
                     {
                         <td>@item.RentalRequest.CustomerId</td>
+                        <td>@item.RentalRequest.EquipmentId</td>
                     }                    
                     <td>@item.EquipmentName</td>
                     <td>@item.PickupDate.ToString("d/M/yyyy")</td>
@@ -171,6 +174,7 @@
                     @if (!User.IsInRole("Customer"))
                     {
                         <td>@item.RentalRequest.CustomerId</td>
+                        <td>@item.RentalRequest.EquipmentId</td>
                     }
                     <td>@item.EquipmentName</td>
                     <td>@item.PickupDate.ToString("d/M/yyyy")</td>

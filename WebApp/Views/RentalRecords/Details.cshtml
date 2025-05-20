@@ -63,11 +63,15 @@
     </div>
 
     <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
+            <label>Equipment Id</label>
+            <input class="form-control" value="@Model.RentalRequest.EquipmentId" readonly />
+        </div>
+        <div class="col-md-4">
             <label>Equipment Title</label>
             <input class="form-control" value="@Model.EquipmentName" readonly />
         </div>
-        <div class="col-md-6">
+        <div class="col-md-4">
             <label>Actual Pickup Date</label>
             <input class="form-control" value="@Model.PickupDate.ToString("g")" readonly />
         </div>
