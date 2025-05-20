@@ -82,8 +82,8 @@ public class NotificationManager
             NotificationTypeId = notificationTypeId,
             MessageContent = message,
             IsRead = false,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
         };
 
         _context.Notifications.Add(notification);

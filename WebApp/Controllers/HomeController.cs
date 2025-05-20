@@ -6,19 +6,24 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using WebApp.Models;
 using Microsoft.Extensions.Options;
+using Database.Core.Domain;
+using Microsoft.EntityFrameworkCore;
+using Database.Persistence;
 
 namespace WebApp.Controllers
 {
     public class HomeController : Controller
     {
+        private readonly RentalDBContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly EmailSettings _emailSettings;
 
 
-        public HomeController(UserManager<ApplicationUser> userManager, IOptions<EmailSettings> emailSettings)
+        public HomeController(UserManager<ApplicationUser> userManager, IOptions<EmailSettings> emailSettings, RentalDBContext context)
         {
             _userManager = userManager;
             _emailSettings = emailSettings.Value;
+            _context = context;
         }
 
         public async Task<IActionResult> Index()
@@ -73,7 +78,7 @@ namespace WebApp.Controllers
                 TempData["MessageText"] = "Error while trying to send message, Try again later.";
                 TempData["MessageType"] = "error";
             }
-            
+
             return RedirectToAction("About");
         }
 
