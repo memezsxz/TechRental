@@ -17,12 +17,14 @@
 }
 
 <nav aria-label="breadcrumb" style="margin-top:2%">
-    <ol class="breadcrumb">
-        <li class="breadcrumb-item">
-            <a asp-controller="Users" asp-action="Index">Users List</a>
-        </li>
-        <li class="breadcrumb-item active" aria-current="page">Edit User</li>
-    </ol>
+    <a asp-controller="Users" asp-action="Index" class="text-success">&lt; Back</a>
+
+    @* <ol class="breadcrumb"> *@
+    @*     <li class="breadcrumb-item"> *@
+    @*         <a asp-controller="Users" asp-action="Index">Users List</a> *@
+    @*     </li> *@
+    @*     <li class="breadcrumb-item active" aria-current="page">Edit User</li> *@
+    @* </ol> *@
 </nav>
 
 <div class="row pt-4">
@@ -115,6 +117,12 @@
 
     <div class="d-flex gap-3 mt-4">
         <button type="submit" class="btn btn-success px-5" value="Save" >Save Changes</button>
+
+            <a asp-action="Index" class="btn btn-outline-success  px-5">
+                Cancel
+            </a>
+        </div>
+
     </div>
 </form>
 

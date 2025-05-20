@@ -126,18 +126,14 @@ namespace WebApp.Areas.Identity.Pages.Account
 
         public async Task OnGetAsync(string returnUrl = null)
         {
+            //check if all the roles exsist in the idintity db
             await ContextSeed.SeedRoleAsync(_userManager, _roleManager);
+
+            //add admin if there is none in the db
             await ContextSeed.SeedAdminAsync(_userManager, _roleManager, _context);
+
+            //add manager if there is none in the db
             await ContextSeed.SeedManagerAsync(_userManager, _roleManager, _context);
-
-            
-
-            //if (!_roleManager.RoleExistsAsync("Admin").GetAwaiter().GetResult())
-            //{
-            //    _roleManager.CreateAsync(new IdentityRole("Admin")).GetAwaiter().GetResult();
-            //    _roleManager.CreateAsync(new IdentityRole("Customer")).GetAwaiter().GetResult();
-            //    _roleManager.CreateAsync(new IdentityRole("Manager")).GetAwaiter().GetResult();
-            //}
 
 
             ReturnUrl = returnUrl;
