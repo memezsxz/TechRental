@@ -21,20 +21,20 @@
     <h2 class="text-center mb-5 page-title">Users List</h2>
 
     <!-- Filter and Search Form -->
-    <form method="get" asp-controller="Users" asp-action="Index" class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4" style="max-width: 1100px; margin: 0 auto;">
-        <div style="flex: 1; min-width: 180px;">
-            <select class="form-select form-select-sm" asp-for="RoleFilter"
+    <form method="get" id="auto-filter-form" asp-controller="Users" asp-action="Index" class="container d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3 auto-filter-form" style="max-width: 1100px;">
+        <div style="flex: 1; min-width: 200px;">
+            <select class="form-select" style="min-width: 200px;" asp-for="RoleFilter"
                     asp-items="@Model.RolesList.Select(a => new SelectListItem{Text = a.RoleName, Value = a.Id.ToString()})">
                 <option value="">All Roles</option>
             </select>
         </div>
 
-        <div style="flex: 2; min-width: 240px;">
-            <input type="text" class="form-control form-control-sm" placeholder="Search by First Name, Last Name" asp-for="SearchString" />
+        <div style="flex: 2; min-width: 300px;" style="flex: 2; min-width: 300px;">
+            <input type="text" class="form-control" placeholder="Search by User ID, email" asp-for="SearchString" style="min-width: 240px;" />
         </div>
 
         <div style="flex: 1; min-width: 180px;">
-            <select id="sortBy" name="sortBy" class="form-select form-select-sm">
+            <select id="sortBy" name="sortBy" class="form-select" style="min-width: 180px; font-size:13px">
                 <option value="">Default</option>
                 @foreach (var option in Model.SortOptions)
                 {
@@ -46,8 +46,8 @@
         </div>
 
         <div class="d-flex gap-2">
-            <button class="btn btn-success btn-sm px-4" type="submit">Search</button>
-            <a asp-controller="Users" asp-action="Index" class="btn btn-outline-danger btn-sm px-4">Clear</a>
+            <button class="btn btn-success px-4" type="submit">Search</button>
+            <a asp-controller="Users" asp-action="Index" class="btn btn-danger px-4">Clear</a>
         </div>
     </form>
 
@@ -65,7 +65,7 @@
         <tbody>
             @foreach (var item in Model.UsersList)
             {
-                <tr class="user-row"
+                <tr class="user-row clickable-row"
                     data-bs-toggle="tooltip"
                     data-bs-placement="top"
                     title="Click to edit user"
@@ -145,22 +145,22 @@
 
 
 @section Scripts {
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            // Tooltip activation
-            const tooltipList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
-            tooltipList.map(function (el) {
-                return new bootstrap.Tooltip(el);
-            });
+    @* <script> *@
+    @*     document.addEventListener("DOMContentLoaded", function () { *@
+    @*         // Tooltip activation *@
+    @*         const tooltipList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]')); *@
+    @*         tooltipList.map(function (el) { *@
+    @*             return new bootstrap.Tooltip(el); *@
+    @*         }); *@
 
-            // Row click behavior
-            const rows = document.querySelectorAll(".user-row");
-            rows.forEach(row => {
-                row.addEventListener("click", () => {
-                    const url = row.getAttribute("data-href");
-                    if (url) window.location.href = url;
-                });
-            });
-        });
-    </script>
+    @*         // Row click behavior *@
+    @*         const rows = document.querySelectorAll(".user-row"); *@
+    @*         rows.forEach(row => { *@
+    @*             row.addEventListener("click", () => { *@
+    @*                 const url = row.getAttribute("data-href"); *@
+    @*                 if (url) window.location.href = url; *@
+    @*             }); *@
+    @*         }); *@
+    @*     }); *@
+    @* </script> *@
 }
