@@ -31,13 +31,15 @@ namespace WebApp.Controllers
         private readonly IUnitOfWork _unitOfWork;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
+        private readonly RentalDBContext _context;
 
         // Constructor - Dependency injection of UnitOfWork, UserManager, and EmailSender
-        public UsersController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IEmailSender emailSender)
+        public UsersController(IUnitOfWork unitOfWork, UserManager<ApplicationUser> userManager, IEmailSender emailSender, RentalDBContext context)
         {
             _unitOfWork = unitOfWork;
             _userManager = userManager;
             _emailSender = emailSender;
+            _context = context;
         }
 
         // GET: Display list of users with optional search, filter, and pagination
@@ -110,7 +112,7 @@ namespace WebApp.Controllers
 
                 return View(viewModel);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 return View("Error");
             }
@@ -130,6 +132,7 @@ namespace WebApp.Controllers
 
             if (!ModelState.IsValid)
             {
+
                 // Return with validation errors and reload role list
                 editUser.RolesList = await _unitOfWork.UserRoles.GetAllAsync();
                 return View(editUser);
@@ -137,6 +140,25 @@ namespace WebApp.Controllers
 
             try
             {
+
+
+                var trackedUser = await _context.Users.FindAsync(editUser.User.Id);
+                if (trackedUser == null)
+                {
+                    return NotFound();
+                }
+
+                var oldData = System.Text.Json.JsonSerializer.Serialize(trackedUser);
+
+                // Update the tracked entity instead of replacing it
+                trackedUser.FirstName = editUser.User.FirstName;
+                trackedUser.LastName = editUser.User.LastName;
+                trackedUser.PhoneNumber = editUser.User.PhoneNumber;
+                trackedUser.UpdatedAt = DateTime.Now;
+
+                var newData = System.Text.Json.JsonSerializer.Serialize(trackedUser);
+
+
                 // Save changes to the custom user table (not Identity)
                 await _unitOfWork.Users.UpdateAsync(editUser.User);
                 await _unitOfWork.SaveChangesAsync();
@@ -174,6 +196,17 @@ namespace WebApp.Controllers
                     }
                 }
 
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await AuditLogger.LogActionAsync(
+                    context: _context,
+                    userId: userid,
+                    actionType: "Edit",
+                    sourceEntity: "Users",
+                    dataBefore: oldData,
+                    dataAfter: newData,
+                    affectedRecordKey: editUser.User.Id.ToString()
+                );
+
                 TempData["MessageText"] = "User was saved successfully!";
                 TempData["MessageType"] = "success";
                 return RedirectToAction(nameof(Index));
@@ -208,6 +241,17 @@ namespace WebApp.Controllers
 
             try
             {
+
+                var trackedUser = await _context.Users.FindAsync(id);
+                if (trackedUser == null)
+                {
+                    return NotFound();
+                }
+
+                var oldData = System.Text.Json.JsonSerializer.Serialize(trackedUser);
+
+                
+
                 // Get user by ID
                 var user = await _unitOfWork.Users.GetAsync(id.Value);
                 if (user == null) return View("NotFound");
@@ -226,6 +270,19 @@ namespace WebApp.Controllers
                 user.Email = "Deleted" + user.Id;
                 await _unitOfWork.Users.UpdateAsync(user);
                 await _unitOfWork.SaveChangesAsync();
+
+
+
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await AuditLogger.LogActionAsync(
+                    context: _context,
+                    userId: userid,
+                    actionType: "Delete",
+                    sourceEntity: "Users",
+                    dataBefore: oldData,
+                    dataAfter:  " ",
+                    affectedRecordKey: id.ToString()
+                );
 
                 return Json(new
                 {
