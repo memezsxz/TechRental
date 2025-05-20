@@ -11,14 +11,12 @@ namespace WebApp.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly EmailSettings _emailSettings;
 
 
-        public HomeController(ILogger<HomeController> logger, UserManager<ApplicationUser> userManager, IOptions<EmailSettings> emailSettings)
+        public HomeController(UserManager<ApplicationUser> userManager, IOptions<EmailSettings> emailSettings)
         {
-            _logger = logger;
             _userManager = userManager;
             _emailSettings = emailSettings.Value;
         }
