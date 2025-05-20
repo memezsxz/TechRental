@@ -158,26 +158,37 @@ namespace WebApp.Controllers
                 trackedCategory.UpdatedAt = DateTime.Now;
 
                 var newData = System.Text.Json.JsonSerializer.Serialize(trackedCategory);
-
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
                 try
                 {
                     await _context.SaveChangesAsync();
                 }
-                catch (DbUpdateConcurrencyException)
+                catch (DbUpdateConcurrencyException ex)
                 {
                     if (!await CategoryExists(category.Id))
                         return NotFound();
                     else
+                    {
+                        // log the error
+                        await ErrorLogger.LogErrorAsync(
+                            context: _context,
+                            userId: userid,
+                            errorMessage: ex.Message,
+                            errorSource: ex.Source ?? "Unknown",
+                            sourceProcedure: Exception.ReferenceEquals(ex.TargetSite, null) ? "Unknown" : ex.TargetSite.Name
+                        );
+
                         throw;
+                    }
                 }
 
                 TempData["MessageText"] = "Category edited successfully.";
                 TempData["MessageType"] = "success";
-                var userid = (int) (await _userManager.GetUserAsync(User)).UserID;
+
                 await AuditLogger.LogActionAsync(
                     context: _context,
                     userId: userid,
-                    actionType: "Edit",
+                    actionType: "Update",
                     sourceEntity: "Category",
                     dataBefore: oldData,
                     dataAfter: newData,
