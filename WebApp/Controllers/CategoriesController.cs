@@ -27,8 +27,19 @@ namespace WebApp.Controllers
             _userManager = userManager;
         }
 
+        /// <summary>
+        /// Displays a list of all categories in the system.
+        /// - Restricted to authenticated Admin users only.
+        /// - Returns Forbidden or Unauthorized views based on access checks.
+        /// 
+        /// Returns:
+        /// - View of category list if successful
+        /// - View("Forbidden") if not an Admin
+        /// - View("Unauthorized") if not logged in
+        /// </summary>
+
         // GET: Categories
-        public  IActionResult Index()
+        public IActionResult Index()
         {
             if (!User.Identity.IsAuthenticated) {
                 return View("Unauthorized");
@@ -44,7 +55,15 @@ namespace WebApp.Controllers
                         Problem("Entity set 'RentalDBContext.Categories'  is null.");
         }
 
-       
+        /// <summary>
+        /// Displays the form for creating a new category.
+        /// - Restricted to authenticated Admin users only.
+        /// 
+        /// Returns:
+        /// - Create view for category
+        /// - View("Forbidden") or View("Unauthorized") if access is denied
+        /// </summary>
+
         // GET: Categories/Create
         public IActionResult Create()
         {
@@ -60,6 +79,17 @@ namespace WebApp.Controllers
 
             return View();
         }
+
+        /// <summary>
+        /// Handles submission of the category creation form.
+        /// - Binds form data to a new Category entity.
+        /// - Restricted to authenticated Admin users only.
+        /// - Adds the category to the database and redirects to Index on success.
+        /// 
+        /// Returns:
+        /// - Redirects to Index on success
+        /// - Returns form with validation errors otherwise
+        /// </summary>
 
         // POST: Categories/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -91,6 +121,16 @@ namespace WebApp.Controllers
             return View(category);
         }
 
+        /// <summary>
+        /// Displays the edit form for a specific category by ID.
+        /// - Restricted to authenticated Admin users only.
+        /// - Returns 404 if category not found.
+        /// 
+        /// Returns:
+        /// - Edit view with pre-filled category data
+        /// - NotFound or Forbidden/Unauthorized view if conditions fail
+        /// </summary>
+
         // GET: Categories/Edit/5
         public IActionResult Edit(int id)
         {
@@ -118,6 +158,16 @@ namespace WebApp.Controllers
             return View(category);
         }
 
+        /// <summary>
+        /// Handles form submission for editing a category.
+        /// - Restricted to authenticated Admin users only.
+        /// - Compares old and new data for audit logging.
+        /// - Handles concurrency and logs any update exceptions.
+        /// 
+        /// Returns:
+        /// - Redirects to Index on success
+        /// - Returns form view if validation fails or error occurs
+        /// </summary>
         // POST: Categories/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -200,6 +250,13 @@ namespace WebApp.Controllers
             return View(category);
         }
 
+
+        /// <summary>
+        /// Checks if a category with a given ID exists in the database.
+        /// 
+        /// Returns:
+        /// - True if category exists, otherwise false
+        /// </summary>
         private async Task<bool> CategoryExists(int id)
         {
             return await _context.Categories.AnyAsync(c => c.Id == id);

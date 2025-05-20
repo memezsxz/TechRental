@@ -357,6 +357,7 @@ namespace WebApp.Controllers
                 // Only proceed if model is valid
                 if (ModelState.IsValid)
                 {
+                    var oldData = System.Text.Json.JsonSerializer.Serialize(existingEquipment);
                     // Manually map allowed fields
                     existingEquipment.Name = equipment.Name;
                     existingEquipment.Description = equipment.Description;
@@ -364,10 +365,23 @@ namespace WebApp.Controllers
                     existingEquipment.CategoryId = equipment.CategoryId;
                     existingEquipment.ConditionStatusId = equipment.ConditionStatusId;
                     existingEquipment.AvailabilityStatusId = equipment.AvailabilityStatusId;
-                    existingEquipment.UpdatedAt = DateTime.UtcNow;
+                    existingEquipment.UpdatedAt = DateTime.Now;
+
+                    var newData = System.Text.Json.JsonSerializer.Serialize(existingEquipment);
 
                     _context.Update(existingEquipment);
                     await _context.SaveChangesAsync();
+
+                    var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                    await AuditLogger.LogActionAsync(
+                        context: _context,
+                        userId: userid,
+                        actionType: "Update",
+                        sourceEntity: "Equipment",
+                        dataBefore: oldData,
+                        dataAfter: newData,
+                        affectedRecordKey: id.ToString()
+                    );
 
                     TempData["MessageText"] = "Equipment was updated successfully!";
                     TempData["MessageType"] = "success";
@@ -391,6 +405,15 @@ namespace WebApp.Controllers
             }
             catch (Exception ex)
             {
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await ErrorLogger.LogErrorAsync(
+                context: _context,
+                userId: userid,
+                errorMessage: ex.Message,
+                errorSource: ex.Source ?? "Unknown",
+                sourceProcedure: ex.TargetSite?.Name ?? "Unknown"
+            );
+
                 TempData["MessageText"] = "An unexpected error occurred: " + ex.Message;
                 TempData["MessageType"] = "error";
             }
@@ -454,10 +477,23 @@ namespace WebApp.Controllers
                     {
                         await ImageManager.DeleteImageFromDatabaseAndS3(_context, equipment.ImageId.Value);
                     }
+                    var oldData = System.Text.Json.JsonSerializer.Serialize(equipment);
 
                     // Delete the equipment
+                    
                     _context.Equipment.Remove(equipment);
                     await _context.SaveChangesAsync();
+
+                    var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                    await AuditLogger.LogActionAsync(
+                        context: _context,
+                        userId: userid,
+                        actionType: "Delete",
+                        sourceEntity: "Equipment",
+                        dataBefore: oldData,
+                        dataAfter: " ",
+                        affectedRecordKey: id.ToString()
+                    );
 
                     return Json(new
                     {
@@ -470,6 +506,15 @@ namespace WebApp.Controllers
             }
             catch (Exception ex)
             {
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await ErrorLogger.LogErrorAsync(
+                    context: _context,
+                    userId: userid,
+                    errorMessage: ex.Message,
+                    errorSource: ex.Source ?? "Unknown",
+                    sourceProcedure: ex.TargetSite?.Name ?? "Unknown"
+                );
+
                 return Json(new
                 {
                     success = false,
