@@ -58,6 +58,7 @@
     <input type="hidden" asp-for="User.CreatedAt" />
     <input type="hidden" asp-for="User.UpdatedAt" />
     <input type="hidden" asp-for="User.ImageId" />
+    <input type="hidden" asp-for="User.Email" />
 
 
 
@@ -77,7 +78,7 @@
 
     <div class="mb-3">
         <label asp-for="User.Email" class="form-label">Email</label>
-        <input asp-for="User.Email" class="form-control" readonly/>
+        <input asp-for="User.Email" class="form-control" disabled/>
         <span asp-validation-for="User.Email" class="text-danger"></span>
     </div>
 
