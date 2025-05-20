@@ -189,8 +189,6 @@ namespace Database.Persistence
 
         #endregion
 
-
-
         #region IDisposable
 
         /// <summary>

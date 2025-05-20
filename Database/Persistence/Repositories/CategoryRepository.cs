@@ -57,6 +57,12 @@ namespace Database.Persistence.Repositories
                 .ToDictionary(c => c.Id, c => c.Name);
         }
 
+        /// <inheritdoc/>
+        public bool IsDuplicateName(string name)
+        {
+            return RentalDBContext.Categories.Any(c => c.Name.ToLower() == name.Trim().ToLower());
+        }
+
         #endregion
 
         #region View Projection

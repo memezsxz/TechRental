@@ -24,7 +24,7 @@ namespace FormsApp
         /// <summary>
         /// Currently logged-in user ID
         /// </summary>
-        public static int userID = 2;
+        public static int userID = 40;
 
         /// <summary>
         /// Type/role of the currently logged-in user (e.g., "admin", "manager")
@@ -309,14 +309,14 @@ namespace FormsApp
                 UnitOfWork unitOfWork = new UnitOfWork(userID);
 
                 string sourceProc = FormatStackTraceForSourceProcedure(e);
-                string className = e.TargetSite?.DeclaringType?.Name ?? "";
+                string className = (e.TargetSite?.DeclaringType?.Name ?? "") + e.InnerException?.Message;
                 if (!string.IsNullOrWhiteSpace(className)) sourceProc = className + "." + sourceProc;
                 sourceProc = Truncate(sourceProc, 255);
 
                 var errorLog = new SystemErrorLog
                 {
                     ErrorMessage = Truncate(e.GetType().Name + ": " + e.Message, 255),
-                    ErrorSource = Truncate(e.Source, 255),
+                    ErrorSource = "FormsApp",
                     SourceProcedure = sourceProc,
                     UserId = unitOfWork.UserId,
                     Timestamp = DateTime.Now
@@ -334,6 +334,9 @@ namespace FormsApp
             }
             catch (Exception exception)
             {
+                //Console.WriteLine(exception.Message);
+                //Console.WriteLine(exception.InnerException?.Message);
+                //Console.WriteLine(exception.StackTrace);
                 MessageBox.Show("Could not report error, please contact support.", "Error", MessageBoxButtons.OK,
                     MessageBoxIcon.Error);
             }
@@ -391,13 +394,6 @@ namespace FormsApp
             if (string.IsNullOrEmpty(input)) return string.Empty;
             return input.Length <= maxLength ? input : input.Substring(0, maxLength - 3) + "...";
         }
-        #endregion
-
-        #region File Handling
-
-
-
-
         #endregion
     }
 }
