@@ -1,7 +1,6 @@
 ﻿using Database.Persistence;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Helper;
 
 namespace WebApp.Controllers
 {

@@ -1,6 +1,5 @@
 ﻿using Database.Persistence;
 using Microsoft.AspNetCore.Mvc;
-using Database.Core.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace WebApp.Controllers

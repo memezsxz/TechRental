@@ -8,9 +8,17 @@
 
   <ItemGroup>
     <Compile Remove="Helpers\**" />
+    <Compile Remove="Views\Notification\**" />
     <Content Remove="Helpers\**" />
+    <Content Remove="Views\Notification\**" />
     <EmbeddedResource Remove="Helpers\**" />
+    <EmbeddedResource Remove="Views\Notification\**" />
     <None Remove="Helpers\**" />
+    <None Remove="Views\Notification\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Controllers\NotificationController.cs" />
   </ItemGroup>
 
   <ItemGroup>
