@@ -108,6 +108,7 @@ namespace FormsApp.views.dialogs
         protected override void PrepareForEdit()
         {
             LoadItemInfo();
+            if (canDelete) deleteLabel.Visible = true;
         }
 
         /// <summary>
@@ -129,6 +130,7 @@ namespace FormsApp.views.dialogs
         }
 
         #endregion
+
         #region Dropdown Loaders
 
         /// <summary>
@@ -223,6 +225,7 @@ namespace FormsApp.views.dialogs
         }
 
         #endregion
+
         #region Validation and Image Upload
 
         /// <summary>

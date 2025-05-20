@@ -47,7 +47,6 @@ namespace Database.Persistence.Repositories
                 Id = e.Id,
                 UserId = e.UserId,
                 ErrorSource = e.ErrorSource,
-                SourceProcedure = e.SourceProcedure,
                 Timestamp = e.Timestamp,
             }).Cast<object>();
         }

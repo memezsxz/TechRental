@@ -1,25 +1,12 @@
 ﻿#region Using Directives
-
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.Globalization;
-using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
-using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 using Database.Core.Domain;
-using Database.Core.Repositories;
 using Database.Persistence;
 using Database.Search;
 using FormsApp.views.controls;
 using FormsApp.views.dialogs;
-using Microsoft.EntityFrameworkCore;
-using Sprache;
 
 #endregion
 
@@ -399,19 +386,19 @@ public partial class BaseDBSetView : UserControl
             // Determine which form to open based on the entity type
             if (currentType == typeof(Equipment))
             {
-                form = new ManageEquipment(type, id);
+                form = new ManageEquipment(type, id, allowDelete);
             }
             else if (currentType == typeof(RentalRequest))
             {
-                form = new ManageRental(ManageRental.ItemType.Request, type, id);
+                form = new ManageRental(ManageRental.ItemType.Request, type, id, allowDelete);
             }
             else if (currentType == typeof(RentalRecord))
             {
-                form = new ManageRental(ManageRental.ItemType.Record, type, id);
+                form = new ManageRental(ManageRental.ItemType.Record, type, id, allowDelete);
             }
             else if (currentType == typeof(Category))
             {
-                form = new ManageCategory(type, id);
+                form = new ManageCategory(type, id, allowDelete);
             }
             else if (currentType == typeof(User))
             {

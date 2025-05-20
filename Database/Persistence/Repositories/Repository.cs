@@ -211,8 +211,8 @@ internal partial class Repository<TEntity> : IRepository<TEntity> where TEntity 
                 AffectedRecordKey = entry.Property("Id").CurrentValue?.ToString()
                                  ?? entry.Property("Id").OriginalValue?.ToString()
                                  ?? "0",
-                DataBeforeAction = before.Count > 0 ? JsonSerializer.Serialize(before) : null,
-                DataAfterAction = after.Count > 0 ? JsonSerializer.Serialize(after) : null,
+                DataBeforeAction = before.Count > 0 ? JsonSerializer.Serialize(before) : "{}",
+                DataAfterAction = after.Count > 0 ? JsonSerializer.Serialize(after) : "{}",
                 Timestamp = DateTime.Now,
                 SourceEntity = typeof(TEntity).Name,
                 Source = "FormsApp",

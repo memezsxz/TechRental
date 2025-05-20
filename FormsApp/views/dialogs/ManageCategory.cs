@@ -150,6 +150,7 @@ namespace FormsApp.views.dialogs
         }
 
         #endregion
+       
         #region Validation and Utility
 
         /// <summary>
@@ -172,6 +173,16 @@ namespace FormsApp.views.dialogs
                 required: true,
                 minLength: 3,
                 maxLength: 100);
+
+            bool duplicate = context.Categories.IsDuplicateName(lblName.Text.Trim());
+
+            if (isValidInput && duplicate)
+            {
+                lblNameError.Text = "A category with the same name already exists";
+                lblNameError.Visible = true;
+            }
+
+            isValidInput &= !duplicate;
 
             // Validate Description field (required, length 3–255)
             isValidInput &= ValidateTextLength(
