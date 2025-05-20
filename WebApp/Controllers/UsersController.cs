@@ -77,8 +77,16 @@ namespace WebApp.Controllers
 
                 return View(viewModel);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await ErrorLogger.LogErrorAsync(
+                    context: _context,
+                    userId: userid,
+                    errorMessage: ex.Message,
+                    errorSource: ex.Source ?? "Unknown",
+                    sourceProcedure: ex.TargetSite?.Name ?? "Unknown"
+                );
                 // In case of any unhandled exception, show the error view
                 return View("Error");
             }
@@ -114,6 +122,14 @@ namespace WebApp.Controllers
             }
             catch (Exception ex)
             {
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await ErrorLogger.LogErrorAsync(
+                    context: _context,
+                    userId: userid,
+                    errorMessage: ex.Message,
+                    errorSource: ex.Source ?? "Unknown",
+                    sourceProcedure: ex.TargetSite?.Name ?? "Unknown"
+                );
                 return View("Error");
             }
         }
@@ -200,8 +216,8 @@ namespace WebApp.Controllers
                 await AuditLogger.LogActionAsync(
                     context: _context,
                     userId: userid,
-                    actionType: "Edit",
-                    sourceEntity: "Users",
+                    actionType: "Update",
+                    sourceEntity: "User",
                     dataBefore: oldData,
                     dataAfter: newData,
                     affectedRecordKey: editUser.User.Id.ToString()
@@ -211,16 +227,35 @@ namespace WebApp.Controllers
                 TempData["MessageType"] = "success";
                 return RedirectToAction(nameof(Index));
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbUpdateConcurrencyException ex)
             {
+
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await ErrorLogger.LogErrorAsync(
+                    context: _context,
+                    userId: userid,
+                    errorMessage: ex.Message,
+                    errorSource: ex.Source ?? "Unknown",
+                    sourceProcedure: ex.TargetSite?.Name ?? "Unknown"
+                );
                 // Handle case where user may have been modified/deleted by someone else
                 if (!await _unitOfWork.Users.UserExistsAsync(editUser.User.Id))
                     return View("NotFound");
                 else
                     throw;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await ErrorLogger.LogErrorAsync(
+                    context: _context,
+                    userId: userid,
+                    errorMessage: ex.Message,
+                    errorSource: ex.Source ?? "Unknown",
+                    sourceProcedure: ex.TargetSite?.Name ?? "Unknown"
+                );
+
                 // Handle other exceptions
                 TempData["faild"] = "Failed to update user.";
                 editUser.RolesList = await _unitOfWork.UserRoles.GetAllAsync();
@@ -278,7 +313,7 @@ namespace WebApp.Controllers
                     context: _context,
                     userId: userid,
                     actionType: "Delete",
-                    sourceEntity: "Users",
+                    sourceEntity: "User",
                     dataBefore: oldData,
                     dataAfter:  " ",
                     affectedRecordKey: id.ToString()
@@ -292,8 +327,18 @@ namespace WebApp.Controllers
                     type = "success"
                 });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await ErrorLogger.LogErrorAsync(
+                    context: _context,
+                    userId: userid,
+                    errorMessage: ex.Message,
+                    errorSource: ex.Source ?? "Unknown",
+                    sourceProcedure: ex.TargetSite?.Name ?? "Unknown"
+                );
+
                 return Json(new { success = false, message = "Unexpected error occurred.", type = "error" });
             }
         }
@@ -329,8 +374,9 @@ namespace WebApp.Controllers
                     if (addr.Address != user.Email)
                         ModelState.AddModelError("User.Email", "Invalid email address format.");
                 }
-                catch
+                catch(Exception ex)
                 {
+                    
                     ModelState.AddModelError("User.Email", "Invalid email address format.");
                 }
             }
@@ -369,8 +415,16 @@ namespace WebApp.Controllers
 
                 return RedirectToAction("Index");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
+                await ErrorLogger.LogErrorAsync(
+                    context: _context,
+                    userId: userid,
+                    errorMessage: ex.Message,
+                    errorSource: ex.Source ?? "Unknown",
+                    sourceProcedure: ex.TargetSite?.Name ?? "Unknown"
+                );
                 TempData["MessageText"] = "Failed to send reset link.";
                 TempData["MessageType"] = "error";
                 return RedirectToAction("Index");
