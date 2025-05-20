@@ -19,75 +19,113 @@ namespace WebApp.Controllers
             {
                 return View("Forbidden");
             }
-            {
-                var role = User.IsInRole("Admin") ? "Admin" : "Manager";
 
-                var stats = new
+            var role = User.IsInRole("Admin") ? "Admin" : "Manager";
+
+            var pending = await _context.RentalRequests
+                .CountAsync(r => r.Status.StatusName == "Pending");
+
+            var approved = await _context.RentalRequests
+                .CountAsync(r => r.Status.StatusName == "Approved");
+
+            var rejected = await _context.RentalRequests
+                .CountAsync(r => r.Status.StatusName == "Rejected");
+
+            var totalRequests = await _context.RentalRequests.CountAsync();
+
+            var damaged = await _context.Equipment
+                .CountAsync(e => e.ConditionStatus.ConditionName == "Needs Repair");
+
+            var repairCost = await _context.RentalRecords
+                .SumAsync(r => (decimal?)r.TotalCost) ?? 0;
+
+            var recent = await _context.RentalRequests
+                .OrderByDescending(r => r.CreatedAt)
+                .Where(r => r.Status.StatusName == "Pending")
+                .Take(5)
+                .Select(r => new
                 {
+                    RequestId = r.Id,
+                    EquipmentName = r.Equipment.Name,
+                    Category = r.Equipment.Category.Name,
+                    Status = r.Status.StatusName,
+                    CustomerName = r.Customer.FirstName + " " + r.Customer.LastName,
+                    StartDate = r.StartDate,
+                    ReturnDate = r.ReturnDate
+                })
+                .ToListAsync();
 
-                    PendingRequests = await _context.RentalRequests
-                        .Include(r => r.Status)
-                        .CountAsync(r => r.Status.StatusName == "Pending"),
+            int totalUsers = 0, admins = 0, managers = 0;
 
-                    ApprovedRequests = await _context.RentalRequests
-                        .Include(r => r.Status)
-                        .CountAsync(r => r.Status.StatusName == "Approved"),
+            if (role == "Admin")
+            {
+                totalUsers = await _context.Users
+                    .Where(u => u.IsActive.Value).CountAsync();
 
-                    RejectedRequests = await _context.RentalRequests
-                        .Include(r => r.Status)
-                        .CountAsync(r => r.Status.StatusName == "Rejected"),
+                admins = await _context.Users
+                    .Where(u => u.IsActive.Value && u.Role.RoleName == "Admin")
+                    .CountAsync();
 
-                    TotalRequests = await _context.RentalRequests.CountAsync(),
-
-                    DamagedEquipment = await _context.Equipment
-                        .Include(e => e.ConditionStatus)
-                        .CountAsync(e => e.ConditionStatus.ConditionName == "Needs Repair"),
-
-                    TotalRepairCost = await _context.RentalRecords
-                        .SumAsync(r => (decimal?)r.TotalCost) ?? 0,
-
-                    RecentRequests = await _context.RentalRequests
-                        .Include(r => r.Equipment)
-                        .ThenInclude(e => e.Category)
-                        .Include(r => r.Status)
-                        .Include(r => r.Customer)
-                        .OrderByDescending(r => r.CreatedAt)
-                        .Where(r => r.Status.StatusName == "Pending")
-                        .Take(5)
-                        .Select(r => new
-                        {
-                            RequestId = r.Id,
-                            EquipmentName = r.Equipment.Name,
-                            Category = r.Equipment.Category.Name,
-                            Status = r.Status.StatusName,
-                            CustomerName = r.Customer.FirstName + " " + r.Customer.LastName,
-                            StartDate = r.StartDate,
-                            ReturnDate = r.ReturnDate
-                        })
-                        .ToListAsync(),
-
-                    TotalUsers = role == "Admin" ? await _context.Users
-                    .Where(u => u.IsActive == true)
-                    .CountAsync() : 0,
-
-                    Admins = role == "Admin" ?
-                        await _context.Users
-                            .Include(u => u.Role)
-                            .Where(u => u.IsActive == true)
-                            .CountAsync(u => u.Role.RoleName == "Admin") : 0,
-
-                    Managers = role == "Admin" ?
-                        await _context.Users
-                            .Include(u => u.Role)
-                            .Where(u => u.IsActive == true)
-                            .CountAsync(u => u.Role.RoleName == "Manager") : 0
-                };
-
-                ViewBag.Role = role;
-                ViewBag.Stats = stats;
-
-                return View();
+                managers = await _context.Users
+                    .Where(u => u.IsActive.Value && u.Role.RoleName == "Manager")
+                    .CountAsync();
             }
+
+            var stats = new
+            {
+                PendingRequests = pending,
+                ApprovedRequests = approved,
+                RejectedRequests = rejected,
+                TotalRequests = totalRequests,
+                DamagedEquipment = damaged,
+                TotalRepairCost = repairCost,
+                RecentRequests = recent,
+                TotalUsers = totalUsers,
+                Admins = admins,
+                Managers = managers
+            };
+
+            ViewBag.Role = role;
+            ViewBag.Stats = stats;
+
+            return View();
         }
+
+
+
+        public async Task<IActionResult> ChartData()
+        {
+            if (!(User.IsInRole(RoleConstants.Admin) || User.IsInRole(RoleConstants.Manager)))
+            {
+                return View("Forbidden");
+            }
+
+            var statusCounts = await _context.RentalRequests
+                .Include(r => r.Status)
+                .GroupBy(r => r.Status.StatusName)
+                .Select(g => new
+                {
+                    Status = g.Key,
+                    Count = g.Count()
+                }).ToListAsync();
+
+            var mostRented = await _context.RentalRequests
+                .GroupBy(r => r.Equipment.Name)
+                .Select(g => new
+                {
+                    EquipmentName = g.Key,
+                    Count = g.Count()
+                })
+                .OrderByDescending(g => g.Count)
+                .Take(4)
+                .ToListAsync();
+
+            return Json(new
+            {
+                StatusCounts = statusCounts,
+                MostRented = mostRented
+            });
+        }
+
     }
 }

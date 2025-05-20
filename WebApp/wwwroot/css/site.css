@@ -35,7 +35,7 @@ body {
 }
 
 .dashboard-card {
-    background-color: #baeeb6;
+    background-color: #ffff;
     padding: 20px;
     text-align: center;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -44,6 +44,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 180px;
+    border: solid 1px #baeeb6;
 }
 
     .dashboard-card img {
