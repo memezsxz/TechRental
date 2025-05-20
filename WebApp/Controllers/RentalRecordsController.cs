@@ -30,8 +30,7 @@ namespace WebApp.Controllers
         /// - Filtering by due status (for transactions)
         /// - Sorting and pagination
         /// </summary>
-        public async Task<IActionResult> Index(string search, string sortBy, string status, string conditionFilter,
-            string dueFilter, int page = 1, int pageSize = 10)
+        public async Task<IActionResult> Index(string search, string sortBy, string conditionFilter, string dueFilter, string status = "transaction", int page = 1, int pageSize = 10)
         {
             // Block unauthenticated users
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
@@ -327,6 +326,7 @@ namespace WebApp.Controllers
                 .FirstOrDefaultAsync(r => r.Id == id);
 
             if (record == null) return View("NotFound"); // HTTP 404
+            if (record.ActualReturnDate != null) return View("Forbidden");
 
             ViewBag.Mode = "return"; // Important for conditional rendering in the shared view
             ViewBag.RentalRequest = record.RentalRequest;
