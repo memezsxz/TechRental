@@ -212,7 +212,9 @@ namespace Database.Persistence.Repositories
                     var rentalRequestId = entry.Property("RentalRequestId").CurrentValue as int?;
 
                     // Fetch the corresponding RentalRequest from the database to get the user ID
-                    var rentalRequest = context.RentalRequests.Find(rentalRequestId);
+                    var rentalRequest = context.RentalRequests
+                        .Include(r => r.Equipment)
+                        .FirstOrDefault(r => r.Id == rentalRequestId);
                     var userId = rentalRequest.CustomerId;
 
                     // If a valid user ID was found, yield a new notification
@@ -222,7 +224,7 @@ namespace Database.Persistence.Repositories
                         {
                             UserId = userId,
                             NotificationTypeId = 4, // Hardcoded type ID for "Return confirmed"
-                            MessageContent = $"Return for rental #{rentalRequestId} has been confirmed.",
+                            MessageContent = $"Return of {rentalRequest.Equipment.Name} for rental #{rentalRequestId} has been confirmed.",
                             IsRead = false,
                             CreatedAt = DateTime.Now,
                             UpdatedAt = DateTime.Now

@@ -123,7 +123,7 @@ namespace FormsApp.views.dialogs
                 ddlReqStatus.Enabled = false;
             }
 
-            if (request.Status?.StatusName.ToLower() != "approved")
+            if (request.Status?.StatusName.ToLower() != "approved" && request.Status?.StatusName.ToLower() != "pending")
             {
                 lblClose.Location = lblSave.Location;
                 lblSave.Visible = false;

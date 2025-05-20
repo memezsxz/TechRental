@@ -17,9 +17,9 @@ namespace Database.Persistence.Repositories
 
         private static readonly List<(int requestStatusId, string messageTemplate, int notificationTypeId)> StatusNotifications = new()
         {
-            (2, "Rental request #{0} has been approved.", 1),
-            (3, "Rental request #{0} has been rejected.", 2),
-            (4, "Rental request #{0} has been canceled.", 5),
+            (2, "Rental request #{0} for {1} has been approved.", 1),
+            (3, "Rental request #{0} for {1} has been rejected.", 2),
+            (4, "Rental request #{0} for {1} has been canceled.", 5),
         };
 
         #endregion
@@ -190,6 +190,7 @@ namespace Database.Persistence.Repositories
             {
                 var currentStatusId = entry.Property("StatusId").CurrentValue as int?;
                 var originalStatusId = entry.Property("StatusId").OriginalValue as int?;
+                var equipmentId = entry.Property("EquipmentId").CurrentValue as int?;
                 var customerId = entry.Property("CustomerId").CurrentValue as int?;
                 var requestId = entry.Property("Id").CurrentValue?.ToString() ?? "?";
 
@@ -199,12 +200,18 @@ namespace Database.Persistence.Repositories
                 // Only notify if status changed and matched one of the configured notifications
                 if (currentStatusId != originalStatusId && config != default)
                 {
+                    // Get equipment name (optional: cache this if needed)
+                    var equipmentName = RentalDBContext.Equipment
+                        .Where(eq => eq.Id == equipmentId)
+                        .Select(eq => eq.Name)
+                        .FirstOrDefault() ?? "Unknown Equipment";
+
                     var (statusId, template, typeId) = config;
 
                     yield return new Notification
                     {
                         UserId = customerId.Value,
-                        MessageContent = string.Format(template, requestId),
+                        MessageContent = string.Format(template, requestId, equipmentName),
                         NotificationTypeId = typeId,
                         IsRead = false,
                         CreatedAt = DateTime.Now,
