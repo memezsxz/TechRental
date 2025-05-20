@@ -74,11 +74,15 @@
 
         <!-- Equipment Info & Status -->
         <div class="row mb-4">
-            <div class="col-md-6">
+            <div class="col-md-4">
+                <label>Equipment Id</label>
+                <input class="form-control" value="@Model.Equipment?.Id" readonly />
+            </div>
+            <div class="col-md-4">
                 <label>Equipment Title</label>
                 <input class="form-control" value="@Model.Equipment?.Name" readonly />
             </div>
-            <div class="col-md-6">
+            <div class="col-md-4">
                 <label asp-for="StatusId">Status</label>
                 @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
                 {

@@ -165,12 +165,12 @@
             // tbDataBeforeAction
             // 
             tbDataBeforeAction.BackColor = Color.FromArgb(247, 247, 249);
-            tbDataBeforeAction.Enabled = false;
             tbDataBeforeAction.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbDataBeforeAction.Location = new Point(189, 321);
             tbDataBeforeAction.Margin = new Padding(2);
             tbDataBeforeAction.Multiline = true;
             tbDataBeforeAction.Name = "tbDataBeforeAction";
+            tbDataBeforeAction.ReadOnly = true;
             tbDataBeforeAction.Size = new Size(394, 114);
             tbDataBeforeAction.TabIndex = 40;
             // 
@@ -199,12 +199,12 @@
             // tbDataAfterAction
             // 
             tbDataAfterAction.BackColor = Color.FromArgb(247, 247, 249);
-            tbDataAfterAction.Enabled = false;
             tbDataAfterAction.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbDataAfterAction.Location = new Point(189, 456);
             tbDataAfterAction.Margin = new Padding(2);
             tbDataAfterAction.Multiline = true;
             tbDataAfterAction.Name = "tbDataAfterAction";
+            tbDataAfterAction.ReadOnly = true;
             tbDataAfterAction.Size = new Size(394, 114);
             tbDataAfterAction.TabIndex = 59;
             // 

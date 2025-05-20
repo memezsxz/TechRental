@@ -30,9 +30,7 @@ namespace WebApp.Controllers
         /// </summary>
         public async Task<IActionResult> Index(string search, string statusFilter, string sortBy, int page = 1, int pageSize = 10)
         {
-
             if (!User.Identity.IsAuthenticated) return View("Unauthorized"); // HTTP 401
-
 
             //  Ensure page number is valid (avoid OFFSET negative errors)
             if (page < 1) page = 1;
@@ -170,8 +168,8 @@ namespace WebApp.Controllers
                 .Include(e => e.ConditionStatus)
                 .FirstOrDefault(e => e.Id == equipmentId);
 
-            // If the equipment ID is invalid or not found, show HTTP 404
-            if (equipment == null) return View("NotFound");
+            // If the equipment ID is invalid or not found or equipment is not active, show HTTP 404
+            if (equipment == null || equipment.IsActive == false) return View("NotFound");
 
             // call helper to get unavailable date strings
             ViewBag.UnavailableDates = GetUnavailableDates(equipmentId);
@@ -221,15 +219,7 @@ namespace WebApp.Controllers
 
                 ViewBag.Equipment = equipment;
 
-                var errors = ModelState
-                    .Where(m => m.Value.Errors.Any())
-                    .Select(m => new {
-                        Field = m.Key,
-                        Errors = m.Value.Errors.Select(e => e.ErrorMessage)
-                    });
-
-                TempData["MessageText"] = "Validation failed: " + string.Join(" | ",
-                    errors.Select(e => $"{e.Field}: {string.Join(", ", e.Errors)}"));
+                TempData["MessageText"] = "Please select start and return dates.";
                 TempData["MessageType"] = "error";
 
                 // Recompute the list of unavailable rental dates

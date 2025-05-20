@@ -1,19 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+﻿using System.Text.RegularExpressions;
 using Database.Core.Domain;
 using Database.Persistence;
 using Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -119,7 +109,8 @@ namespace FormsApp
             }
             catch (Exception ex)
             {
-                Global.DisplayReportErrorDialog(ex);
+                //Global.DisplayReportErrorDialog(ex);
+                lblLoginError.Text = "An error occurred, try again later or contact customer support.";
             }
             finally
             {
@@ -187,8 +178,8 @@ namespace FormsApp
             }
             catch (Exception ex)
             {
-                Global.DisplayReportErrorDialog(ex);
-                lblLoginError.Text = "An error occurred, try again later.";
+                //Global.DisplayReportErrorDialog(ex);
+                lblLoginError.Text = "An error occurred, try again later or contact customer support.";
                 return false;
             }
         }
@@ -307,7 +298,7 @@ namespace FormsApp
             }
             catch (Exception ex)
             {
-                Global.DisplayReportErrorDialog(ex);
+                lblLoginError.Text = "An error occurred, try again later or contact customer support.";
             }
         }
         #endregion

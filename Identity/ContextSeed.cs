@@ -9,8 +9,6 @@ namespace Identity
     public class ContextSeed
     {
   
-
-
         public static async Task SeedRoleAsync(UserManager<ApplicationUser> userManager , RoleManager<IdentityRole> roleManager) {
 
 

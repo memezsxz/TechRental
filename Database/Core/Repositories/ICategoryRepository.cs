@@ -28,6 +28,14 @@ namespace Database.Core.Repositories
         /// <returns>True if the category is referenced; otherwise, false.</returns>
         bool IsReferenced(int id);
 
+        /// <summary>
+        /// Determines whether the specified category name already exists in the database.
+        /// </summary>
+        /// <param name="name">The name of the category to check for references.</param>
+        /// <returns>True if the name category is duplicated; otherwise, false.</returns>
+
+        public bool IsDuplicateName(string name);
+
         #endregion
     }
 }

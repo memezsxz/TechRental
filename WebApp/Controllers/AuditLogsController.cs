@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Database.Persistence;
-using Microsoft.AspNetCore.Authorization;
 using Identity;
 
 namespace WebApp.Controllers

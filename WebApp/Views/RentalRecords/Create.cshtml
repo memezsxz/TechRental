@@ -67,24 +67,23 @@
         }
     </div>
     <div class="row mb-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
+            <label>Equipment Id</label>
+            <input class="form-control" value="@request?.Equipment.Id" readonly />
+        </div>
+        <div class="col-md-4">
             <label>Equipment Title</label>
             <input class="form-control" value="@request?.Equipment.Name" readonly />
         </div>
-        @if (mode == "return") {
-            <div class="col-md-6">
-                <label>Actual Pickup Date</label>
-                <input class="form-control" value="@Model?.PickupDate" readonly />
-            </div>
+        <div class="col-md-4">
+            <label>Actual Pickup Date</label>
+            @if (mode == "return") {
+                    <input class="form-control" value="@Model?.PickupDate" readonly />
+            } else {
+                    <input id="actualPickupDate" class="form-control flatpickr-input" placeholder="Select pickup date and time" />
+            }
+        </div>
 
-        } else {
-            <div class="col-md-6">
-                <label>Actual Pickup Date</label>
-                <input id="actualPickupDate"
-                       class="form-control flatpickr-input"
-                       placeholder="Select pickup date and time" />
-            </div>
-        }
     </div>
     <div class="row mb-4">
         <div class="col-md-4">

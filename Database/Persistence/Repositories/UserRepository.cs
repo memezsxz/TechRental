@@ -43,11 +43,21 @@ namespace Database.Persistence.Repositories
             // Search by name
             if (!string.IsNullOrWhiteSpace(searchString))
             {
-                var lowerSearch = searchString.ToLower().Trim();
-                query = query.Where(x =>
-                    x.FirstName.ToLower().Contains(lowerSearch) ||
-                    x.LastName.ToLower().Contains(lowerSearch) ||
-                    (x.FirstName + " " + x.LastName).ToLower().Contains(lowerSearch));
+                if (Int32.TryParse(searchString, out int id))
+                {
+                    query = query.Where(u => u.Id == Convert.ToInt32(searchString));
+
+                }
+                else
+                {
+                    var lowerSearch = searchString.ToLower().Trim();
+                    query = query.Where(x => x.Email.ToLower().Contains(lowerSearch));
+                }
+                //var lowerSearch = searchString.ToLower().Trim();
+                //query = query.Where(x =>
+                //    x.FirstName.ToLower().Contains(lowerSearch) ||
+                //    x.LastName.ToLower().Contains(lowerSearch) ||
+                //    (x.FirstName + " " + x.LastName).ToLower().Contains(lowerSearch));
             }
 
             // Filter by role
@@ -151,12 +161,7 @@ namespace Database.Persistence.Repositories
         public override Dictionary<string, string> GetEntityColumnsWithTypes()
         {
             var d = base.GetEntityColumnsWithTypes();
-            d.Remove("Image");
-
-            //foreach (var kv in d)
-            //{
-            //    Console.WriteLine(kv); // For debugging metadata mapping
-            //}
+            d.Remove("ImageId");
 
             return d;
         }

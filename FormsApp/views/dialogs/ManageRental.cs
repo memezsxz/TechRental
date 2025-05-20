@@ -123,8 +123,13 @@ namespace FormsApp.views.dialogs
                 ddlReqStatus.Enabled = false;
             }
 
+            if (request.Status?.StatusName.ToLower() != "approved")
+            {
+                lblClose.Location = lblSave.Location;
+                lblSave.Visible = false;
+            }
             // Show "Start Transaction" or "Process Return" button based on context
-            if (request.Status?.StatusName.ToLower() == "approved" && record == null)
+            else if (request.Status?.StatusName.ToLower() == "approved" && record == null)
             {
                 lblAction.Visible = true;
             }
