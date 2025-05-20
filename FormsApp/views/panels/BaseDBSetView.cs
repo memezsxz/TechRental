@@ -7,6 +7,8 @@ using Database.Persistence;
 using Database.Search;
 using FormsApp.views.controls;
 using FormsApp.views.dialogs;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using Button = System.Windows.Forms.Button;
 
 #endregion
 
@@ -77,6 +79,9 @@ public partial class BaseDBSetView : UserControl
         cbRecordsNum.DataSource = Global.pageSizes;
         LoadColumnDropdown();
         HandlePermissions();
+        this.HandleCreated += (_, _) => ResizeGridColumns(dvgItems);
+        this.Resize += (_, _) => ResizeGridColumns(dvgItems);
+
     }
 
     private void HandlePermissions()
@@ -92,27 +97,13 @@ public partial class BaseDBSetView : UserControl
 
     private void dropdownColumns_SelectedIndexChanged(object sender, EventArgs e) => ChangeFilterControl();
 
-    /// <summary>
-    /// Event handler for the DataBindingComplete event of a DataGridView.
-    /// This method formats the column headers by splitting PascalCase into spaced words
-    /// and auto-sizes each column to fit its content.
-    /// </summary>
-    /// <param name="sender">The DataGridView that triggered the event.</param>
-    /// <param name="e">Event arguments for data binding completion.</param>
     private void dgvData_DataBindingComplete(object sender, DataGridViewBindingCompleteEventArgs e)
     {
         // Cast the sender to a DataGridView
         if (sender is not DataGridView grid) return;
 
-        // Loop through each column in the grid
-        foreach (DataGridViewColumn col in grid.Columns)
-        {
-            // Format header text by splitting PascalCase (e.g., "RentalDate" -> "Rental Date")
-            col.HeaderText = SplitPascalCase(col.DataPropertyName);
-
-            // Automatically resize the column width based on its content
-            col.Width = col.GetPreferredWidth(DataGridViewAutoSizeColumnMode.AllCells, true);
-        }
+        RenameGridColumns(grid);
+        ResizeGridColumns(grid);
     }
 
 
@@ -547,6 +538,69 @@ public partial class BaseDBSetView : UserControl
         {
             // Return null if value is not convertible to int
             return null;
+        }
+    }
+
+    /// <summary>
+    /// This method formats the column headers by splitting PascalCase into spaced words
+    /// and auto-sizes each column to fit its content.
+    /// </summary>
+    /// <param name="grid">The DataGridView to target.</param>
+    private void RenameGridColumns(DataGridView grid)
+    {
+        // Loop through each column in the grid
+        foreach (DataGridViewColumn col in grid.Columns)
+        {
+            // Format header text by splitting PascalCase (e.g., "RentalDate" -> "Rental Date")
+            col.HeaderText = SplitPascalCase(col.DataPropertyName);
+
+            // Automatically resize the column width based on its content
+            col.Width = col.GetPreferredWidth(DataGridViewAutoSizeColumnMode.AllCells, true);
+        }
+
+    }
+
+    /// <summary>
+    /// This method formats the column sizes to fill the data grid view
+    /// </summary>
+    /// <param name="grid">The DataGridView to target.</param>
+    private void ResizeGridColumns(DataGridView grid)
+    {
+        if (!this.IsHandleCreated || dvgItems.Columns.Count == 0)
+            return;
+
+        // Get the width available for columns (exclude row headers)
+        int totalGridWidth = grid.ClientSize.Width - (grid.RowHeadersVisible ? grid.RowHeadersWidth : 0);
+
+        // Account for borders or slight internal padding
+        totalGridWidth -= SystemInformation.VerticalScrollBarWidth -27; // safety buffer
+
+        // Calculate total current width after autosizing
+        int totalOriginalWidth = dvgItems.Columns.Cast<DataGridViewColumn>()
+            .Sum(c => c.Width);
+
+        // Safety check
+        if (totalOriginalWidth <= 0) return;
+
+        // Apply proportional resizing
+        int totalAssigned = 0;
+
+        for (int i = 0; i < grid.Columns.Count; i++)
+        {
+            var col = grid.Columns[i];
+            float ratio = (float)col.Width / totalOriginalWidth;
+
+            // Assign proportional width
+            int newWidth = (int)Math.Floor(ratio * totalGridWidth);
+            col.Width = newWidth;
+            totalAssigned += newWidth;
+        }
+
+        // Add remaining pixels (due to rounding) to the last column
+        int leftover = totalGridWidth - totalAssigned;
+        if (leftover > 0)
+        {
+            grid.Columns[^1].Width += leftover;
         }
     }
 
