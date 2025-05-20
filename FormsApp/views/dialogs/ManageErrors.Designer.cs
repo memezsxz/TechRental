@@ -49,7 +49,7 @@
             lblClose.BackColor = Color.White;
             lblClose.Font = new Font("Cascadia Mono", 10F, FontStyle.Regular, GraphicsUnit.Point);
             lblClose.ForeColor = Color.FromArgb(60, 173, 104);
-            lblClose.Location = new Point(324, 538);
+            lblClose.Location = new Point(391, 755);
             lblClose.Margin = new Padding(0);
             lblClose.Name = "lblClose";
             lblClose.Size = new Size(122, 48);
@@ -62,7 +62,7 @@
             lblDelete.BackColor = Color.Red;
             lblDelete.Font = new Font("Cascadia Mono", 10F, FontStyle.Regular, GraphicsUnit.Point);
             lblDelete.ForeColor = Color.White;
-            lblDelete.Location = new Point(19, 540);
+            lblDelete.Location = new Point(19, 757);
             lblDelete.Margin = new Padding(0);
             lblDelete.Name = "lblDelete";
             lblDelete.Size = new Size(122, 48);
@@ -75,7 +75,7 @@
             lblSave.BackColor = Color.FromArgb(60, 173, 104);
             lblSave.Font = new Font("Cascadia Mono", 10F, FontStyle.Regular, GraphicsUnit.Point);
             lblSave.ForeColor = Color.White;
-            lblSave.Location = new Point(457, 538);
+            lblSave.Location = new Point(524, 755);
             lblSave.Margin = new Padding(0);
             lblSave.Name = "lblSave";
             lblSave.Size = new Size(122, 48);
@@ -91,7 +91,7 @@
             tbUserId.Location = new Point(189, 79);
             tbUserId.Margin = new Padding(2);
             tbUserId.Name = "tbUserId";
-            tbUserId.Size = new Size(390, 38);
+            tbUserId.Size = new Size(454, 38);
             tbUserId.TabIndex = 39;
             // 
             // tbId
@@ -102,7 +102,7 @@
             tbId.Location = new Point(189, 20);
             tbId.Margin = new Padding(2);
             tbId.Name = "tbId";
-            tbId.Size = new Size(390, 38);
+            tbId.Size = new Size(454, 38);
             tbId.TabIndex = 38;
             // 
             // label4
@@ -129,13 +129,13 @@
             // tbSourceProseadure
             // 
             tbSourceProseadure.BackColor = Color.FromArgb(247, 247, 249);
-            tbSourceProseadure.Enabled = false;
             tbSourceProseadure.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
             tbSourceProseadure.Location = new Point(189, 260);
             tbSourceProseadure.Margin = new Padding(2);
             tbSourceProseadure.Multiline = true;
             tbSourceProseadure.Name = "tbSourceProseadure";
-            tbSourceProseadure.Size = new Size(394, 114);
+            tbSourceProseadure.ReadOnly = true;
+            tbSourceProseadure.Size = new Size(458, 221);
             tbSourceProseadure.TabIndex = 40;
             // 
             // label9
@@ -152,19 +152,19 @@
             // tbErrorMessage
             // 
             tbErrorMessage.BackColor = Color.FromArgb(247, 247, 249);
-            tbErrorMessage.Enabled = false;
             tbErrorMessage.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            tbErrorMessage.Location = new Point(189, 395);
+            tbErrorMessage.Location = new Point(189, 505);
             tbErrorMessage.Margin = new Padding(2);
             tbErrorMessage.Multiline = true;
             tbErrorMessage.Name = "tbErrorMessage";
-            tbErrorMessage.Size = new Size(394, 114);
+            tbErrorMessage.ReadOnly = true;
+            tbErrorMessage.Size = new Size(458, 221);
             tbErrorMessage.TabIndex = 59;
             // 
             // label3
             // 
             label3.Font = new Font("Segoe UI", 10F, FontStyle.Regular, GraphicsUnit.Point);
-            label3.Location = new Point(20, 395);
+            label3.Location = new Point(20, 505);
             label3.Margin = new Padding(2, 0, 2, 0);
             label3.Name = "label3";
             label3.Size = new Size(150, 98);
@@ -176,7 +176,7 @@
             dtpTimestamp.Enabled = false;
             dtpTimestamp.Location = new Point(189, 141);
             dtpTimestamp.Name = "dtpTimestamp";
-            dtpTimestamp.Size = new Size(390, 34);
+            dtpTimestamp.Size = new Size(454, 34);
             dtpTimestamp.TabIndex = 62;
             // 
             // label11
@@ -198,7 +198,7 @@
             tbSource.Location = new Point(189, 198);
             tbSource.Margin = new Padding(2);
             tbSource.Name = "tbSource";
-            tbSource.Size = new Size(390, 38);
+            tbSource.Size = new Size(454, 38);
             tbSource.TabIndex = 57;
             // 
             // ManageErrors
@@ -206,7 +206,7 @@
             AutoScaleDimensions = new SizeF(11F, 28F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(600, 604);
+            ClientSize = new Size(663, 815);
             Controls.Add(dtpTimestamp);
             Controls.Add(tbErrorMessage);
             Controls.Add(label3);

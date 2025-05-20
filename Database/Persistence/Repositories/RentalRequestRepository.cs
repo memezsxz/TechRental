@@ -179,6 +179,7 @@ namespace Database.Persistence.Repositories
         #endregion
 
         #region INotifiable Implementation
+
         /// <inheritdoc/>
         public IEnumerable<Notification> GetPendingNotifications()
         {
@@ -192,7 +193,8 @@ namespace Database.Persistence.Repositories
                 var customerId = entry.Property("CustomerId").CurrentValue as int?;
                 var requestId = entry.Property("Id").CurrentValue?.ToString() ?? "?";
 
-                var config = StatusNotifications.FirstOrDefault(n => n.requestStatusId == currentStatusId);
+                var config = StatusNotifications
+                    .FirstOrDefault(n => n.requestStatusId == currentStatusId);
 
                 // Only notify if status changed and matched one of the configured notifications
                 if (currentStatusId != originalStatusId && config != default)
