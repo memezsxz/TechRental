@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Database.Persistence;
 using Identity;
-using Microsoft.AspNetCore.Authorization;
 
 namespace WebApp.Controllers
 {

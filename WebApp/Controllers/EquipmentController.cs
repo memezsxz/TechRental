@@ -5,7 +5,6 @@ using Database.Core.Domain;
 using Database.Persistence;
 using Helper;
 using Identity;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 
 namespace WebApp.Controllers
