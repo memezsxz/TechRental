@@ -200,8 +200,8 @@ namespace WebApp.Controllers
                 await AuditLogger.LogActionAsync(
                     context: _context,
                     userId: userid,
-                    actionType: "Edit",
-                    sourceEntity: "Users",
+                    actionType: "Update",
+                    sourceEntity: "User",
                     dataBefore: oldData,
                     dataAfter: newData,
                     affectedRecordKey: editUser.User.Id.ToString()
@@ -278,7 +278,7 @@ namespace WebApp.Controllers
                     context: _context,
                     userId: userid,
                     actionType: "Delete",
-                    sourceEntity: "Users",
+                    sourceEntity: "User",
                     dataBefore: oldData,
                     dataAfter:  " ",
                     affectedRecordKey: id.ToString()
