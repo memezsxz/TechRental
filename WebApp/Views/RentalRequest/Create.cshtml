@@ -77,14 +77,14 @@
                     <!-- Rental Start Date -->
                     <div class="mb-3">
                         <label asp-for="StartDate" class="form-label">From</label>
-                        <input asp-for="StartDate" class="form-control" id="startDate" />
+                        <input asp-for="StartDate" class="form-control" id="startDate" required/>
                         <span asp-validation-for="StartDate" class="text-danger"></span>
                     </div>
 
                     <!-- Rental Return Date -->
                     <div class="mb-3">
                         <label asp-for="ReturnDate" class="form-label">To</label>
-                        <input asp-for="ReturnDate" class="form-control" id="returnDate" />
+                        <input asp-for="ReturnDate" class="form-control" id="returnDate" required />
                         <span asp-validation-for="ReturnDate" class="text-danger"></span>
                     </div>
 

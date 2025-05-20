@@ -18,7 +18,6 @@
    ------------------------------------------------------------------------------ *@
 @{
     var isCustomer = User.IsInRole("Customer");
-    var userEmail = isCustomer ? User.Identity?.Name : null;
     ViewData["Title"] = "Rental Requests";
     Layout = "~/Views/Shared/_Layout.cshtml";
 
@@ -80,6 +79,7 @@
                 @if (!isCustomer)
                 {
                     <th>User ID</th>
+                    <th>Equipment ID</th>
                 }
                 <th>Equipment Title</th>
                 <th>Status</th>
@@ -99,6 +99,7 @@
                     @if (!isCustomer)
                     {
                         <td>@item.Customer?.Id</td>
+                        <td>@item.Equipment?.Id</td>
                     }
                     <td>@item.Equipment?.Name</td>
                     <td>
@@ -135,8 +136,7 @@
                    asp-route-page="@(ViewBag.CurrentPage - 1)"
                    asp-route-search="@currentSearch"
                    asp-route-statusFilter="@currentStatus"
-                   asp-route-sortBy="@currentSort"
-                   asp-route-userEmail="@userEmail">
+                   asp-route-sortBy="@currentSort">
                     <i class="bi bi-chevron-left"></i> Previous
                 </a>
             </li>
@@ -154,7 +154,6 @@
                    asp-route-search="@currentSearch"
                    asp-route-statusFilter="@currentStatus"
                    asp-route-sortBy="@currentSort"
-                   asp-route-userEmail="@userEmail"
                    style="border-radius: 8px; margin: 0 4px;">
                     @i
                 </a>
@@ -169,8 +168,7 @@
                    asp-route-page="@(ViewBag.CurrentPage + 1)"
                    asp-route-search="@currentSearch"
                    asp-route-statusFilter="@currentStatus"
-                   asp-route-sortBy="@currentSort"
-                   asp-route-userEmail="@userEmail">
+                   asp-route-sortBy="@currentSort">
                     Next <i class="bi bi-chevron-right"></i>
                 </a>
             </li>
