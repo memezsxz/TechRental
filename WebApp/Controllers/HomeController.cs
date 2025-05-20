@@ -77,15 +77,6 @@ namespace WebApp.Controllers
             {
                 TempData["MessageText"] = "Error while trying to send message, Try again later.";
                 TempData["MessageType"] = "error";
-                var userid = (int)(await _userManager.GetUserAsync(User)).UserID;
-                await ErrorLogger.LogErrorAsync(
-                   context: _context,
-                   userId: userid,
-                   errorMessage: ex.Message,
-                   errorSource: ex.Source ?? "Unknown",
-                   sourceProcedure: "CategoriesController.Edit"
-               );
-
             }
 
             return RedirectToAction("About");

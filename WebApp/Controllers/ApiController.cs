@@ -28,9 +28,9 @@ namespace WebApp.Controllers
             return Content("pong");
         }
 
-        public IActionResult categories()
+        public async Task<IActionResult> categories()
         {
-            var categories = _unitOfWork.Categories.GetAllAsync().Result;
+            var categories = await _unitOfWork.Categories.GetAllAsync();
 
             List<string> categorieslist = new List<string>();
 
