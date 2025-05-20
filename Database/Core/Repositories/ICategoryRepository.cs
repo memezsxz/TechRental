@@ -31,10 +31,11 @@ namespace Database.Core.Repositories
         /// <summary>
         /// Determines whether the specified category name already exists in the database.
         /// </summary>
+        /// <param name="id">The id of the category to check for references.</param>
         /// <param name="name">The name of the category to check for references.</param>
         /// <returns>True if the name category is duplicated; otherwise, false.</returns>
 
-        public bool IsDuplicateName(string name);
+        public bool IsDuplicateName(int? id, string name);
 
         #endregion
     }

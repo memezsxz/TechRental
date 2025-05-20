@@ -278,7 +278,7 @@ namespace FormsApp
         {
             try
             {
-                string connectionString = "Server=reboot08.com,1433;Database=RentalIdentity;User Id=sa;Password=caliber,willpower,enjoyably,ending,giggling,P5;Encrypt=False;TrustServerCertificate=True;";
+                string connectionString = "Server=reboot08.com,1450;Database=RentalIdentity;User Id=sa;Password=caliber,willpower,enjoyably,ending,giggling,P5;Encrypt=False;TrustServerCertificate=True;";
 
                 // Configure database context
                 services.AddDbContext<IdentityContext>(options =>

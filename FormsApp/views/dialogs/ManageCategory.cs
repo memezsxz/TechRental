@@ -174,7 +174,7 @@ namespace FormsApp.views.dialogs
                 minLength: 3,
                 maxLength: 100);
 
-            bool duplicate = context.Categories.IsDuplicateName(lblName.Text.Trim());
+            bool duplicate = context.Categories.IsDuplicateName(item.Id, lblName.Text.Trim());
 
             if (isValidInput && duplicate)
             {

@@ -58,9 +58,10 @@ namespace Database.Persistence.Repositories
         }
 
         /// <inheritdoc/>
-        public bool IsDuplicateName(string name)
+        public bool IsDuplicateName(int? id, string name)
         {
-            return RentalDBContext.Categories.Any(c => c.Name.ToLower() == name.Trim().ToLower());
+            if (id == null) return RentalDBContext.Categories.Any(c => c.Name.ToLower() == name.Trim().ToLower());
+            else return RentalDBContext.Categories.Any(c => c.Name.ToLower() == name.Trim().ToLower() && c.Id != id);
         }
 
         #endregion
