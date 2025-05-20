@@ -36,7 +36,7 @@ namespace WebApp.Controllers
             var damaged = await _context.Equipment
                 .CountAsync(e => e.ConditionStatus.ConditionName == "Needs Repair");
 
-            var repairCost = await _context.RentalRecords
+            var totalCost = await _context.RentalRecords
                 .SumAsync(r => (decimal?)r.TotalCost) ?? 0;
 
             var recent = await _context.RentalRequests
@@ -78,7 +78,7 @@ namespace WebApp.Controllers
                 RejectedRequests = rejected,
                 TotalRequests = totalRequests,
                 DamagedEquipment = damaged,
-                TotalRepairCost = repairCost,
+                TotalCost = totalCost,
                 RecentRequests = recent,
                 TotalUsers = totalUsers,
                 Admins = admins,

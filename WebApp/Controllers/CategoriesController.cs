@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using Database.Core.Domain;
 using Database.Persistence;
 using Identity;
+using System.Drawing.Text;
+using Microsoft.AspNetCore.Identity;
+using Sprache;
 
 namespace WebApp.Controllers
 {
@@ -16,10 +19,12 @@ namespace WebApp.Controllers
     {
 
         private readonly RentalDBContext _context;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public CategoriesController(RentalDBContext context)
+        public CategoriesController(RentalDBContext context, UserManager<ApplicationUser> userManager)
         {
             _context = context;
+            _userManager = userManager;
         }
 
         // GET: Categories
@@ -39,34 +44,7 @@ namespace WebApp.Controllers
                         Problem("Entity set 'RentalDBContext.Categories'  is null.");
         }
 
-        // GET: Categories/Details/5
-        public IActionResult Details(int id)
-        {
-
-            if (!User.Identity.IsAuthenticated)
-            {
-                return View("Unauthorized");
-            }
-
-            if (!User.IsInRole(RoleConstants.Admin))
-            {
-                return View("Forbidden");
-            }
-
-            if (id == null || _context.Categories == null)
-            {
-                return NotFound();
-            }
-
-            var category = _context.Categories.Find(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
-        }
-
+       
         // GET: Categories/Create
         public IActionResult Create()
         {
@@ -105,6 +83,9 @@ namespace WebApp.Controllers
             {
                 await _context.Categories.AddAsync(category);
                 await _context.SaveChangesAsync();
+                TempData["MessageText"] = "Category created successfully.";
+                TempData["MessageType"] = "success";
+
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
@@ -162,9 +143,24 @@ namespace WebApp.Controllers
 
             if (ModelState.IsValid)
             {
+                var trackedCategory = await _context.Categories.FindAsync(id);
+                if (trackedCategory == null)
+                {
+                    return NotFound();
+                }
+
+                var oldData = System.Text.Json.JsonSerializer.Serialize(trackedCategory);
+
+                // Update the tracked entity instead of replacing it
+                trackedCategory.Name = category.Name;
+                trackedCategory.Description = category.Description;
+                trackedCategory.IsActive = category.IsActive;
+                trackedCategory.UpdatedAt = DateTime.Now;
+
+                var newData = System.Text.Json.JsonSerializer.Serialize(trackedCategory);
+
                 try
                 {
-                    _context.Categories.Update(category);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
@@ -175,66 +171,22 @@ namespace WebApp.Controllers
                         throw;
                 }
 
+                TempData["MessageText"] = "Category edited successfully.";
+                TempData["MessageType"] = "success";
+                var userid = (int) (await _userManager.GetUserAsync(User)).UserID;
+                await AuditLogger.LogActionAsync(
+                    context: _context,
+                    userId: userid,
+                    actionType: "Edit",
+                    sourceEntity: "Category",
+                    dataBefore: oldData,
+                    dataAfter: newData,
+                    affectedRecordKey: id.ToString()
+                );
+
                 return RedirectToAction(nameof(Index));
             }
             return View(category);
-        }
-
-        // GET: Categories/Delete/5
-        public async Task<IActionResult> Delete(int id)
-        {
-            if (!User.Identity.IsAuthenticated)
-            {
-                return View("Unauthorized");
-            }
-
-            if (!User.IsInRole(RoleConstants.Admin))
-            {
-                return View("Forbidden");
-            }
-
-            if (id == null || _context.Categories == null)
-            {
-                return NotFound();
-            }
-
-            var category = _context.Categories.Find(id);
-            if (category == null)
-            {
-                return NotFound();
-            }
-
-            return View(category);
-        }
-
-        // POST: Categories/Delete/5
-        [HttpPost, ActionName("Delete")]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DeleteConfirmed(int id)
-        {
-
-            if (!User.Identity.IsAuthenticated)
-            {
-                return View("Unauthorized");
-            }
-
-            if (!User.IsInRole(RoleConstants.Admin))
-            {
-                return View("Forbidden");
-            }
-
-            if (_context.Categories == null)
-            {
-                return Problem("Entity set 'RentalDBContext.Categories'  is null.");
-            }
-            var category = _context.Categories.Find(id);
-            if (category != null)
-            {
-                _context.Categories.Remove(category);
-            }
-
-            await _context.SaveChangesAsync();
-            return RedirectToAction(nameof(Index));
         }
 
         private async Task<bool> CategoryExists(int id)
