@@ -40,9 +40,10 @@ TechRental is an equipment rental management system built using ASP.NET Core MVC
 
 | Username       | Password | Role     | Features Accessible                                  |
 |----------------|----------|----------|------------------------------------------------------|
-| customer@test.com | 123456   | Customer | Create/view rental requests, view PDFs               |
-| manager@test.com  | 123456   | Manager  | Approve requests, edit records, view all data        |
-| admin@test.com    | 123456   | Admin    | Full access, user and system management              |
+| Shima@gmail.com | As123!    | Customer | Create/view rental requests, view PDFs               |
+| chloe.perry@example.com | As123!    | Customer | Create/view rental requests, view PDFs               |
+| Manager1@gmail.com   | Pa$$word123   | Manager  | Approve requests, edit records, view all data        |
+| Admin1@gmail.com     | Pa$$word123   | Admin    | Full access, user and system management              |
 
 ## 🗄️ Database Overview
 
